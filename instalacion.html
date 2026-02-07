@@ -8,6 +8,7 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <meta name="theme-color" content="#0b5cff">
   <link rel="stylesheet" href="./styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
 <body>
   <header class="topbar">
@@ -195,9 +196,10 @@
     </section>
 
     <section class="card">
-  <div class="btnRow">
+<div class="btnRow">
   <button id="btnGuardar" class="btn-primary" type="button">GUARDAR (LOCAL)</button>
   <button id="btnCompartir" class="btn-secondary" type="button">COMPARTIR (WhatsApp)</button>
+  <button id="btnPDF" class="btn-secondary" type="button">ENVIAR PDF (WhatsApp)</button>
 </div>
 
 <p class="msg ok" id="ok" aria-live="polite"></p>
@@ -677,6 +679,277 @@ btnCompartir.addEventListener("click", async () => {
   // 2) Fallback: abrir WhatsApp con texto
   const url = "https://wa.me/?text=" + encodeURIComponent(text);
   window.open(url, "_blank");
+});
+    // -------- PDF + COMPARTIR (con fotos) --------
+const btnPDF = document.getElementById("btnPDF");
+
+// Convierte File -> DataURL
+const fileToDataURL = (file) => new Promise((resolve, reject) => {
+  const r = new FileReader();
+  r.onload = () => resolve(r.result);
+  r.onerror = reject;
+  r.readAsDataURL(file);
+});
+
+// Coge TODAS las fotos disponibles: (a) cámara propia arrays + (b) fototeca files
+async function collectImages() {
+  const ticket = [];
+  const material = [];
+
+  // (a) cámara propia (dataURL ya listo)
+  if (typeof ticketShots !== "undefined") ticket.push(...ticketShots);
+  if (typeof materialShots !== "undefined") material.push(...materialShots);
+
+  // (b) fototeca (File -> dataURL)
+  if (fotoTicket?.files?.length) {
+    for (const f of fotoTicket.files) ticket.push(await fileToDataURL(f));
+  }
+  if (fotoMaterial?.files?.length) {
+    for (const f of fotoMaterial.files) material.push(await fileToDataURL(f));
+  }
+
+  return { ticket, material };
+}
+
+// Dibuja texto con estilo “parte”
+// (PDF: A4, unidades mm)
+function addHeader(doc, meta) {
+  const M = 14;
+  let y = 16;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text("PARTE · INSTALACIÓN", M, y);
+
+  y += 8;
+  doc.setDrawColor(30);
+  doc.setLineWidth(0.3);
+  doc.line(M, y, 210 - M, y);
+  y += 8;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(11);
+  doc.text(`Fecha: ${meta.fecha}`, M, y); y += 6;
+  doc.text(`ID Cliente: ${meta.idCliente}`, M, y); y += 6;
+  doc.text(`Técnicos: ${meta.tecnicos}`, M, y); y += 6;
+
+  return y + 2;
+}
+
+function addTable(doc, startY, rows) {
+  const M = 14;
+  const W = 210 - M * 2;
+  const col1 = M;
+  const col2 = M + 95;
+  const col3 = M + 140;
+
+  let y = startY;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text("DETALLE", M, y);
+  y += 6;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(11);
+
+  // Encabezado
+  doc.setDrawColor(220);
+  doc.setLineWidth(0.3);
+  doc.line(M, y, M + W, y);
+  y += 6;
+
+  for (const r of rows) {
+    // salto página si hace falta
+    if (y > 270) {
+      doc.addPage();
+      y = 16;
+    }
+    doc.text(r.label, col1, y);
+    doc.text(r.qty, col2, y, { align: "right" });
+    doc.text(r.amount, col3, y, { align: "right" });
+    y += 6;
+  }
+
+  doc.setDrawColor(220);
+  doc.line(M, y, M + W, y);
+  y += 10;
+
+  return y;
+}
+
+function addTotal(doc, y, totalStr) {
+  const M = 14;
+  const W = 210 - M * 2;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text("TOTAL", M, y);
+  doc.text(totalStr, M + W, y, { align: "right" });
+  return y + 10;
+}
+
+function addObservaciones(doc, y, obs) {
+  const M = 14;
+  const W = 210 - M * 2;
+
+  if (y > 255) {
+    doc.addPage();
+    y = 16;
+  }
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text("OBSERVACIONES", M, y);
+  y += 6;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(11);
+
+  const text = obs?.trim() ? obs.trim() : "—";
+  const lines = doc.splitTextToSize(text, W);
+  doc.text(lines, M, y);
+
+  return y + (lines.length * 5) + 6;
+}
+
+// Añade fotos como “grid” con título por sección
+async function addPhotos(doc, y, title, images) {
+  const M = 14;
+  const W = 210 - M * 2;
+
+  if (!images.length) return y;
+
+  if (y > 240) {
+    doc.addPage();
+    y = 16;
+  }
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text(title, M, y);
+  y += 8;
+
+  // Grid 2 columnas
+  const gap = 6;
+  const cellW = (W - gap) / 2;
+  const cellH = 60;
+
+  let x = M;
+  let col = 0;
+
+  for (let i = 0; i < images.length; i++) {
+    if (y + cellH > 285) {
+      doc.addPage();
+      y = 16;
+      x = M;
+      col = 0;
+    }
+
+    // Nota: jsPDF detecta PNG/JPEG si le pasas dataURL
+    doc.setDrawColor(220);
+    doc.rect(x, y, cellW, cellH);
+
+    // Imagen dentro
+    const img = images[i];
+    doc.addImage(img, "JPEG", x + 2, y + 2, cellW - 4, cellH - 4, undefined, "FAST");
+
+    col++;
+    if (col === 2) {
+      col = 0;
+      x = M;
+      y += (cellH + gap);
+    } else {
+      x = M + cellW + gap;
+    }
+  }
+
+  return y + 6;
+}
+
+btnPDF.addEventListener("click", async () => {
+  err.textContent = "";
+  ok.textContent = "";
+
+  if (!header.idCliente) {
+    err.textContent = "Falta ID Cliente (vuelve atrás y créalo desde Nuevo Parte).";
+    return;
+  }
+
+  try {
+    // Datos
+    const hi = clamp0(toNum(hInst.value));
+    const hd = clamp0(toNum(hDespl.value));
+    const km = clamp0(toNum(kms.value));
+    const co = clamp0(toNum(comida.value));
+    const ma = clamp0(toNum(material.value));
+    const fu = furgonOn.checked ? FURGON : 0;
+
+    const impInst = hi * P_INST * TECNICOS_INST;
+    const impDespl = hd * P_DESPL;
+    const impKm = km * P_KM;
+    const total = impInst + impDespl + impKm + co + ma + fu;
+
+    const obs = document.getElementById("obs").value || "";
+
+    // Fotos
+    const { ticket, material } = await collectImages();
+
+    // PDF
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "mm", format: "a4" });
+
+    let y = addHeader(doc, {
+      fecha: header.fecha || "—",
+      idCliente: header.idCliente || "—",
+      tecnicos: TECNICOS_INST
+    });
+
+    const rows = [
+      { label: "Horas instalación", qty: `${hi.toFixed(1).replace(".", ",")} h`, amount: EUR(impInst) },
+      { label: "Horas despl.",      qty: `${hd.toFixed(1).replace(".", ",")} h`, amount: EUR(impDespl) },
+      { label: "Kilómetros",        qty: `${String(km).replace(".", ",")}`,      amount: EUR(impKm) },
+      { label: "Comida",            qty: "",                                     amount: EUR(co) },
+      { label: "Material",          qty: "",                                     amount: EUR(ma) },
+      { label: "Furgón",            qty: furgonOn.checked ? "Sí" : "No",         amount: EUR(fu) },
+    ];
+
+    y = addTable(doc, y, rows);
+    y = addTotal(doc, y, EUR(total));
+    y = addObservaciones(doc, y, obs);
+
+    // Fotos (si las hay)
+    y = await addPhotos(doc, y, `FOTOS · Ticket comida (${ticket.length})`, ticket);
+    y = await addPhotos(doc, y, `FOTOS · Material (${material.length})`, material);
+
+    const pdfBlob = doc.output("blob");
+    const filename = `Parte_Instalacion_${header.idCliente || "cliente"}_${header.fecha || "fecha"}.pdf`;
+    const file = new File([pdfBlob], filename, { type: "application/pdf" });
+
+    // Compartir como archivo (iOS share sheet -> WhatsApp)
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: "Parte de instalación",
+        text: "Adjunto parte en PDF."
+      });
+      ok.textContent = "PDF compartido ✅";
+      return;
+    }
+
+    // Fallback: descargar
+    const url = URL.createObjectURL(pdfBlob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    ok.textContent = "PDF descargado (fallback) ✅";
+
+  } catch (e) {
+    console.error(e);
+    err.textContent = "Error generando/compartiendo PDF. Revisa permisos y prueba en Safari.";
+  }
 });
   </script>
 

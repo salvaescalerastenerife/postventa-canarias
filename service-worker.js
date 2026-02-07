@@ -1,4 +1,4 @@
-const CACHE = "postventa-canarias-v2";
+const CACHE = "postventa-canarias-v3";
 const ASSETS = [
   "./",
   "./index.html",

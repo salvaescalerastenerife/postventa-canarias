@@ -418,9 +418,9 @@ recalc();
         },
         observaciones: document.getElementById("obs").value || "",
         fotos: {
-  ticket_count: (fotoTicket.files?.length || 0) + ticketShots.length,
-  material_count: (fotoMaterial.files?.length || 0) + materialShots.length,
-  ticket_dataurls: ticketShots,      // puede crecer; luego podemos limitar a 3
+  ticket_count: getTicketCount(),
+  material_count: getMaterialCount(),
+  ticket_dataurls: ticketShots,
   material_dataurls: materialShots
 },
         saved_at: new Date().toISOString()
@@ -458,11 +458,12 @@ let currentTarget = null; // "ticket" | "material"
 let stream = null;
 let lastDataUrl = null;
 
+const getTicketCount = () => (ticketShots.length + (fotoTicket.files?.length || 0));
+const getMaterialCount = () => (materialShots.length + (fotoMaterial.files?.length || 0));
+
 const updatePhotoCounts = () => {
-  const t = ticketShots.length + (fotoTicket.files?.length || 0);
-  const m = materialShots.length + (fotoMaterial.files?.length || 0);
-  cTicket.textContent = `${t} fotos`;
-  cMat.textContent = `${m} fotos`;
+  cTicket.textContent = `${getTicketCount()} fotos`;
+  cMat.textContent = `${getMaterialCount()} fotos`;
 };
 
 const openCam = async (target) => {
@@ -584,11 +585,8 @@ function buildWhatsAppText() {
   const obs = (document.getElementById("obs").value || "").trim();
 
   // Contadores de fotos (si tienes cámara propia: ticketShots/materialShots existen)
-  const tShots = (typeof ticketShots !== "undefined") ? ticketShots.length : 0;
-  const mShots = (typeof materialShots !== "undefined") ? materialShots.length : 0;
-
-  const ticketCount = (fotoTicket.files?.length || 0) + tShots;
-  const materialCount = (fotoMaterial.files?.length || 0) + mShots;
+const ticketCount = getTicketCount();
+const materialCount = getMaterialCount();
 
   // Anchos para que quede “cuadrado”
   const W1 = 18; // etiqueta

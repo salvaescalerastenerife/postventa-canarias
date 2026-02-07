@@ -33,9 +33,21 @@
         <div class="rate">27,95 €/h</div>
       </div>
 
-      <label class="field onecol">
-        <input id="hInst" inputmode="decimal" placeholder="0" />
-      </label>
+<div class="stepper">
+  <button type="button" class="step" data-target="hInst" data-delta="-0.5">−0,5</button>
+  <div class="stepval"><span id="hInstText">0,0</span> h</div>
+  <button type="button" class="step" data-target="hInst" data-delta="0.5">+0,5</button>
+</div>
+
+<div class="quick">
+  <button class="qdelta" type="button" data-target="hInst" data-delta="1">+1</button>
+  <button class="qdelta" type="button" data-target="hInst" data-delta="2">+2</button>
+  <button class="qdelta" type="button" data-target="hInst" data-delta="4">+4</button>
+  <button class="qdelta" type="button" data-target="hInst" data-delta="8">+8</button>
+  <button class="qreset" type="button" data-target="hInst">Reset</button>
+</div>
+
+<input id="hInst" type="hidden" value="0" />
 
       <div class="quick">
         <button class="q" data-target="hInst" data-val="0.5">0,5</button>
@@ -62,16 +74,25 @@
         <div class="rate">19,28 €/h</div>
       </div>
 
-      <label class="field onecol">
-        <input id="hDespl" inputmode="decimal" placeholder="0" />
-      </label>
+<div class="stepper">
+  <button type="button" class="step" data-target="hDespl" data-delta="-0.5">−0,5</button>
 
-      <div class="quick">
-        <button class="q" data-target="hDespl" data-val="0.5">0,5</button>
-        <button class="q" data-target="hDespl" data-val="1">1</button>
-        <button class="q" data-target="hDespl" data-val="2">2</button>
-        <button class="q" data-target="hDespl" data-val="3">3</button>
-      </div>
+  <div class="stepval">
+    <span id="hDesplText">0,0</span> h
+  </div>
+
+  <button type="button" class="step" data-target="hDespl" data-delta="0.5">+0,5</button>
+</div>
+
+<div class="quick">
+  <button class="qdelta" type="button" data-target="hDespl" data-delta="1">+1</button>
+  <button class="qdelta" type="button" data-target="hDespl" data-delta="2">+2</button>
+  <button class="qdelta" type="button" data-target="hDespl" data-delta="4">+4</button>
+  <button class="qdelta" type="button" data-target="hDespl" data-delta="8">+8</button>
+  <button class="qreset" type="button" data-target="hDespl">Reset</button>
+</div>
+
+<input id="hDespl" type="hidden" value="0" />
 
       <div class="totline">
         <span>Total desplazamiento</span>
@@ -289,20 +310,67 @@
       furgonOn.addEventListener(evt, recalc);
     });
 
-    // Botones rápidos
-    document.querySelectorAll(".q").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const target = btn.dataset.target;
-        const val = btn.dataset.val;
-        const el = document.getElementById(target);
-        el.value = String(val).replace(".", ","); // para visual
-        recalc();
-      });
-    });
+// --- STEPPER horas (saltos de 0,5 hasta 9h) ---
+const setHalfHour = (val) => {
+  let v = Math.round(val * 2) / 2; // fuerza múltiplos de 0,5
+  if (v < 0) v = 0;
+  if (v > 9) v = 9;
+  return v;
+};
 
+const fmtHours = (v) => String(v.toFixed(1)).replace(".", ",");
+
+// Actualiza los textos visibles
+const syncDisplays = () => {
+  const hi = toNum(hInst.value || 0);
+  const hd = toNum(hDespl.value || 0);
+  const ti = document.getElementById("hInstText");
+  const td = document.getElementById("hDesplText");
+  if (ti) ti.textContent = fmtHours(hi);
+  if (td) td.textContent = fmtHours(hd);
+};
+
+// Botones +/- 0,5
+document.querySelectorAll(".step").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const target = btn.dataset.target;
+    const delta = Number(btn.dataset.delta);
+    const el = document.getElementById(target);
+    const cur = toNum(el.value || 0);
+    el.value = setHalfHour(cur + delta);
+    syncDisplays();
     recalc();
-    setCounts();
+  });
+});
 
+// Chips +1 +2 +4 +8
+document.querySelectorAll(".qdelta").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const target = btn.dataset.target;
+    const delta = Number(btn.dataset.delta);
+    const el = document.getElementById(target);
+    const cur = toNum(el.value || 0);
+    el.value = setHalfHour(cur + delta);
+    syncDisplays();
+    recalc();
+  });
+});
+
+// Reset
+document.querySelectorAll(".qreset").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const target = btn.dataset.target;
+    const el = document.getElementById(target);
+    el.value = 0;
+    syncDisplays();
+    recalc();
+  });
+});
+
+// Inicialización
+syncDisplays();
+recalc();
+setCounts();
     // ------- Guardado local -------
     const ok = document.getElementById("ok");
     const err = document.getElementById("err");
@@ -468,6 +536,47 @@
       font-weight:1000;
     }
     .msg.ok{ color:#15803d; }
+    .stepper{
+  display:grid;
+  grid-template-columns: 1fr 1.2fr 1fr;
+  gap:10px;
+  align-items:center;
+  margin-top:6px;
+}
+
+.step{
+  height:56px;
+  border-radius:16px;
+  border:1px solid var(--line);
+  background:#fff;
+  font-size:18px;
+  font-weight:1000;
+  color:var(--primary);
+}
+
+.stepval{
+  height:56px;
+  border-radius:16px;
+  border:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  font-weight:1000;
+  background:#fff;
+}
+
+.quick .qdelta,
+.quick .qreset{
+  height:44px;
+  padding:0 14px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background:#fff;
+  font-size:18px;
+  font-weight:1000;
+  color:var(--primary);
+}
   </style>
 </body>
 </html>

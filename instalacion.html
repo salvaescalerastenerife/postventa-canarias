@@ -195,9 +195,13 @@
     </section>
 
     <section class="card">
-      <button id="btnGuardar" class="btn-primary" type="button">GUARDAR (LOCAL)</button>
-      <p class="msg ok" id="ok" aria-live="polite"></p>
-      <p class="msg" id="err" aria-live="polite"></p>
+  <div class="btnRow">
+  <button id="btnGuardar" class="btn-primary" type="button">GUARDAR (LOCAL)</button>
+  <button id="btnCompartir" class="btn-secondary" type="button">COMPARTIR (WhatsApp)</button>
+</div>
+
+<p class="msg ok" id="ok" aria-live="polite"></p>
+<p class="msg" id="err" aria-live="polite"></p>
     </section>
     <!-- MODAL CÁMARA -->
 <div id="camModal" class="camModal" hidden>
@@ -554,6 +558,129 @@ fotoMaterial.addEventListener("change", updatePhotoCounts);
 
 // Inicializa
 updatePhotoCounts();
+    // -------- COMPARTIR (WhatsApp) --------
+const btnCompartir = document.getElementById("btnCompartir");
+
+// Alineación “tipo PDF” para WhatsApp (monoespaciado)
+const padR = (s, n) => String(s).padEnd(n, " ");
+const padL = (s, n) => String(s).padStart(n, " ");
+const fmtH = (n) => String(Number(n || 0).toFixed(1)).replace(".", ",") + " h";
+
+function buildWhatsAppText() {
+  const hi = clamp0(toNum(hInst.value));
+  const hd = clamp0(toNum(hDespl.value));
+  const km = clamp0(toNum(kms.value));
+  const co = clamp0(toNum(comida.value));
+  const ma = clamp0(toNum(material.value));
+  const fu = furgonOn.checked ? FURGON : 0;
+
+  // IMPORTES (ojo: instalación × 2 técnicos)
+  const TECNICOS = (typeof TECNICOS_INST !== "undefined") ? TECNICOS_INST : 2;
+  const impInst = hi * P_INST * TECNICOS;
+  const impDespl = hd * P_DESPL;
+  const impKm = km * P_KM;
+
+  const total = impInst + impDespl + impKm + co + ma + fu;
+
+  const obs = (document.getElementById("obs").value || "").trim();
+
+  // Contadores de fotos (si tienes cámara propia: ticketShots/materialShots existen)
+  const tShots = (typeof ticketShots !== "undefined") ? ticketShots.length : 0;
+  const mShots = (typeof materialShots !== "undefined") ? materialShots.length : 0;
+
+  const ticketCount = (fotoTicket.files?.length || 0) + tShots;
+  const materialCount = (fotoMaterial.files?.length || 0) + mShots;
+
+  // Anchos para que quede “cuadrado”
+  const W1 = 18; // etiqueta
+  const W2 = 10; // horas/km
+  const W3 = 14; // importe
+
+  const lines = [];
+  lines.push("🧾 PARTE · INSTALACIÓN");
+  lines.push("────────────────────────────");
+  lines.push(`Fecha: ${header.fecha || "—"}`);
+  lines.push(`ID Cliente: ${header.idCliente || "—"}`);
+  lines.push(`Técnicos: ${TECNICOS}`);
+  lines.push("");
+
+  lines.push("DETALLE");
+  lines.push("────────────────────────────");
+  lines.push(
+    padR("Horas instalación", W1) + " " +
+    padL(fmtH(hi), W2) + "  " +
+    padL(EUR(impInst), W3)
+  );
+  lines.push(
+    padR("Horas despl.", W1) + " " +
+    padL(fmtH(hd), W2) + "  " +
+    padL(EUR(impDespl), W3)
+  );
+  lines.push(
+    padR("Kilómetros", W1) + " " +
+    padL(String(km).replace(".", ","), W2) + "  " +
+    padL(EUR(impKm), W3)
+  );
+  lines.push(
+    padR("Comida", W1) + " " +
+    padL("", W2) + "  " +
+    padL(EUR(co), W3)
+  );
+  lines.push(
+    padR("Material", W1) + " " +
+    padL("", W2) + "  " +
+    padL(EUR(ma), W3)
+  );
+  lines.push(
+    padR("Furgón", W1) + " " +
+    padL(furgonOn.checked ? "Sí" : "No", W2) + "  " +
+    padL(EUR(fu), W3)
+  );
+
+  lines.push("────────────────────────────");
+  lines.push(padR("TOTAL", W1 + W2 + 2) + padL(EUR(total), W3));
+  lines.push("");
+
+  lines.push("ADJUNTOS");
+  lines.push("────────────────────────────");
+  lines.push(`Ticket comida: ${ticketCount} foto(s)`);
+  lines.push(`Material:      ${materialCount} foto(s)`);
+  lines.push("");
+
+  lines.push("OBSERVACIONES");
+  lines.push("────────────────────────────");
+  lines.push(obs ? obs : "—");
+
+  // WhatsApp se ve mejor en bloque monoespaciado
+  return "```" + "\n" + lines.join("\n") + "\n" + "```";
+}
+
+btnCompartir.addEventListener("click", async () => {
+  err.textContent = "";
+  ok.textContent = "";
+
+  if (!header.idCliente) {
+    err.textContent = "Falta ID Cliente (vuelve atrás y créalo desde Nuevo Parte).";
+    return;
+  }
+
+  const text = buildWhatsAppText();
+
+  // 1) Intento: share sheet iOS (elige WhatsApp)
+  if (navigator.share) {
+    try {
+      await navigator.share({ text });
+      ok.textContent = "Compartido ✅";
+      return;
+    } catch (e) {
+      // si cancelas o falla, hacemos fallback a URL
+    }
+  }
+
+  // 2) Fallback: abrir WhatsApp con texto
+  const url = "https://wa.me/?text=" + encodeURIComponent(text);
+  window.open(url, "_blank");
+});
   </script>
 
   <style>
@@ -809,6 +936,21 @@ updatePhotoCounts();
     /* FIX: que el atributo hidden funcione aunque .camModal tenga display:flex */
 .camModal[hidden] { 
   display: none !important; 
+}
+    .btnRow{
+  display:grid;
+  gap:10px;
+}
+
+.btn-secondary{
+  width:100%;
+  height:64px;
+  border-radius:18px;
+  border:1px solid rgba(11,92,255,.35);
+  background:#fff;
+  color:var(--primary);
+  font-size:20px;
+  font-weight:1000;
 }
   </style>
 </body>

@@ -241,7 +241,7 @@
     const P_DESPL = 19.28;
     const P_KM = 0.31;
     const FURGON = 80.00;
-
+    const TECNICOS_INST = 2;
     // ------- Cargar cabecera -------
     const header = (() => {
       try { return JSON.parse(localStorage.getItem("pv_header") || "{}"); }
@@ -294,7 +294,7 @@
       const ma = clamp0(toNum(material.value));
       const fu = furgonOn.checked ? FURGON : 0;
 
-      const a = hi * P_INST;
+      const a = hi * P_INST * TECNICOS_INST;
       const b = hd * P_DESPL;
       const c = km * P_KM;
 

@@ -434,6 +434,7 @@ setCounts();
     });
     // -------- Cámara propia (evita “cámara negra” del input file en iOS) --------
 const camModal = document.getElementById("camModal");
+camModal.hidden = true;
 const camVideo = document.getElementById("camVideo");
 const camCanvas = document.getElementById("camCanvas");
 const camShot = document.getElementById("camShot");
@@ -804,6 +805,10 @@ updatePhotoCounts();
   color:#b91c1c;
   font-weight:800;
   min-height:20px;
+}
+    /* FIX: que el atributo hidden funcione aunque .camModal tenga display:flex */
+.camModal[hidden] { 
+  display: none !important; 
 }
   </style>
 </body>

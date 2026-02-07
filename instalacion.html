@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Instalación · Postventa Canarias</title>
+
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#0b5cff">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="back" href="./index.html" aria-label="Volver">←</a>
+    <h1>Instalación</h1>
+  </header>
+
+  <main class="container">
+    <!-- Cabecera -->
+    <section class="card">
+      <div class="meta">
+        <div><strong>Intervención:</strong> Instalación</div>
+        <div><strong>Fecha:</strong> <span id="mFecha">—</span></div>
+        <div><strong>ID Cliente:</strong> <span id="mId">—</span></div>
+        <div><strong>Técnicos:</strong> 2</div>
+      </div>
+    </section>
+
+    <!-- Horas instalación -->
+    <section class="card">
+      <div class="rowhead">
+        <h2>Horas de instalación</h2>
+        <div class="rate">27,95 €/h</div>
+      </div>
+
+      <label class="field onecol">
+        <input id="hInst" inputmode="decimal" placeholder="0" />
+      </label>
+
+      <div class="quick">
+        <button class="q" data-target="hInst" data-val="0.5">0,5</button>
+        <button class="q" data-target="hInst" data-val="1">1</button>
+        <button class="q" data-target="hInst" data-val="2">2</button>
+        <button class="q" data-target="hInst" data-val="3">3</button>
+        <button class="q" data-target="hInst" data-val="4">4</button>
+        <button class="q" data-target="hInst" data-val="5">5</button>
+        <button class="q" data-target="hInst" data-val="6">6</button>
+        <button class="q" data-target="hInst" data-val="7">7</button>
+        <button class="q" data-target="hInst" data-val="8">8</button>
+      </div>
+
+      <div class="totline">
+        <span>Total instalación</span>
+        <strong id="tInst">0,00 €</strong>
+      </div>
+    </section>
+
+    <!-- Horas desplazamiento -->
+    <section class="card">
+      <div class="rowhead">
+        <h2>Horas de desplazamiento</h2>
+        <div class="rate">19,28 €/h</div>
+      </div>
+
+      <label class="field onecol">
+        <input id="hDespl" inputmode="decimal" placeholder="0" />
+      </label>
+
+      <div class="quick">
+        <button class="q" data-target="hDespl" data-val="0.5">0,5</button>
+        <button class="q" data-target="hDespl" data-val="1">1</button>
+        <button class="q" data-target="hDespl" data-val="2">2</button>
+        <button class="q" data-target="hDespl" data-val="3">3</button>
+      </div>
+
+      <div class="totline">
+        <span>Total desplazamiento</span>
+        <strong id="tDespl">0,00 €</strong>
+      </div>
+    </section>
+
+    <!-- Kilómetros -->
+    <section class="card">
+      <div class="rowhead">
+        <h2>Kilómetros</h2>
+        <div class="rate">0,31 €/km</div>
+      </div>
+
+      <label class="field onecol">
+        <input id="kms" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
+      </label>
+
+      <div class="totline">
+        <span>Total km</span>
+        <strong id="tKm">0,00 €</strong>
+      </div>
+    </section>
+
+    <!-- Comida -->
+    <section class="card">
+      <div class="rowhead">
+        <h2>Comida</h2>
+        <div class="rate">€</div>
+      </div>
+
+      <label class="field onecol">
+        <input id="comida" inputmode="decimal" placeholder="0" />
+      </label>
+
+      <div class="attach">
+        <label class="btn-attach">
+          📷 Foto ticket
+          <input id="fotoTicket" type="file" accept="image/*" capture="environment" multiple />
+        </label>
+        <span class="count" id="cTicket">0 fotos</span>
+      </div>
+    </section>
+
+    <!-- Material -->
+    <section class="card">
+      <div class="rowhead">
+        <h2>Consumibles / Material</h2>
+        <div class="rate">€</div>
+      </div>
+
+      <label class="field onecol">
+        <input id="material" inputmode="decimal" placeholder="0" />
+      </label>
+
+      <div class="attach">
+        <label class="btn-attach">
+          📷 Foto material
+          <input id="fotoMaterial" type="file" accept="image/*" capture="environment" multiple />
+        </label>
+        <span class="count" id="cMat">0 fotos</span>
+      </div>
+    </section>
+
+    <!-- Furgón -->
+    <section class="card">
+      <div class="rowhead">
+        <h2>Furgón</h2>
+        <div class="rate">80,00 €</div>
+      </div>
+
+      <div class="switchrow">
+        <label class="switch">
+          <input id="furgonOn" type="checkbox" checked />
+          <span class="slider"></span>
+        </label>
+        <div class="swtext">
+          <div class="swtitle">Aplicar furgón</div>
+          <div class="swsub">Por defecto activo</div>
+        </div>
+        <strong id="tFurgon">80,00 €</strong>
+      </div>
+    </section>
+
+    <!-- Observaciones -->
+    <section class="card">
+      <h2>Observaciones</h2>
+      <textarea id="obs" rows="4" placeholder="Escribe aquí si hay algo que anotar..."></textarea>
+    </section>
+
+    <!-- Resumen -->
+    <section class="card">
+      <h2>Resumen</h2>
+
+      <div class="sumline"><span>Instalación</span><strong id="sInst">0,00 €</strong></div>
+      <div class="sumline"><span>Desplazamiento</span><strong id="sDespl">0,00 €</strong></div>
+      <div class="sumline"><span>Kilómetros</span><strong id="sKm">0,00 €</strong></div>
+      <div class="sumline"><span>Comida</span><strong id="sComida">0,00 €</strong></div>
+      <div class="sumline"><span>Material</span><strong id="sMat">0,00 €</strong></div>
+      <div class="sumline"><span>Furgón</span><strong id="sFurgon">80,00 €</strong></div>
+
+      <div class="sumtotal">
+        <span>TOTAL</span>
+        <strong id="total">80,00 €</strong>
+      </div>
+    </section>
+
+    <section class="card">
+      <button id="btnGuardar" class="btn-primary" type="button">GUARDAR (LOCAL)</button>
+      <p class="msg ok" id="ok" aria-live="polite"></p>
+      <p class="msg" id="err" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <script>
+    // ------- Utilidades -------
+    const EUR = (n) => new Intl.NumberFormat("es-ES", { style:"currency", currency:"EUR" }).format(n);
+
+    // Acepta "1,5" o "1.5"
+    const toNum = (v) => {
+      if (!v) return 0;
+      const s = String(v).trim().replace(",", ".");
+      const n = Number(s);
+      return Number.isFinite(n) ? n : 0;
+    };
+
+    const clamp0 = (n) => (n < 0 ? 0 : n);
+
+    // Tarifas
+    const P_INST = 27.95;
+    const P_DESPL = 19.28;
+    const P_KM = 0.31;
+    const FURGON = 80.00;
+
+    // ------- Cargar cabecera -------
+    const header = (() => {
+      try { return JSON.parse(localStorage.getItem("pv_header") || "{}"); }
+      catch { return {}; }
+    })();
+
+    // Guardas por si alguien entra directo
+    document.getElementById("mFecha").textContent = header.fecha || "—";
+    document.getElementById("mId").textContent = header.idCliente || "—";
+
+    // ------- Inputs -------
+    const hInst = document.getElementById("hInst");
+    const hDespl = document.getElementById("hDespl");
+    const kms = document.getElementById("kms");
+    const comida = document.getElementById("comida");
+    const material = document.getElementById("material");
+    const furgonOn = document.getElementById("furgonOn");
+
+    const fotoTicket = document.getElementById("fotoTicket");
+    const fotoMaterial = document.getElementById("fotoMaterial");
+    const cTicket = document.getElementById("cTicket");
+    const cMat = document.getElementById("cMat");
+
+    const setCounts = () => {
+      cTicket.textContent = `${fotoTicket.files?.length || 0} fotos`;
+      cMat.textContent = `${fotoMaterial.files?.length || 0} fotos`;
+    };
+    fotoTicket.addEventListener("change", setCounts);
+    fotoMaterial.addEventListener("change", setCounts);
+
+    // ------- Cálculos -------
+    const tInst = document.getElementById("tInst");
+    const tDespl = document.getElementById("tDespl");
+    const tKm = document.getElementById("tKm");
+    const tFurgon = document.getElementById("tFurgon");
+
+    const sInst = document.getElementById("sInst");
+    const sDespl = document.getElementById("sDespl");
+    const sKm = document.getElementById("sKm");
+    const sComida = document.getElementById("sComida");
+    const sMat = document.getElementById("sMat");
+    const sFurgon = document.getElementById("sFurgon");
+    const totalEl = document.getElementById("total");
+
+    const recalc = () => {
+      const hi = clamp0(toNum(hInst.value));
+      const hd = clamp0(toNum(hDespl.value));
+      const km = clamp0(toNum(kms.value));
+      const co = clamp0(toNum(comida.value));
+      const ma = clamp0(toNum(material.value));
+      const fu = furgonOn.checked ? FURGON : 0;
+
+      const a = hi * P_INST;
+      const b = hd * P_DESPL;
+      const c = km * P_KM;
+
+      tInst.textContent = EUR(a);
+      tDespl.textContent = EUR(b);
+      tKm.textContent = EUR(c);
+
+      const tf = EUR(fu);
+      tFurgon.textContent = tf;
+
+      sInst.textContent = EUR(a);
+      sDespl.textContent = EUR(b);
+      sKm.textContent = EUR(c);
+      sComida.textContent = EUR(co);
+      sMat.textContent = EUR(ma);
+      sFurgon.textContent = tf;
+
+      const tot = a + b + c + co + ma + fu;
+      totalEl.textContent = EUR(tot);
+    };
+
+    ["input","change"].forEach(evt => {
+      hInst.addEventListener(evt, recalc);
+      hDespl.addEventListener(evt, recalc);
+      kms.addEventListener(evt, recalc);
+      comida.addEventListener(evt, recalc);
+      material.addEventListener(evt, recalc);
+      furgonOn.addEventListener(evt, recalc);
+    });
+
+    // Botones rápidos
+    document.querySelectorAll(".q").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.target;
+        const val = btn.dataset.val;
+        const el = document.getElementById(target);
+        el.value = String(val).replace(".", ","); // para visual
+        recalc();
+      });
+    });
+
+    recalc();
+    setCounts();
+
+    // ------- Guardado local -------
+    const ok = document.getElementById("ok");
+    const err = document.getElementById("err");
+    const btnGuardar = document.getElementById("btnGuardar");
+
+    btnGuardar.addEventListener("click", async () => {
+      ok.textContent = "";
+      err.textContent = "";
+
+      // Validación mínima
+      if (!header.idCliente) {
+        err.textContent = "Falta ID Cliente (vuelve atrás y créalo desde Nuevo Parte).";
+        return;
+      }
+
+      const payload = {
+        header,
+        tipo: "instalacion",
+        tarifas: { P_INST, P_DESPL, P_KM, FURGON },
+        datos: {
+          horas_inst: toNum(hInst.value),
+          horas_despl: toNum(hDespl.value),
+          kms: toNum(kms.value),
+          comida: toNum(comida.value),
+          material: toNum(material.value),
+          furgon: furgonOn.checked
+        },
+        observaciones: document.getElementById("obs").value || "",
+        fotos: {
+          ticket_count: fotoTicket.files?.length || 0,
+          material_count: fotoMaterial.files?.length || 0
+        },
+        saved_at: new Date().toISOString()
+      };
+
+      // Guardamos un array de partes
+      const key = "pv_partes";
+      let arr = [];
+      try { arr = JSON.parse(localStorage.getItem(key) || "[]"); } catch {}
+      arr.push(payload);
+      localStorage.setItem(key, JSON.stringify(arr));
+
+      ok.textContent = "Guardado en el móvil ✅";
+    });
+  </script>
+
+  <style>
+    /* Pequeñas extensiones específicas sin tocar styles.css por ahora */
+    .back{
+      position:absolute;
+      left:16px;
+      top:16px;
+      text-decoration:none;
+      font-size:22px;
+      font-weight:900;
+      color:var(--primary);
+    }
+    .topbar{ position:sticky; }
+    .topbar h1{ text-align:center; }
+
+    .meta{ display:grid; gap:8px; font-size:16px; }
+    .rowhead{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+    .rate{ font-weight:900; color:var(--muted); }
+
+    .field.onecol{ grid-template-columns: 1fr; grid-template-rows:auto; }
+    .quick{
+      display:flex; gap:8px; flex-wrap:wrap;
+      margin-top:10px;
+    }
+    .q{
+      height:44px;
+      padding:0 14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-size:18px;
+      font-weight:900;
+      color:var(--primary);
+    }
+
+    .totline{
+      display:flex; justify-content:space-between; align-items:center;
+      padding-top:12px; margin-top:8px;
+      border-top:1px solid var(--line);
+      font-size:16px;
+      color:var(--muted);
+    }
+    .totline strong{ color:var(--text); font-size:18px; }
+
+    .attach{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; margin-top:10px;
+    }
+    .btn-attach{
+      display:inline-flex; align-items:center; justify-content:center;
+      height:52px;
+      padding:0 14px;
+      border-radius:14px;
+      background:#0b5cff;
+      color:#fff;
+      font-weight:900;
+      border:none;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn-attach input{ display:none; }
+    .count{ color:var(--muted); font-weight:800; }
+
+    .switchrow{
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      gap:12px;
+      align-items:center;
+    }
+    .switch{ position:relative; width:56px; height:34px; display:inline-block; }
+    .switch input{ display:none; }
+    .slider{
+      position:absolute; inset:0;
+      background:#cbd5e1;
+      border-radius:999px;
+      transition:.2s;
+    }
+    .slider:before{
+      content:"";
+      position:absolute; width:28px; height:28px;
+      left:3px; top:3px;
+      background:#fff;
+      border-radius:999px;
+      transition:.2s;
+      box-shadow:0 8px 18px rgba(2,8,23,.15);
+    }
+    .switch input:checked + .slider{ background: rgba(11,92,255,.85); }
+    .switch input:checked + .slider:before{ transform: translateX(22px); }
+    .swtitle{ font-weight:900; }
+    .swsub{ color:var(--muted); font-weight:700; font-size:13px; }
+
+    textarea{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px 14px;
+      font-size:18px;
+      font-family:var(--font);
+      outline:none;
+    }
+    textarea:focus{
+      border-color: rgba(11,92,255,.45);
+      box-shadow: 0 0 0 4px rgba(11,92,255,.12);
+    }
+
+    .sumline{
+      display:flex; justify-content:space-between; align-items:center;
+      padding:10px 0;
+      border-bottom:1px dashed var(--line);
+      color:var(--muted);
+      font-weight:800;
+    }
+    .sumline strong{ color:var(--text); }
+    .sumtotal{
+      display:flex; justify-content:space-between; align-items:center;
+      padding-top:14px;
+      font-size:22px;
+      font-weight:1000;
+    }
+    .msg.ok{ color:#15803d; }
+  </style>
+</body>
+</html>

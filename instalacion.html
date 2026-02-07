@@ -116,13 +116,16 @@
         <input id="comida" inputmode="decimal" placeholder="0" />
       </label>
 
-      <div class="attach">
-        <label class="btn-attach">
-          📷 Foto ticket
-<input id="fotoTicket" type="file" accept="image/*" />
-        </label>
-        <span class="count" id="cTicket">0 fotos</span>
-      </div>
+<div class="attach">
+  <button type="button" class="btn-attach" id="btnCamTicket">📷 Sacar foto</button>
+
+  <label class="btn-attach alt">
+    🖼️ Fototeca
+    <input id="fotoTicket" type="file" accept="image/*" />
+  </label>
+
+  <span class="count" id="cTicket">0 fotos</span>
+</div>
     </section>
 
     <!-- Material -->
@@ -136,13 +139,16 @@
         <input id="material" inputmode="decimal" placeholder="0" />
       </label>
 
-      <div class="attach">
-        <label class="btn-attach">
-          📷 Foto material
-<input id="fotoMaterial" type="file" accept="image/*" />
-        </label>
-        <span class="count" id="cMat">0 fotos</span>
-      </div>
+<div class="attach">
+  <button type="button" class="btn-attach" id="btnCamMaterial">📷 Sacar foto</button>
+
+  <label class="btn-attach alt">
+    🖼️ Fototeca
+    <input id="fotoMaterial" type="file" accept="image/*" />
+  </label>
+
+  <span class="count" id="cMat">0 fotos</span>
+</div>
     </section>
 
     <!-- Furgón -->
@@ -193,6 +199,27 @@
       <p class="msg ok" id="ok" aria-live="polite"></p>
       <p class="msg" id="err" aria-live="polite"></p>
     </section>
+    <!-- MODAL CÁMARA -->
+<div id="camModal" class="camModal" hidden>
+  <div class="camPanel">
+    <div class="camTop">
+      <strong id="camTitle">Cámara</strong>
+      <button type="button" id="camClose" class="camClose">✕</button>
+    </div>
+
+    <video id="camVideo" playsinline autoplay></video>
+
+    <canvas id="camCanvas" hidden></canvas>
+
+    <div class="camBottom">
+      <button type="button" id="camShot" class="camBtnPrimary">CAPTURAR</button>
+      <button type="button" id="camUse" class="camBtn" disabled>USAR FOTO</button>
+      <button type="button" id="camRetake" class="camBtn" disabled>REPETIR</button>
+    </div>
+
+    <p id="camMsg" class="camMsg"></p>
+  </div>
+</div>
   </main>
 
   <script>
@@ -388,9 +415,11 @@ setCounts();
         },
         observaciones: document.getElementById("obs").value || "",
         fotos: {
-          ticket_count: fotoTicket.files?.length || 0,
-          material_count: fotoMaterial.files?.length || 0
-        },
+  ticket_count: (fotoTicket.files?.length || 0) + ticketShots.length,
+  material_count: (fotoMaterial.files?.length || 0) + materialShots.length,
+  ticket_dataurls: ticketShots,      // puede crecer; luego podemos limitar a 3
+  material_dataurls: materialShots
+},
         saved_at: new Date().toISOString()
       };
 
@@ -403,6 +432,127 @@ setCounts();
 
       ok.textContent = "Guardado en el móvil ✅";
     });
+    // -------- Cámara propia (evita “cámara negra” del input file en iOS) --------
+const camModal = document.getElementById("camModal");
+const camVideo = document.getElementById("camVideo");
+const camCanvas = document.getElementById("camCanvas");
+const camShot = document.getElementById("camShot");
+const camUse = document.getElementById("camUse");
+const camRetake = document.getElementById("camRetake");
+const camClose = document.getElementById("camClose");
+const camMsg = document.getElementById("camMsg");
+const camTitle = document.getElementById("camTitle");
+
+const btnCamTicket = document.getElementById("btnCamTicket");
+const btnCamMaterial = document.getElementById("btnCamMaterial");
+
+// guardamos las fotos en memoria (DataURL). Luego podrás meterlas en localStorage o exportar.
+let ticketShots = [];
+let materialShots = [];
+
+let currentTarget = null; // "ticket" | "material"
+let stream = null;
+let lastDataUrl = null;
+
+const updatePhotoCounts = () => {
+  const t = ticketShots.length + (fotoTicket.files?.length || 0);
+  const m = materialShots.length + (fotoMaterial.files?.length || 0);
+  cTicket.textContent = `${t} fotos`;
+  cMat.textContent = `${m} fotos`;
+};
+
+const openCam = async (target) => {
+  currentTarget = target;
+  lastDataUrl = null;
+  camMsg.textContent = "";
+  camUse.disabled = true;
+  camRetake.disabled = true;
+  camShot.disabled = false;
+
+  camTitle.textContent = target === "ticket" ? "Cámara · Ticket" : "Cámara · Material";
+
+  camModal.hidden = false;
+
+  try {
+    // iOS: mejor pedir environment pero con fallback si no lo da
+    const constraints = { video: { facingMode: { ideal: "environment" } }, audio: false };
+    stream = await navigator.mediaDevices.getUserMedia(constraints);
+    camVideo.srcObject = stream;
+    await camVideo.play();
+  } catch (e) {
+    camMsg.textContent = "No se pudo abrir la cámara. Usa Fototeca si hace falta.";
+    // Cerrar modal si falla
+    closeCam();
+  }
+};
+
+const closeCam = () => {
+  camModal.hidden = true;
+  camMsg.textContent = "";
+  lastDataUrl = null;
+
+  if (stream) {
+    stream.getTracks().forEach(t => t.stop());
+    stream = null;
+  }
+  camVideo.srcObject = null;
+};
+
+camClose.addEventListener("click", closeCam);
+
+// Capturar frame del video
+camShot.addEventListener("click", () => {
+  if (!camVideo.videoWidth || !camVideo.videoHeight) {
+    camMsg.textContent = "La cámara aún no está lista. Espera 1 segundo y prueba otra vez.";
+    return;
+  }
+
+  const w = camVideo.videoWidth;
+  const h = camVideo.videoHeight;
+
+  camCanvas.width = w;
+  camCanvas.height = h;
+  const ctx = camCanvas.getContext("2d");
+  ctx.drawImage(camVideo, 0, 0, w, h);
+
+  lastDataUrl = camCanvas.toDataURL("image/jpeg", 0.85);
+
+  camUse.disabled = false;
+  camRetake.disabled = false;
+  camShot.disabled = true;
+  camMsg.textContent = "Foto capturada ✅";
+});
+
+// Usar foto capturada
+camUse.addEventListener("click", () => {
+  if (!lastDataUrl) return;
+
+  if (currentTarget === "ticket") ticketShots.push(lastDataUrl);
+  if (currentTarget === "material") materialShots.push(lastDataUrl);
+
+  updatePhotoCounts();
+  closeCam();
+});
+
+// Repetir
+camRetake.addEventListener("click", () => {
+  lastDataUrl = null;
+  camUse.disabled = true;
+  camRetake.disabled = true;
+  camShot.disabled = false;
+  camMsg.textContent = "";
+});
+
+// Botones
+btnCamTicket.addEventListener("click", () => openCam("ticket"));
+btnCamMaterial.addEventListener("click", () => openCam("material"));
+
+// Actualiza contadores también cuando el user usa Fototeca
+fotoTicket.addEventListener("change", updatePhotoCounts);
+fotoMaterial.addEventListener("change", updatePhotoCounts);
+
+// Inicializa
+updatePhotoCounts();
   </script>
 
   <style>
@@ -564,6 +714,96 @@ setCounts();
   font-size:18px;
   font-weight:1000;
   color:var(--primary);
+}
+    .btn-attach.alt{
+  background:#ffffff;
+  color:var(--primary);
+  border:1px solid rgba(11,92,255,.35);
+}
+
+.camModal{
+  position:fixed;
+  inset:0;
+  background:rgba(2,8,23,.55);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  z-index:9999;
+}
+
+.camPanel{
+  width:min(720px, 100%);
+  background:#fff;
+  border-radius:18px;
+  overflow:hidden;
+  border:1px solid var(--line);
+  box-shadow: 0 18px 50px rgba(2,8,23,.25);
+}
+
+.camTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 14px;
+  border-bottom:1px solid var(--line);
+}
+
+.camClose{
+  border:none;
+  background:transparent;
+  font-size:20px;
+  font-weight:900;
+  color:var(--primary);
+}
+
+#camVideo{
+  width:100%;
+  height:55vh;
+  background:#000;
+  object-fit:cover;
+}
+
+.camBottom{
+  display:flex;
+  gap:10px;
+  padding:12px 14px;
+  border-top:1px solid var(--line);
+}
+
+.camBtnPrimary{
+  flex:1.4;
+  height:54px;
+  border-radius:14px;
+  border:none;
+  background:var(--primary);
+  color:#fff;
+  font-weight:1000;
+  font-size:18px;
+}
+
+.camBtn{
+  flex:1;
+  height:54px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--primary);
+  font-weight:1000;
+  font-size:16px;
+}
+
+.camBtn:disabled,
+.camBtnPrimary:disabled{
+  opacity:.45;
+}
+
+.camMsg{
+  margin:0;
+  padding:0 14px 14px;
+  color:#b91c1c;
+  font-weight:800;
+  min-height:20px;
 }
   </style>
 </body>

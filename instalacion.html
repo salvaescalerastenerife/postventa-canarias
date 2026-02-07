@@ -683,7 +683,7 @@ btnCompartir.addEventListener("click", async () => {
     // -------- PDF + COMPARTIR (con fotos) --------
 const btnPDF = document.getElementById("btnPDF");
 
-// Convierte File -> DataURL
+// File -> DataURL (raw)
 const fileToDataURL = (file) => new Promise((resolve, reject) => {
   const r = new FileReader();
   r.onload = () => resolve(r.result);
@@ -691,21 +691,56 @@ const fileToDataURL = (file) => new Promise((resolve, reject) => {
   r.readAsDataURL(file);
 });
 
+// DataURL (cualquier formato: HEIC/PNG/JPG) -> JPEG DataURL
+const dataUrlToJpeg = (src) => new Promise((resolve, reject) => {
+  const img = new Image();
+  img.onload = () => {
+    // downscale para que el PDF no pese una barbaridad
+    const MAX_W = 1400;
+    let w = img.naturalWidth || img.width;
+    let h = img.naturalHeight || img.height;
+
+    if (w > MAX_W) {
+      h = Math.round(h * (MAX_W / w));
+      w = MAX_W;
+    }
+
+    const c = document.createElement("canvas");
+    c.width = w; c.height = h;
+    const ctx = c.getContext("2d");
+    ctx.drawImage(img, 0, 0, w, h);
+
+    resolve(c.toDataURL("image/jpeg", 0.85));
+  };
+  img.onerror = reject;
+  img.src = src;
+});
+
+// File -> JPEG DataURL (robusto)
+const fileToJpegDataURL = async (file) => {
+  const raw = await fileToDataURL(file);
+  return await dataUrlToJpeg(raw);
+};
+
 // Coge TODAS las fotos disponibles: (a) cámara propia arrays + (b) fototeca files
 async function collectImages() {
   const ticket = [];
   const material = [];
 
-  // (a) cámara propia (dataURL ya listo)
-  if (typeof ticketShots !== "undefined") ticket.push(...ticketShots);
-  if (typeof materialShots !== "undefined") material.push(...materialShots);
+  // (a) cámara propia (aunque ya viene JPEG, lo normalizamos igual)
+  if (typeof ticketShots !== "undefined") {
+    for (const u of ticketShots) ticket.push(await dataUrlToJpeg(u));
+  }
+  if (typeof materialShots !== "undefined") {
+    for (const u of materialShots) material.push(await dataUrlToJpeg(u));
+  }
 
-  // (b) fototeca (File -> dataURL)
+  // (b) fototeca (File -> JPEG)
   if (fotoTicket?.files?.length) {
-    for (const f of fotoTicket.files) ticket.push(await fileToDataURL(f));
+    for (const f of fotoTicket.files) ticket.push(await fileToJpegDataURL(f));
   }
   if (fotoMaterial?.files?.length) {
-    for (const f of fotoMaterial.files) material.push(await fileToDataURL(f));
+    for (const f of fotoMaterial.files) material.push(await fileToJpegDataURL(f));
   }
 
   return { ticket, material };
@@ -853,7 +888,7 @@ async function addPhotos(doc, y, title, images) {
     // Imagen dentro
     const img = images[i];
 const format = img.startsWith("data:image/png") ? "PNG" : "JPEG";
-doc.addImage(img, format, x + 2, y + 2, cellW - 4, cellH - 4);
+doc.addImage(img, "JPEG", x + 2, y + 2, cellW - 4, cellH - 4);
 
     col++;
     if (col === 2) {
@@ -947,10 +982,10 @@ btnPDF.addEventListener("click", async () => {
     URL.revokeObjectURL(url);
     ok.textContent = "PDF descargado (fallback) ✅";
 
-  } catch (e) {
-    console.error(e);
-    err.textContent = "Error generando/compartiendo PDF. Revisa permisos y prueba en Safari.";
-  }
+} catch (e) {
+  console.error(e);
+  err.textContent = "PDF ERROR: " + (e?.message ? e.message : String(e));
+}
 });
   </script>
 

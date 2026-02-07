@@ -2,6 +2,7 @@ const CACHE = "postventa-canarias-v1";
 const ASSETS = [
   "./",
   "./index.html",
+  "./instalacion.html",
   "./styles.css",
   "./app.js",
   "./manifest.webmanifest"

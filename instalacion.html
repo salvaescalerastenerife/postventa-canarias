@@ -724,26 +724,26 @@ const fileToJpegDataURL = async (file) => {
 
 // Coge TODAS las fotos disponibles: (a) cámara propia arrays + (b) fototeca files
 async function collectImages() {
-  const ticket = [];
-  const material = [];
+  const ticketImgs = [];
+  const materialImgs = [];
 
-  // (a) cámara propia (aunque ya viene JPEG, lo normalizamos igual)
+  // Fotos de cámara propia
   if (typeof ticketShots !== "undefined") {
-    for (const u of ticketShots) ticket.push(await dataUrlToJpeg(u));
+    for (const u of ticketShots) ticketImgs.push(await dataUrlToJpeg(u));
   }
   if (typeof materialShots !== "undefined") {
-    for (const u of materialShots) material.push(await dataUrlToJpeg(u));
+    for (const u of materialShots) materialImgs.push(await dataUrlToJpeg(u));
   }
 
-  // (b) fototeca (File -> JPEG)
+  // Fotos desde Fototeca
   if (fotoTicket?.files?.length) {
-    for (const f of fotoTicket.files) ticket.push(await fileToJpegDataURL(f));
+    for (const f of fotoTicket.files) ticketImgs.push(await fileToJpegDataURL(f));
   }
   if (fotoMaterial?.files?.length) {
-    for (const f of fotoMaterial.files) material.push(await fileToJpegDataURL(f));
+    for (const f of fotoMaterial.files) materialImgs.push(await fileToJpegDataURL(f));
   }
 
-  return { ticket, material };
+  return { ticketImgs, materialImgs };
 }
 
 // Dibuja texto con estilo “parte”
@@ -929,7 +929,7 @@ btnPDF.addEventListener("click", async () => {
     const obs = document.getElementById("obs").value || "";
 
     // Fotos
-    const { ticket, material } = await collectImages();
+const { ticketImgs, materialImgs } = await collectImages();
 
     // PDF
     const { jsPDF } = window.jspdf;
@@ -954,9 +954,10 @@ btnPDF.addEventListener("click", async () => {
     y = addTotal(doc, y, EUR(total));
     y = addObservaciones(doc, y, obs);
 
-    // Fotos (si las hay)
-    y = await addPhotos(doc, y, `FOTOS · Ticket comida (${ticket.length})`, ticket);
-    y = await addPhotos(doc, y, `FOTOS · Material (${material.length})`, material);
+
+// Fotos (si las hay)
+y = await addPhotos(doc, y, `FOTOS · Ticket comida (${ticketImgs.length})`, ticketImgs);
+y = await addPhotos(doc, y, `FOTOS · Material (${materialImgs.length})`, materialImgs);
 
     const pdfBlob = doc.output("blob");
     const filename = `Parte_Instalacion_${header.idCliente || "cliente"}_${header.fecha || "fecha"}.pdf`;

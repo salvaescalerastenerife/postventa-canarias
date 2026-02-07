@@ -852,7 +852,8 @@ async function addPhotos(doc, y, title, images) {
 
     // Imagen dentro
     const img = images[i];
-    doc.addImage(img, "JPEG", x + 2, y + 2, cellW - 4, cellH - 4, undefined, "FAST");
+const format = img.startsWith("data:image/png") ? "PNG" : "JPEG";
+doc.addImage(img, format, x + 2, y + 2, cellW - 4, cellH - 4);
 
     col++;
     if (col === 2) {

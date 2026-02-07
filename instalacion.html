@@ -853,8 +853,9 @@ async function addPhotos(doc, y, title, images) {
   const M = 14;
   const W = 210 - M * 2;
 
-  if (!images.length) return y;
+  if (!images || !images.length) return y;
 
+  // Título
   if (y > 240) {
     doc.addPage();
     y = 16;
@@ -870,37 +871,71 @@ async function addPhotos(doc, y, title, images) {
   const cellW = (W - gap) / 2;
   const cellH = 60;
 
-  let x = M;
+  // helper: obtener tamaño real de la imagen para mantener proporción
+  const getImgSize = (dataUrl) => new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve({ w: img.naturalWidth || img.width, h: img.naturalHeight || img.height });
+    img.onerror = reject;
+    img.src = dataUrl;
+  });
+
   let col = 0;
+  let x = M;
 
   for (let i = 0; i < images.length; i++) {
+    // Si no cabe la fila completa, nueva página
     if (y + cellH > 285) {
       doc.addPage();
       y = 16;
-      x = M;
       col = 0;
+      x = M;
     }
 
-    // Nota: jsPDF detecta PNG/JPEG si le pasas dataURL
+    // Caja
     doc.setDrawColor(220);
     doc.rect(x, y, cellW, cellH);
 
-    // Imagen dentro
-    const img = images[i];
-const format = img.startsWith("data:image/png") ? "PNG" : "JPEG";
-doc.addImage(img, "JPEG", x + 2, y + 2, cellW - 4, cellH - 4);
+    // Mantener proporción dentro de la caja (margen 2mm)
+    const pad = 2;
+    const maxW = cellW - pad * 2;
+    const maxH = cellH - pad * 2;
 
+    let iw = 1, ih = 1;
+    try {
+      const sz = await getImgSize(images[i]);
+      iw = sz.w; ih = sz.h;
+    } catch (_) {}
+
+    const scale = Math.min(maxW / iw, maxH / ih);
+    const dw = iw * scale;
+    const dh = ih * scale;
+
+    const dx = x + (cellW - dw) / 2;
+    const dy = y + (cellH - dh) / 2;
+
+    // Todas las imágenes ya vienen como JPEG (por tu normalización)
+    doc.addImage(images[i], "JPEG", dx, dy, dw, dh);
+
+    // Siguiente columna
     col++;
+
     if (col === 2) {
+      // Cerramos fila
       col = 0;
       x = M;
       y += (cellH + gap);
     } else {
+      // Segunda columna
       x = M + cellW + gap;
     }
   }
 
-  return y + 6;
+  // Si la última fila quedó a medias (1 sola foto), bajamos igualmente
+  if (col === 1) {
+    y += (cellH + gap);
+  }
+
+  return y;
 }
 
 btnPDF.addEventListener("click", async () => {

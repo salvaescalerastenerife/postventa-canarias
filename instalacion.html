@@ -267,7 +267,12 @@
     // Guardas por si alguien entra directo
     document.getElementById("mFecha").textContent = header.fecha || "—";
     document.getElementById("mId").textContent = header.idCliente || "—";
-
+    // ------- Técnico (selector) -------
+const tecnicoSel = document.getElementById("tecnico");
+tecnicoSel.value = localStorage.getItem("pv_tecnico") || "";
+tecnicoSel.addEventListener("change", () => {
+  localStorage.setItem("pv_tecnico", tecnicoSel.value);
+});
     // ------- Inputs -------
     const hInst = document.getElementById("hInst");
     const hDespl = document.getElementById("hDespl");
@@ -416,9 +421,9 @@ recalc();
         return;
       }
 
-      const payload = {
-        header,
-        tipo: "instalacion",
+const payload = {
+  header: { ...header, tecnico: tecnicoSel.value || "" },
+  tipo: "instalacion",
         tarifas: { P_INST, P_DESPL, P_KM, FURGON },
         datos: {
           horas_inst: toNum(hInst.value),
@@ -611,6 +616,7 @@ const materialCount = getMaterialCount();
   lines.push(`Fecha: ${header.fecha || "—"}`);
   lines.push(`ID Cliente: ${header.idCliente || "—"}`);
   lines.push(`Técnicos: ${TECNICOS}`);
+  lines.push(`Técnico: ${tecnicoSel.value || "—"}`);
   lines.push("");
 
   lines.push("DETALLE");
@@ -672,7 +678,10 @@ btnCompartir.addEventListener("click", async () => {
     err.textContent = "Falta ID Cliente (vuelve atrás y créalo desde Nuevo Parte).";
     return;
   }
-
+if (!tecnicoSel.value) {
+  err.textContent = "Selecciona tu nombre (Técnico).";
+  return;
+}
   const text = buildWhatsAppText();
 
   // 1) Intento: share sheet iOS (elige WhatsApp)
@@ -777,7 +786,7 @@ function addHeader(doc, meta) {
   doc.text(`Fecha: ${meta.fecha}`, M, y); y += 6;
   doc.text(`ID Cliente: ${meta.idCliente}`, M, y); y += 6;
   doc.text(`Técnicos: ${meta.tecnicos}`, M, y); y += 6;
-
+  doc.text(`Técnico: ${meta.tecnico}`, M, y); y += 6;
   return y + 2;
 }
 
@@ -956,7 +965,10 @@ btnPDF.addEventListener("click", async () => {
     err.textContent = "Falta ID Cliente (vuelve atrás y créalo desde Nuevo Parte).";
     return;
   }
-
+if (!tecnicoSel.value) {
+  err.textContent = "Selecciona tu nombre (Técnico).";
+  return;
+}
   try {
     // Datos
     const hi = clamp0(toNum(hInst.value));
@@ -980,12 +992,12 @@ const { ticketImgs, materialImgs } = await collectImages();
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: "mm", format: "a4" });
 
-    let y = addHeader(doc, {
-      fecha: header.fecha || "—",
-      idCliente: header.idCliente || "—",
-      tecnicos: TECNICOS_INST
-    });
-
+let y = addHeader(doc, {
+  fecha: header.fecha || "—",
+  idCliente: header.idCliente || "—",
+  tecnicos: TECNICOS_INST,
+  tecnico: tecnicoSel.value || "—"
+});
     const rows = [
       { label: "Horas instalación", qty: `${hi.toFixed(1).replace(".", ",")} h`, amount: EUR(impInst) },
       { label: "Horas despl.",      qty: `${hd.toFixed(1).replace(".", ",")} h`, amount: EUR(impDespl) },

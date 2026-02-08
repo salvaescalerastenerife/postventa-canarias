@@ -31,7 +31,7 @@
     <section class="card">
       <div class="rowhead">
         <h2>Horas de instalación</h2>
-        <div class="rate">27,95 €/h</div>
+<div class="rate">27,95 €/h ×2 técnicos</div>
       </div>
 
 <div class="stepper">
@@ -60,7 +60,7 @@
     <section class="card">
       <div class="rowhead">
         <h2>Horas de desplazamiento</h2>
-        <div class="rate">19,28 €/h</div>
+<div class="rate">19,28 €/h ×2 técnicos</div>
       </div>
 
 <div class="stepper">
@@ -300,9 +300,9 @@
       const ma = clamp0(toNum(material.value));
       const fu = furgonOn.checked ? FURGON : 0;
 
-      const a = hi * P_INST * TECNICOS_INST;
-      const b = hd * P_DESPL;
-      const c = km * P_KM;
+      const a = hi * P_INST * TECNICOS_INST;        // instalación ×2
+      const b = hd * P_DESPL * TECNICOS_INST;       // desplazamiento ×2
+      const c = km * P_KM;                          // km NO ×2
 
       tInst.textContent = EUR(a);
       tDespl.textContent = EUR(b);
@@ -578,9 +578,9 @@ function buildWhatsAppText() {
 
   // IMPORTES (ojo: instalación × 2 técnicos)
   const TECNICOS = (typeof TECNICOS_INST !== "undefined") ? TECNICOS_INST : 2;
-  const impInst = hi * P_INST * TECNICOS;
-  const impDespl = hd * P_DESPL;
-  const impKm = km * P_KM;
+  const impInst = hi * P_INST * TECNICOS_INST;
+const impDespl = hd * P_DESPL * TECNICOS_INST;
+const impKm = km * P_KM;
 
   const total = impInst + impDespl + impKm + co + ma + fu;
 
@@ -606,12 +606,12 @@ const materialCount = getMaterialCount();
   lines.push("DETALLE");
   lines.push("────────────────────────────");
   lines.push(
-    padR("Horas instalación", W1) + " " +
+    padR("Horas instalación x2", W1) + " " +
     padL(fmtH(hi), W2) + "  " +
     padL(EUR(impInst), W3)
   );
   lines.push(
-    padR("Horas despl.", W1) + " " +
+    padR("Horas despl. x2", W1) + " " +
     padL(fmtH(hd), W2) + "  " +
     padL(EUR(impDespl), W3)
   );

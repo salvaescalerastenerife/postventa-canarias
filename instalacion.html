@@ -999,8 +999,8 @@ let y = addHeader(doc, {
   tecnico: tecnicoSel.value || "—"
 });
     const rows = [
-      { label: "Horas instalación", qty: `${hi.toFixed(1).replace(".", ",")} h`, amount: EUR(impInst) },
-      { label: "Horas despl.",      qty: `${hd.toFixed(1).replace(".", ",")} h`, amount: EUR(impDespl) },
+      { label: "Horas instalación x2", qty: `${hi.toFixed(1).replace(".", ",")} h`, amount: EUR(impInst) },
+      { label: "Horas despl. x2",      qty: `${hd.toFixed(1).replace(".", ",")} h`, amount: EUR(impDespl) },
       { label: "Kilómetros",        qty: `${String(km).replace(".", ",")}`,      amount: EUR(impKm) },
       { label: "Comida",            qty: "",                                     amount: EUR(co) },
       { label: "Material",          qty: "",                                     amount: EUR(ma) },

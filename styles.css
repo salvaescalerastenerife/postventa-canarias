@@ -2,17 +2,28 @@
   --bg:#f4f6fb;
   --card:#ffffff;
   --text:#0f172a;
-  --muted:#64748b;
-  --line:#e2e8f0;
+  --muted:rgba(15,23,42,.62);
+  --line:rgba(15,23,42,.10);
   --primary:#0b5cff;
-  --shadow: 0 10px 30px rgba(2,8,23,.08);
+
+  --shadow: 0 10px 28px rgba(2,8,23,.08);
   --radius:18px;
   --tap:56px;
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+
+  /* acentos por tipo */
+  --inst:#0b5cff;
+  --rep:#0f766e;
+  --mant:#d6a100;
+
+  --inst-bg: rgba(11,92,255,.08);
+  --rep-bg: rgba(15,118,110,.10);
+  --mant-bg: rgba(214,161,0,.12);
 }
 
 *{ box-sizing:border-box; }
 html,body{ height:100%; }
+
 body{
   margin:0;
   font-family:var(--font);
@@ -20,28 +31,32 @@ body{
   color:var(--text);
 }
 
+/* Topbar más “iOS” */
 .topbar{
   position:sticky;
   top:0;
   z-index:5;
   background:rgba(244,246,251,.92);
   backdrop-filter: blur(10px);
-  padding:14px 16px 10px;
-  border-bottom:1px solid var(--line);
+  padding:14px 16px 12px;
+  border-bottom:1px solid rgba(15,23,42,.08);
 }
 
 .topbar h1{
   margin:0;
-  font-size:26px;
-  letter-spacing:-.3px;
+  font-size:30px;
+  font-weight:1000;
+  letter-spacing:-.6px;
 }
 
+/* Contenedor */
 .container{
   padding:16px;
   max-width:720px;
   margin:0 auto;
 }
 
+/* Cards premium */
 .card{
   background:var(--card);
   border:1px solid var(--line);
@@ -52,63 +67,151 @@ body{
 }
 
 h2{
-  margin:0 0 12px;
+  margin:0 0 10px;
   font-size:18px;
+  font-weight:1000;
   color:var(--text);
 }
 
+/* ====== SELECCIÓN: de botones a tarjetas ====== */
 .chips{
   display:grid;
   gap:12px;
 }
 
 .chip{
-  height:var(--tap);
-  border-radius:16px;
+  /* tarjeta */
+  height:auto;
+  min-height:64px;
+  padding:14px 14px;
+  border-radius:18px;
   border:1px solid var(--line);
-  font-size:20px;
-  font-weight:700;
-  padding:0 16px;
-  text-align:left;
-  display:flex;
+  background:#fff;
+
+  /* layout */
+  display:grid;
+  grid-template-columns: 52px 1fr 26px;
   align-items:center;
-  justify-content:flex-start;
+  gap:12px;
+
+  /* tipografía */
+  font-size:20px;
+  font-weight:1000;
+  text-align:left;
+
   cursor:pointer;
+  user-select:none;
+  transition: transform .06s ease, border-color .15s ease, background .15s ease, box-shadow .15s ease;
 }
 
+.chip:active{
+  transform: scale(.99);
+}
+
+/* icono tipo “pastilla” (si no hay icono en HTML, no molesta) */
+.chip::before{
+  content:"";
+  width:52px;
+  height:52px;
+  border-radius:16px;
+  display:block;
+  background: var(--inst-bg);
+}
+
+/* check a la derecha */
+.chip::after{
+  content:"";
+  width:22px;
+  height:22px;
+  border-radius:999px;
+  border:2px solid rgba(15,23,42,.18);
+  display:block;
+}
+
+/* Colores por tipo (sin gradientes) */
+.chip-inst{ color:var(--text); }
+.chip-inst::before{ background: var(--inst-bg); }
+
+.chip-repa{ color:var(--text); }
+.chip-repa::before{ background: var(--rep-bg); }
+
+.chip-mant{ color:var(--text); }
+.chip-mant::before{ background: var(--mant-bg); }
+
+/* Estado seleccionado: ahora es “card seleccionada” */
 .chip[aria-pressed="true"]{
-  outline:3px solid rgba(11,92,255,.25);
-  border-color:rgba(11,92,255,.35);
+  outline:none;
+  border-color: rgba(11,92,255,.55);
+  background: rgba(11,92,255,.06);
+  box-shadow: 0 10px 24px rgba(11,92,255,.10);
 }
 
-.chip-inst{ background: linear-gradient(180deg, #2d74ff, #0b5cff); color:#fff; border-color:transparent; }
-.chip-repa{ background: linear-gradient(180deg, #2d7a66, #1f5e50); color:#fff; border-color:transparent; }
-.chip-mant{ background: linear-gradient(180deg, #f3c84b, #e7a919); color:#1f2937; border-color:transparent; }
+.chip[aria-pressed="true"]::after{
+  content:"✓";
+  display:grid;
+  place-items:center;
+  border-color: rgba(11,92,255,.75);
+  background: rgba(11,92,255,.12);
+  color: var(--primary);
+  font-weight:1000;
+  font-size:14px;
+}
 
+/* Para que el seleccionado respete el tipo */
+.chip-repa[aria-pressed="true"]{
+  border-color: rgba(15,118,110,.55);
+  background: rgba(15,118,110,.06);
+  box-shadow: 0 10px 24px rgba(15,118,110,.10);
+}
+.chip-repa[aria-pressed="true"]::after{
+  border-color: rgba(15,118,110,.75);
+  background: rgba(15,118,110,.12);
+  color: var(--rep);
+}
+
+.chip-mant[aria-pressed="true"]{
+  border-color: rgba(214,161,0,.55);
+  background: rgba(214,161,0,.07);
+  box-shadow: 0 10px 24px rgba(214,161,0,.10);
+}
+.chip-mant[aria-pressed="true"]::after{
+  border-color: rgba(214,161,0,.75);
+  background: rgba(214,161,0,.14);
+  color: var(--mant);
+}
+
+/* ====== DATOS ====== */
 .field{
   display:grid;
   grid-template-columns: 1fr auto;
   grid-template-rows:auto auto;
   gap:10px 10px;
   align-items:center;
-  margin-top:10px;
+  margin-top:12px;
 }
 
 .field span{
   grid-column:1 / -1;
-  font-weight:700;
+  font-weight:900;
   color:var(--muted);
   font-size:14px;
+  letter-spacing:.2px;
 }
 
 input{
-  height:var(--tap);
-  border-radius:14px;
+  height:58px;
+  border-radius:16px;
   border:1px solid var(--line);
   padding:0 14px;
   font-size:22px;
+  font-weight:1000;
   outline:none;
   background:#fff;
+}
+
+input::placeholder{
+  color: rgba(15,23,42,.28);
+  font-weight:900;
 }
 
 input:focus{
@@ -116,32 +219,42 @@ input:focus{
   box-shadow: 0 0 0 4px rgba(11,92,255,.12);
 }
 
+/* Botón HOY: secundario integrado (no CTA) */
 .btn-small{
-  height:var(--tap);
+  height:44px;
   border-radius:14px;
   border:1px solid rgba(11,92,255,.35);
-  background:#fff;
+  background: rgba(11,92,255,.08);
   color:var(--primary);
   font-size:16px;
-  font-weight:800;
-  padding:0 14px;
+  font-weight:1000;
+  padding:0 16px;
 }
 
+/* CTA continuar premium */
 .btn-primary{
   width:100%;
-  height:64px;
-  border-radius:18px;
+  height:68px;
+  border-radius:20px;
   border:none;
   background:var(--primary);
   color:#fff;
   font-size:22px;
-  font-weight:900;
+  font-weight:1000;
   letter-spacing:.4px;
+  box-shadow: 0 16px 32px rgba(11,92,255,.22);
 }
 
+.btn-primary:disabled{
+  background: rgba(15,23,42,.14);
+  box-shadow:none;
+  color: rgba(255,255,255,.85);
+}
+
+/* Mensajes */
 .msg{
   margin:10px 4px 0;
   color:#b91c1c;
-  font-weight:700;
+  font-weight:800;
   min-height:22px;
 }

@@ -979,7 +979,7 @@ if (!tecnicoSel.value) {
     const fu = furgonOn.checked ? FURGON : 0;
 
     const impInst = hi * P_INST * TECNICOS_INST;
-    const impDespl = hd * P_DESPL;
+const impDespl = hd * P_DESPL * TECNICOS_INST;
     const impKm = km * P_KM;
     const total = impInst + impDespl + impKm + co + ma + fu;
 

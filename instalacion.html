@@ -25,54 +25,53 @@
         <div><strong>ID Cliente:</strong> <span id="mId">—</span></div>
         <div><strong>Técnicos:</strong> 2</div>
       </div>
-      <div class="field onecol" style="margin-top:10px;">
-  <label style="font-weight:900; display:block; margin-bottom:6px;">Técnico</label>
-<div class="field onecol" style="margin-top:10px;">
-  <label style="font-weight:900; display:block; margin-bottom:6px;">Técnico 1</label>
-  <select id="tec1" style="width:100%; height:56px; border-radius:14px; border:1px solid var(--line); font-size:18px; padding:0 12px;">
-    <option value="" selected>Selecciona…</option>
-    <option value="JUAN PABLO CABRERA PEREZ">JUAN PABLO CABRERA PEREZ</option>
-    <option value="DAMASO ROLDAN PEREZ">DAMASO ROLDAN PEREZ</option>
-    <option value="PABLO ECHEDEY ESPINO ORTEGA">PABLO ECHEDEY ESPINO ORTEGA</option>
-    <option value="YISHAR ROMAN MEDINA">YISHAR ROMAN MEDINA</option>
-  </select>
-</div>
 
-<div class="field onecol" style="margin-top:10px;">
-  <label style="font-weight:900; display:block; margin-bottom:6px;">Técnico 2</label>
-  <select id="tec2" style="width:100%; height:56px; border-radius:14px; border:1px solid var(--line); font-size:18px; padding:0 12px;">
-    <option value="" selected>Selecciona…</option>
-    <option value="JUAN PABLO CABRERA PEREZ">JUAN PABLO CABRERA PEREZ</option>
-    <option value="DAMASO ROLDAN PEREZ">DAMASO ROLDAN PEREZ</option>
-    <option value="PABLO ECHEDEY ESPINO ORTEGA">PABLO ECHEDEY ESPINO ORTEGA</option>
-    <option value="YISHAR ROMAN MEDINA">YISHAR ROMAN MEDINA</option>
-  </select>
-</div>
-</div>
+      <!-- Técnicos -->
+      <div class="field onecol" style="margin-top:12px;">
+        <label style="font-weight:900; display:block; margin-bottom:6px;">Técnico 1</label>
+        <select id="tec1" style="width:100%; height:56px; border-radius:14px; border:1px solid var(--line); font-size:18px; padding:0 12px;">
+          <option value="" selected>Selecciona…</option>
+          <option value="JUAN PABLO CABRERA PEREZ">JUAN PABLO CABRERA PEREZ</option>
+          <option value="DAMASO ROLDAN PEREZ">DAMASO ROLDAN PEREZ</option>
+          <option value="PABLO ECHEDEY ESPINO ORTEGA">PABLO ECHEDEY ESPINO ORTEGA</option>
+          <option value="YISHAR ROMAN MEDINA">YISHAR ROMAN MEDINA</option>
+        </select>
+      </div>
+
+      <div class="field onecol" style="margin-top:10px;">
+        <label style="font-weight:900; display:block; margin-bottom:6px;">Técnico 2</label>
+        <select id="tec2" style="width:100%; height:56px; border-radius:14px; border:1px solid var(--line); font-size:18px; padding:0 12px;">
+          <option value="" selected>Selecciona…</option>
+          <option value="JUAN PABLO CABRERA PEREZ">JUAN PABLO CABRERA PEREZ</option>
+          <option value="DAMASO ROLDAN PEREZ">DAMASO ROLDAN PEREZ</option>
+          <option value="PABLO ECHEDEY ESPINO ORTEGA">PABLO ECHEDEY ESPINO ORTEGA</option>
+          <option value="YISHAR ROMAN MEDINA">YISHAR ROMAN MEDINA</option>
+        </select>
+      </div>
     </section>
 
     <!-- Horas instalación -->
     <section class="card">
       <div class="rowhead">
         <h2>Horas de instalación</h2>
-<div class="rate">27,95 €/h ×2 técnicos</div>
+        <div class="rate">27,95 €/h ×2 técnicos</div>
       </div>
 
-<div class="stepper">
-  <button type="button" class="step" data-target="hInst" data-delta="-0.5">−0,5</button>
-  <div class="stepval"><span id="hInstText">0,0</span> h</div>
-  <button type="button" class="step" data-target="hInst" data-delta="0.5">+0,5</button>
-</div>
+      <div class="stepper">
+        <button type="button" class="step" data-target="hInst" data-delta="-0.5">−0,5</button>
+        <div class="stepval"><span id="hInstText">0,0</span> h</div>
+        <button type="button" class="step" data-target="hInst" data-delta="0.5">+0,5</button>
+      </div>
 
-<div class="quick">
-  <button class="qdelta" type="button" data-target="hInst" data-delta="1">+1</button>
-  <button class="qdelta" type="button" data-target="hInst" data-delta="2">+2</button>
-  <button class="qdelta" type="button" data-target="hInst" data-delta="4">+4</button>
-  <button class="qdelta" type="button" data-target="hInst" data-delta="8">+8</button>
-  <button class="qreset" type="button" data-target="hInst">Reset</button>
-</div>
+      <div class="quick">
+        <button class="qdelta" type="button" data-target="hInst" data-delta="1">+1</button>
+        <button class="qdelta" type="button" data-target="hInst" data-delta="2">+2</button>
+        <button class="qdelta" type="button" data-target="hInst" data-delta="4">+4</button>
+        <button class="qdelta" type="button" data-target="hInst" data-delta="8">+8</button>
+        <button class="qreset" type="button" data-target="hInst">Reset</button>
+      </div>
 
-<input id="hInst" type="hidden" value="0" />
+      <input id="hInst" type="hidden" value="0" />
 
       <div class="totline">
         <span>Total instalación</span>
@@ -84,28 +83,26 @@
     <section class="card">
       <div class="rowhead">
         <h2>Horas de desplazamiento</h2>
-<div class="rate">19,28 €/h ×2 técnicos</div>
+        <div class="rate">19,28 €/h ×2 técnicos</div>
       </div>
 
-<div class="stepper">
-  <button type="button" class="step" data-target="hDespl" data-delta="-0.5">−0,5</button>
+      <div class="stepper">
+        <button type="button" class="step" data-target="hDespl" data-delta="-0.5">−0,5</button>
+        <div class="stepval">
+          <span id="hDesplText">0,0</span> h
+        </div>
+        <button type="button" class="step" data-target="hDespl" data-delta="0.5">+0,5</button>
+      </div>
 
-  <div class="stepval">
-    <span id="hDesplText">0,0</span> h
-  </div>
+      <div class="quick">
+        <button class="qdelta" type="button" data-target="hDespl" data-delta="1">+1</button>
+        <button class="qdelta" type="button" data-target="hDespl" data-delta="2">+2</button>
+        <button class="qdelta" type="button" data-target="hDespl" data-delta="4">+4</button>
+        <button class="qdelta" type="button" data-target="hDespl" data-delta="8">+8</button>
+        <button class="qreset" type="button" data-target="hDespl">Reset</button>
+      </div>
 
-  <button type="button" class="step" data-target="hDespl" data-delta="0.5">+0,5</button>
-</div>
-
-<div class="quick">
-  <button class="qdelta" type="button" data-target="hDespl" data-delta="1">+1</button>
-  <button class="qdelta" type="button" data-target="hDespl" data-delta="2">+2</button>
-  <button class="qdelta" type="button" data-target="hDespl" data-delta="4">+4</button>
-  <button class="qdelta" type="button" data-target="hDespl" data-delta="8">+8</button>
-  <button class="qreset" type="button" data-target="hDespl">Reset</button>
-</div>
-
-<input id="hDespl" type="hidden" value="0" />
+      <input id="hDespl" type="hidden" value="0" />
 
       <div class="totline">
         <span>Total desplazamiento</span>
@@ -141,16 +138,16 @@
         <input id="comida" inputmode="decimal" placeholder="0" />
       </label>
 
-<div class="attach">
-  <button type="button" class="btn-attach" id="btnCamTicket">📷 Sacar foto</button>
+      <div class="attach">
+        <button type="button" class="btn-attach" id="btnCamTicket">📷 Sacar foto</button>
 
-  <label class="btn-attach alt">
-    🖼️ Fototeca
-    <input id="fotoTicket" type="file" accept="image/*" />
-  </label>
+        <label class="btn-attach alt">
+          🖼️ Fototeca
+          <input id="fotoTicket" type="file" accept="image/*" />
+        </label>
 
-  <span class="count" id="cTicket">0 fotos</span>
-</div>
+        <span class="count" id="cTicket">0 fotos</span>
+      </div>
     </section>
 
     <!-- Material -->
@@ -164,16 +161,16 @@
         <input id="material" inputmode="decimal" placeholder="0" />
       </label>
 
-<div class="attach">
-  <button type="button" class="btn-attach" id="btnCamMaterial">📷 Sacar foto</button>
+      <div class="attach">
+        <button type="button" class="btn-attach" id="btnCamMaterial">📷 Sacar foto</button>
 
-  <label class="btn-attach alt">
-    🖼️ Fototeca
-    <input id="fotoMaterial" type="file" accept="image/*" />
-  </label>
+        <label class="btn-attach alt">
+          🖼️ Fototeca
+          <input id="fotoMaterial" type="file" accept="image/*" />
+        </label>
 
-  <span class="count" id="cMat">0 fotos</span>
-</div>
+        <span class="count" id="cMat">0 fotos</span>
+      </div>
     </section>
 
     <!-- Furgón -->
@@ -220,43 +217,42 @@
     </section>
 
     <section class="card">
-<div class="btnRow">
-  <button id="btnGuardar" class="btn-primary" type="button">GUARDAR (LOCAL)</button>
-  <button id="btnCompartir" class="btn-secondary" type="button">COMPARTIR (WhatsApp)</button>
-  <button id="btnPDF" class="btn-secondary" type="button">ENVIAR PDF (WhatsApp)</button>
-</div>
+      <div class="btnRow">
+        <button id="btnGuardar" class="btn-primary" type="button">GUARDAR (LOCAL)</button>
+        <button id="btnCompartir" class="btn-secondary" type="button">COMPARTIR (WhatsApp)</button>
+        <button id="btnPDF" class="btn-secondary" type="button">ENVIAR PDF (WhatsApp)</button>
+      </div>
 
-<p class="msg ok" id="ok" aria-live="polite"></p>
-<p class="msg" id="err" aria-live="polite"></p>
+      <p class="msg ok" id="ok" aria-live="polite"></p>
+      <p class="msg" id="err" aria-live="polite"></p>
     </section>
+
     <!-- MODAL CÁMARA -->
-<div id="camModal" class="camModal" hidden>
-  <div class="camPanel">
-    <div class="camTop">
-      <strong id="camTitle">Cámara</strong>
-      <button type="button" id="camClose" class="camClose">✕</button>
+    <div id="camModal" class="camModal" hidden>
+      <div class="camPanel">
+        <div class="camTop">
+          <strong id="camTitle">Cámara</strong>
+          <button type="button" id="camClose" class="camClose">✕</button>
+        </div>
+
+        <video id="camVideo" playsinline autoplay></video>
+        <canvas id="camCanvas" hidden></canvas>
+
+        <div class="camBottom">
+          <button type="button" id="camShot" class="camBtnPrimary">CAPTURAR</button>
+          <button type="button" id="camUse" class="camBtn" disabled>USAR FOTO</button>
+          <button type="button" id="camRetake" class="camBtn" disabled>REPETIR</button>
+        </div>
+
+        <p id="camMsg" class="camMsg"></p>
+      </div>
     </div>
-
-    <video id="camVideo" playsinline autoplay></video>
-
-    <canvas id="camCanvas" hidden></canvas>
-
-    <div class="camBottom">
-      <button type="button" id="camShot" class="camBtnPrimary">CAPTURAR</button>
-      <button type="button" id="camUse" class="camBtn" disabled>USAR FOTO</button>
-      <button type="button" id="camRetake" class="camBtn" disabled>REPETIR</button>
-    </div>
-
-    <p id="camMsg" class="camMsg"></p>
-  </div>
-</div>
   </main>
 
   <script>
     // ------- Utilidades -------
     const EUR = (n) => new Intl.NumberFormat("es-ES", { style:"currency", currency:"EUR" }).format(n);
 
-    // Acepta "1,5" o "1.5"
     const toNum = (v) => {
       if (!v) return 0;
       const s = String(v).trim().replace(",", ".");
@@ -272,35 +268,51 @@
     const P_KM = 0.31;
     const FURGON = 80.00;
     const TECNICOS_INST = 2;
+
     // ------- Cargar cabecera -------
     const header = (() => {
       try { return JSON.parse(localStorage.getItem("pv_header") || "{}"); }
       catch { return {}; }
     })();
 
-    // Guardas por si alguien entra directo
     document.getElementById("mFecha").textContent = header.fecha || "—";
     document.getElementById("mId").textContent = header.idCliente || "—";
-// ------- Técnicos (2 selectores) -------
-const tec1 = document.getElementById("tec1");
-const tec2 = document.getElementById("tec2");
 
-// carga últimos usados
-try {
-  const last = JSON.parse(localStorage.getItem("pv_tecnicos_inst") || "{}");
-  tec1.value = last.tec1 || "";
-  tec2.value = last.tec2 || "";
-} catch {}
+    // ------- Técnicos (2 selectores) -------
+    const tec1 = document.getElementById("tec1");
+    const tec2 = document.getElementById("tec2");
 
-// guarda al cambiar
-const saveTechs = () => {
-  localStorage.setItem("pv_tecnicos_inst", JSON.stringify({
-    tec1: tec1.value || "",
-    tec2: tec2.value || ""
-  }));
-};
-tec1.addEventListener("change", saveTechs);
-tec2.addEventListener("change", saveTechs);
+    try {
+      const last = JSON.parse(localStorage.getItem("pv_tecnicos_inst") || "{}");
+      tec1.value = last.tec1 || "";
+      tec2.value = last.tec2 || "";
+    } catch {}
+
+    const saveTechs = () => {
+      localStorage.setItem("pv_tecnicos_inst", JSON.stringify({
+        tec1: tec1.value || "",
+        tec2: tec2.value || ""
+      }));
+    };
+
+    const syncTechOptions = () => {
+      const v1 = tec1.value || "";
+      const v2 = tec2.value || "";
+
+      [...tec1.options].forEach(opt => {
+        if (!opt.value) return;
+        opt.disabled = (opt.value === v2);
+      });
+      [...tec2.options].forEach(opt => {
+        if (!opt.value) return;
+        opt.disabled = (opt.value === v1);
+      });
+    };
+
+    tec1.addEventListener("change", () => { saveTechs(); syncTechOptions(); });
+    tec2.addEventListener("change", () => { saveTechs(); syncTechOptions(); });
+    syncTechOptions();
+
     // ------- Inputs -------
     const hInst = document.getElementById("hInst");
     const hDespl = document.getElementById("hDespl");
@@ -313,13 +325,6 @@ tec2.addEventListener("change", saveTechs);
     const fotoMaterial = document.getElementById("fotoMaterial");
     const cTicket = document.getElementById("cTicket");
     const cMat = document.getElementById("cMat");
-
-    const setCounts = () => {
-      cTicket.textContent = `${fotoTicket.files?.length || 0} fotos`;
-      cMat.textContent = `${fotoMaterial.files?.length || 0} fotos`;
-    };
-    fotoTicket.addEventListener("change", setCounts);
-    fotoMaterial.addEventListener("change", setCounts);
 
     // ------- Cálculos -------
     const tInst = document.getElementById("tInst");
@@ -374,66 +379,170 @@ tec2.addEventListener("change", saveTechs);
       furgonOn.addEventListener(evt, recalc);
     });
 
-// --- STEPPER horas (saltos de 0,5 hasta 9h) ---
-const setHalfHour = (val) => {
-  let v = Math.round(val * 2) / 2; // fuerza múltiplos de 0,5
-  if (v < 0) v = 0;
-  if (v > 9) v = 9;
-  return v;
-};
+    // --- STEPPER horas (saltos de 0,5 hasta 30h) ---
+    const setHalfHour = (val) => {
+      let v = Math.round(val * 2) / 2;
+      if (v < 0) v = 0;
+      if (v > 30) v = 30;
+      return v;
+    };
 
-const fmtHours = (v) => String(v.toFixed(1)).replace(".", ",");
+    const fmtHours = (v) => String(v.toFixed(1)).replace(".", ",");
 
-// Actualiza los textos visibles
-const syncDisplays = () => {
-  const hi = toNum(hInst.value || 0);
-  const hd = toNum(hDespl.value || 0);
-  const ti = document.getElementById("hInstText");
-  const td = document.getElementById("hDesplText");
-  if (ti) ti.textContent = fmtHours(hi);
-  if (td) td.textContent = fmtHours(hd);
-};
+    const syncDisplays = () => {
+      const hi = toNum(hInst.value || 0);
+      const hd = toNum(hDespl.value || 0);
+      const ti = document.getElementById("hInstText");
+      const td = document.getElementById("hDesplText");
+      if (ti) ti.textContent = fmtHours(hi);
+      if (td) td.textContent = fmtHours(hd);
+    };
 
-// Botones +/- 0,5
-document.querySelectorAll(".step").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const target = btn.dataset.target;
-    const delta = Number(btn.dataset.delta);
-    const el = document.getElementById(target);
-    const cur = toNum(el.value || 0);
-    el.value = setHalfHour(cur + delta);
-    syncDisplays();
-    recalc();
-  });
-});
+    document.querySelectorAll(".step").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.target;
+        const delta = Number(btn.dataset.delta);
+        const el = document.getElementById(target);
+        const cur = toNum(el.value || 0);
+        el.value = setHalfHour(cur + delta);
+        syncDisplays();
+        recalc();
+      });
+    });
 
-// Chips +1 +2 +4 +8
-document.querySelectorAll(".qdelta").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const target = btn.dataset.target;
-    const delta = Number(btn.dataset.delta);
-    const el = document.getElementById(target);
-    const cur = toNum(el.value || 0);
-    el.value = setHalfHour(cur + delta);
-    syncDisplays();
-    recalc();
-  });
-});
+    document.querySelectorAll(".qdelta").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.target;
+        const delta = Number(btn.dataset.delta);
+        const el = document.getElementById(target);
+        const cur = toNum(el.value || 0);
+        el.value = setHalfHour(cur + delta);
+        syncDisplays();
+        recalc();
+      });
+    });
 
-// Reset
-document.querySelectorAll(".qreset").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const target = btn.dataset.target;
-    const el = document.getElementById(target);
-    el.value = 0;
-    syncDisplays();
-    recalc();
-  });
-});
+    document.querySelectorAll(".qreset").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.target;
+        const el = document.getElementById(target);
+        el.value = 0;
+        syncDisplays();
+        recalc();
+      });
+    });
 
-// Inicialización
-syncDisplays();
-recalc();
+    // -------- Cámara propia --------
+    const camModal = document.getElementById("camModal");
+    camModal.hidden = true;
+    const camVideo = document.getElementById("camVideo");
+    const camCanvas = document.getElementById("camCanvas");
+    const camShot = document.getElementById("camShot");
+    const camUse = document.getElementById("camUse");
+    const camRetake = document.getElementById("camRetake");
+    const camClose = document.getElementById("camClose");
+    const camMsg = document.getElementById("camMsg");
+    const camTitle = document.getElementById("camTitle");
+
+    const btnCamTicket = document.getElementById("btnCamTicket");
+    const btnCamMaterial = document.getElementById("btnCamMaterial");
+
+    let ticketShots = [];
+    let materialShots = [];
+    let currentTarget = null;
+    let stream = null;
+    let lastDataUrl = null;
+
+    const getTicketCount = () => (ticketShots.length + (fotoTicket.files?.length || 0));
+    const getMaterialCount = () => (materialShots.length + (fotoMaterial.files?.length || 0));
+
+    const updatePhotoCounts = () => {
+      cTicket.textContent = `${getTicketCount()} fotos`;
+      cMat.textContent = `${getMaterialCount()} fotos`;
+    };
+
+    const openCam = async (target) => {
+      currentTarget = target;
+      lastDataUrl = null;
+      camMsg.textContent = "";
+      camUse.disabled = true;
+      camRetake.disabled = true;
+      camShot.disabled = false;
+
+      camTitle.textContent = target === "ticket" ? "Cámara · Ticket" : "Cámara · Material";
+      camModal.hidden = false;
+
+      try {
+        const constraints = { video: { facingMode: { ideal: "environment" } }, audio: false };
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        camVideo.srcObject = stream;
+        await camVideo.play();
+      } catch (e) {
+        camMsg.textContent = "No se pudo abrir la cámara. Usa Fototeca si hace falta.";
+        closeCam();
+      }
+    };
+
+    const closeCam = () => {
+      camModal.hidden = true;
+      camMsg.textContent = "";
+      lastDataUrl = null;
+
+      if (stream) {
+        stream.getTracks().forEach(t => t.stop());
+        stream = null;
+      }
+      camVideo.srcObject = null;
+    };
+
+    camClose.addEventListener("click", closeCam);
+
+    camShot.addEventListener("click", () => {
+      if (!camVideo.videoWidth || !camVideo.videoHeight) {
+        camMsg.textContent = "La cámara aún no está lista. Espera 1 segundo y prueba otra vez.";
+        return;
+      }
+
+      const w = camVideo.videoWidth;
+      const h = camVideo.videoHeight;
+
+      camCanvas.width = w;
+      camCanvas.height = h;
+      const ctx = camCanvas.getContext("2d");
+      ctx.drawImage(camVideo, 0, 0, w, h);
+
+      lastDataUrl = camCanvas.toDataURL("image/jpeg", 0.85);
+
+      camUse.disabled = false;
+      camRetake.disabled = false;
+      camShot.disabled = true;
+      camMsg.textContent = "Foto capturada ✅";
+    });
+
+    camUse.addEventListener("click", () => {
+      if (!lastDataUrl) return;
+
+      if (currentTarget === "ticket") ticketShots.push(lastDataUrl);
+      if (currentTarget === "material") materialShots.push(lastDataUrl);
+
+      updatePhotoCounts();
+      closeCam();
+    });
+
+    camRetake.addEventListener("click", () => {
+      lastDataUrl = null;
+      camUse.disabled = true;
+      camRetake.disabled = true;
+      camShot.disabled = false;
+      camMsg.textContent = "";
+    });
+
+    btnCamTicket.addEventListener("click", () => openCam("ticket"));
+    btnCamMaterial.addEventListener("click", () => openCam("material"));
+
+    fotoTicket.addEventListener("change", updatePhotoCounts);
+    fotoMaterial.addEventListener("change", updatePhotoCounts);
+
     // ------- Guardado local -------
     const ok = document.getElementById("ok");
     const err = document.getElementById("err");
@@ -443,15 +552,22 @@ recalc();
       ok.textContent = "";
       err.textContent = "";
 
-      // Validación mínima
       if (!header.idCliente) {
         err.textContent = "Falta ID Cliente (vuelve atrás y créalo desde Nuevo Parte).";
         return;
       }
+      if (!tec1.value || !tec2.value) {
+        err.textContent = "Selecciona Técnico 1 y Técnico 2.";
+        return;
+      }
+      if (tec1.value === tec2.value) {
+        err.textContent = "Técnico 1 y Técnico 2 no pueden ser el mismo.";
+        return;
+      }
 
-const payload = {
-  header: { ...header, tecnico: tecnicoSel.value || "" },
-  tipo: "instalacion",
+      const payload = {
+        header: { ...header, tecnico1: tec1.value || "", tecnico2: tec2.value || "" },
+        tipo: "instalacion",
         tarifas: { P_INST, P_DESPL, P_KM, FURGON },
         datos: {
           horas_inst: toNum(hInst.value),
@@ -463,15 +579,14 @@ const payload = {
         },
         observaciones: document.getElementById("obs").value || "",
         fotos: {
-  ticket_count: getTicketCount(),
-  material_count: getMaterialCount(),
-  ticket_dataurls: ticketShots,
-  material_dataurls: materialShots
-},
+          ticket_count: getTicketCount(),
+          material_count: getMaterialCount(),
+          ticket_dataurls: ticketShots,
+          material_dataurls: materialShots
+        },
         saved_at: new Date().toISOString()
       };
 
-      // Guardamos un array de partes
       const key = "pv_partes";
       let arr = [];
       try { arr = JSON.parse(localStorage.getItem(key) || "[]"); } catch {}
@@ -480,599 +595,413 @@ const payload = {
 
       ok.textContent = "Guardado en el móvil ✅";
     });
-    // -------- Cámara propia (evita “cámara negra” del input file en iOS) --------
-const camModal = document.getElementById("camModal");
-camModal.hidden = true;
-const camVideo = document.getElementById("camVideo");
-const camCanvas = document.getElementById("camCanvas");
-const camShot = document.getElementById("camShot");
-const camUse = document.getElementById("camUse");
-const camRetake = document.getElementById("camRetake");
-const camClose = document.getElementById("camClose");
-const camMsg = document.getElementById("camMsg");
-const camTitle = document.getElementById("camTitle");
 
-const btnCamTicket = document.getElementById("btnCamTicket");
-const btnCamMaterial = document.getElementById("btnCamMaterial");
-
-// guardamos las fotos en memoria (DataURL). Luego podrás meterlas en localStorage o exportar.
-let ticketShots = [];
-let materialShots = [];
-
-let currentTarget = null; // "ticket" | "material"
-let stream = null;
-let lastDataUrl = null;
-
-const getTicketCount = () => (ticketShots.length + (fotoTicket.files?.length || 0));
-const getMaterialCount = () => (materialShots.length + (fotoMaterial.files?.length || 0));
-
-const updatePhotoCounts = () => {
-  cTicket.textContent = `${getTicketCount()} fotos`;
-  cMat.textContent = `${getMaterialCount()} fotos`;
-};
-
-const openCam = async (target) => {
-  currentTarget = target;
-  lastDataUrl = null;
-  camMsg.textContent = "";
-  camUse.disabled = true;
-  camRetake.disabled = true;
-  camShot.disabled = false;
-
-  camTitle.textContent = target === "ticket" ? "Cámara · Ticket" : "Cámara · Material";
-
-  camModal.hidden = false;
-
-  try {
-    // iOS: mejor pedir environment pero con fallback si no lo da
-    const constraints = { video: { facingMode: { ideal: "environment" } }, audio: false };
-    stream = await navigator.mediaDevices.getUserMedia(constraints);
-    camVideo.srcObject = stream;
-    await camVideo.play();
-  } catch (e) {
-    camMsg.textContent = "No se pudo abrir la cámara. Usa Fototeca si hace falta.";
-    // Cerrar modal si falla
-    closeCam();
-  }
-};
-
-const closeCam = () => {
-  camModal.hidden = true;
-  camMsg.textContent = "";
-  lastDataUrl = null;
-
-  if (stream) {
-    stream.getTracks().forEach(t => t.stop());
-    stream = null;
-  }
-  camVideo.srcObject = null;
-};
-
-camClose.addEventListener("click", closeCam);
-
-// Capturar frame del video
-camShot.addEventListener("click", () => {
-  if (!camVideo.videoWidth || !camVideo.videoHeight) {
-    camMsg.textContent = "La cámara aún no está lista. Espera 1 segundo y prueba otra vez.";
-    return;
-  }
-
-  const w = camVideo.videoWidth;
-  const h = camVideo.videoHeight;
-
-  camCanvas.width = w;
-  camCanvas.height = h;
-  const ctx = camCanvas.getContext("2d");
-  ctx.drawImage(camVideo, 0, 0, w, h);
-
-  lastDataUrl = camCanvas.toDataURL("image/jpeg", 0.85);
-
-  camUse.disabled = false;
-  camRetake.disabled = false;
-  camShot.disabled = true;
-  camMsg.textContent = "Foto capturada ✅";
-});
-
-// Usar foto capturada
-camUse.addEventListener("click", () => {
-  if (!lastDataUrl) return;
-
-  if (currentTarget === "ticket") ticketShots.push(lastDataUrl);
-  if (currentTarget === "material") materialShots.push(lastDataUrl);
-
-  updatePhotoCounts();
-  closeCam();
-});
-
-// Repetir
-camRetake.addEventListener("click", () => {
-  lastDataUrl = null;
-  camUse.disabled = true;
-  camRetake.disabled = true;
-  camShot.disabled = false;
-  camMsg.textContent = "";
-});
-
-// Botones
-btnCamTicket.addEventListener("click", () => openCam("ticket"));
-btnCamMaterial.addEventListener("click", () => openCam("material"));
-
-// Actualiza contadores también cuando el user usa Fototeca
-fotoTicket.addEventListener("change", updatePhotoCounts);
-fotoMaterial.addEventListener("change", updatePhotoCounts);
-
-// Inicializa
-updatePhotoCounts();
     // -------- COMPARTIR (WhatsApp) --------
-const btnCompartir = document.getElementById("btnCompartir");
+    const btnCompartir = document.getElementById("btnCompartir");
 
-// Alineación “tipo PDF” para WhatsApp (monoespaciado)
-const padR = (s, n) => String(s).padEnd(n, " ");
-const padL = (s, n) => String(s).padStart(n, " ");
-const fmtH = (n) => String(Number(n || 0).toFixed(1)).replace(".", ",") + " h";
+    const padR = (s, n) => String(s).padEnd(n, " ");
+    const padL = (s, n) => String(s).padStart(n, " ");
+    const fmtH = (n) => String(Number(n || 0).toFixed(1)).replace(".", ",") + " h";
 
-function buildWhatsAppText() {
-  const hi = clamp0(toNum(hInst.value));
-  const hd = clamp0(toNum(hDespl.value));
-  const km = clamp0(toNum(kms.value));
-  const co = clamp0(toNum(comida.value));
-  const ma = clamp0(toNum(material.value));
-  const fu = furgonOn.checked ? FURGON : 0;
+    function buildWhatsAppText() {
+      const hi = clamp0(toNum(hInst.value));
+      const hd = clamp0(toNum(hDespl.value));
+      const km = clamp0(toNum(kms.value));
+      const co = clamp0(toNum(comida.value));
+      const ma = clamp0(toNum(material.value));
+      const fu = furgonOn.checked ? FURGON : 0;
 
-  // IMPORTES (ojo: instalación × 2 técnicos)
-  const TECNICOS = (typeof TECNICOS_INST !== "undefined") ? TECNICOS_INST : 2;
-  const impInst = hi * P_INST * TECNICOS_INST;
-const impDespl = hd * P_DESPL * TECNICOS_INST;
-const impKm = km * P_KM;
+      const impInst = hi * P_INST * TECNICOS_INST;
+      const impDespl = hd * P_DESPL * TECNICOS_INST;
+      const impKm = km * P_KM;
 
-  const total = impInst + impDespl + impKm + co + ma + fu;
+      const total = impInst + impDespl + impKm + co + ma + fu;
+      const obs = (document.getElementById("obs").value || "").trim();
 
-  const obs = (document.getElementById("obs").value || "").trim();
+      const ticketCount = getTicketCount();
+      const materialCount = getMaterialCount();
 
-  // Contadores de fotos (si tienes cámara propia: ticketShots/materialShots existen)
-const ticketCount = getTicketCount();
-const materialCount = getMaterialCount();
+      const W1 = 18, W2 = 10, W3 = 14;
 
-  // Anchos para que quede “cuadrado”
-  const W1 = 18; // etiqueta
-  const W2 = 10; // horas/km
-  const W3 = 14; // importe
+      const lines = [];
+      lines.push("🧾 PARTE · INSTALACIÓN");
+      lines.push("────────────────────────────");
+      lines.push(`Fecha: ${header.fecha || "—"}`);
+      lines.push(`ID Cliente: ${header.idCliente || "—"}`);
+      lines.push(`Técnicos: ${TECNICOS_INST}`);
+      lines.push(`Técnico 1: ${tec1.value || "—"}`);
+      lines.push(`Técnico 2: ${tec2.value || "—"}`);
+      lines.push("");
 
-  const lines = [];
-  lines.push("🧾 PARTE · INSTALACIÓN");
-  lines.push("────────────────────────────");
-  lines.push(`Fecha: ${header.fecha || "—"}`);
-  lines.push(`ID Cliente: ${header.idCliente || "—"}`);
-  lines.push(`Técnicos: ${TECNICOS}`);
-  lines.push(`Técnico: ${tecnicoSel.value || "—"}`);
-  lines.push("");
+      lines.push("DETALLE");
+      lines.push("────────────────────────────");
+      lines.push(padR("Horas instalación x2", W1) + " " + padL(fmtH(hi), W2) + "  " + padL(EUR(impInst), W3));
+      lines.push(padR("Horas despl. x2", W1) + " " + padL(fmtH(hd), W2) + "  " + padL(EUR(impDespl), W3));
+      lines.push(padR("Kilómetros", W1) + " " + padL(String(km).replace(".", ","), W2) + "  " + padL(EUR(impKm), W3));
+      lines.push(padR("Comida", W1) + " " + padL("", W2) + "  " + padL(EUR(co), W3));
+      lines.push(padR("Material", W1) + " " + padL("", W2) + "  " + padL(EUR(ma), W3));
+      lines.push(padR("Furgón", W1) + " " + padL(furgonOn.checked ? "Sí" : "No", W2) + "  " + padL(EUR(fu), W3));
 
-  lines.push("DETALLE");
-  lines.push("────────────────────────────");
-  lines.push(
-    padR("Horas instalación x2", W1) + " " +
-    padL(fmtH(hi), W2) + "  " +
-    padL(EUR(impInst), W3)
-  );
-  lines.push(
-    padR("Horas despl. x2", W1) + " " +
-    padL(fmtH(hd), W2) + "  " +
-    padL(EUR(impDespl), W3)
-  );
-  lines.push(
-    padR("Kilómetros", W1) + " " +
-    padL(String(km).replace(".", ","), W2) + "  " +
-    padL(EUR(impKm), W3)
-  );
-  lines.push(
-    padR("Comida", W1) + " " +
-    padL("", W2) + "  " +
-    padL(EUR(co), W3)
-  );
-  lines.push(
-    padR("Material", W1) + " " +
-    padL("", W2) + "  " +
-    padL(EUR(ma), W3)
-  );
-  lines.push(
-    padR("Furgón", W1) + " " +
-    padL(furgonOn.checked ? "Sí" : "No", W2) + "  " +
-    padL(EUR(fu), W3)
-  );
+      lines.push("────────────────────────────");
+      lines.push(padR("TOTAL", W1 + W2 + 2) + padL(EUR(total), W3));
+      lines.push("");
 
-  lines.push("────────────────────────────");
-  lines.push(padR("TOTAL", W1 + W2 + 2) + padL(EUR(total), W3));
-  lines.push("");
+      lines.push("ADJUNTOS");
+      lines.push("────────────────────────────");
+      lines.push(`Ticket comida: ${ticketCount} foto(s)`);
+      lines.push(`Material:      ${materialCount} foto(s)`);
+      lines.push("");
 
-  lines.push("ADJUNTOS");
-  lines.push("────────────────────────────");
-  lines.push(`Ticket comida: ${ticketCount} foto(s)`);
-  lines.push(`Material:      ${materialCount} foto(s)`);
-  lines.push("");
+      lines.push("OBSERVACIONES");
+      lines.push("────────────────────────────");
+      lines.push(obs ? obs : "—");
 
-  lines.push("OBSERVACIONES");
-  lines.push("────────────────────────────");
-  lines.push(obs ? obs : "—");
-
-  // WhatsApp se ve mejor en bloque monoespaciado
-  return "```" + "\n" + lines.join("\n") + "\n" + "```";
-}
-
-btnCompartir.addEventListener("click", async () => {
-  err.textContent = "";
-  ok.textContent = "";
-
-  if (!header.idCliente) {
-    err.textContent = "Falta ID Cliente (vuelve atrás y créalo desde Nuevo Parte).";
-    return;
-  }
-if (!tecnicoSel.value) {
-  err.textContent = "Selecciona tu nombre (Técnico).";
-  return;
-}
-  const text = buildWhatsAppText();
-
-  // 1) Intento: share sheet iOS (elige WhatsApp)
-  if (navigator.share) {
-    try {
-      await navigator.share({ text });
-      ok.textContent = "Compartido ✅";
-      return;
-    } catch (e) {
-      // si cancelas o falla, hacemos fallback a URL
+      return "```" + "\n" + lines.join("\n") + "\n" + "```";
     }
-  }
 
-  // 2) Fallback: abrir WhatsApp con texto
-  const url = "https://wa.me/?text=" + encodeURIComponent(text);
-  window.open(url, "_blank");
-});
+    btnCompartir.addEventListener("click", async () => {
+      err.textContent = "";
+      ok.textContent = "";
+
+      if (!header.idCliente) {
+        err.textContent = "Falta ID Cliente (vuelve atrás y créalo desde Nuevo Parte).";
+        return;
+      }
+      if (!tec1.value || !tec2.value) {
+        err.textContent = "Selecciona Técnico 1 y Técnico 2.";
+        return;
+      }
+      if (tec1.value === tec2.value) {
+        err.textContent = "Técnico 1 y Técnico 2 no pueden ser el mismo.";
+        return;
+      }
+
+      const text = buildWhatsAppText();
+
+      if (navigator.share) {
+        try {
+          await navigator.share({ text });
+          ok.textContent = "Compartido ✅";
+          return;
+        } catch (e) {}
+      }
+
+      const url = "https://wa.me/?text=" + encodeURIComponent(text);
+      window.open(url, "_blank");
+    });
+
     // -------- PDF + COMPARTIR (con fotos) --------
-const btnPDF = document.getElementById("btnPDF");
+    const btnPDF = document.getElementById("btnPDF");
 
-// File -> DataURL (raw)
-const fileToDataURL = (file) => new Promise((resolve, reject) => {
-  const r = new FileReader();
-  r.onload = () => resolve(r.result);
-  r.onerror = reject;
-  r.readAsDataURL(file);
-});
+    const fileToDataURL = (file) => new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
 
-// DataURL (cualquier formato: HEIC/PNG/JPG) -> JPEG DataURL
-const dataUrlToJpeg = (src) => new Promise((resolve, reject) => {
-  const img = new Image();
-  img.onload = () => {
-    // downscale para que el PDF no pese una barbaridad
-    const MAX_W = 1400;
-    let w = img.naturalWidth || img.width;
-    let h = img.naturalHeight || img.height;
+    const dataUrlToJpeg = (src) => new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX_W = 1400;
+        let w = img.naturalWidth || img.width;
+        let h = img.naturalHeight || img.height;
 
-    if (w > MAX_W) {
-      h = Math.round(h * (MAX_W / w));
-      w = MAX_W;
+        if (w > MAX_W) {
+          h = Math.round(h * (MAX_W / w));
+          w = MAX_W;
+        }
+
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        const ctx = c.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+
+        resolve(c.toDataURL("image/jpeg", 0.85));
+      };
+      img.onerror = reject;
+      img.src = src;
+    });
+
+    const fileToJpegDataURL = async (file) => {
+      const raw = await fileToDataURL(file);
+      return await dataUrlToJpeg(raw);
+    };
+
+    async function collectImages() {
+      const ticketImgs = [];
+      const materialImgs = [];
+
+      for (const u of ticketShots) ticketImgs.push(await dataUrlToJpeg(u));
+      for (const u of materialShots) materialImgs.push(await dataUrlToJpeg(u));
+
+      if (fotoTicket?.files?.length) {
+        for (const f of fotoTicket.files) ticketImgs.push(await fileToJpegDataURL(f));
+      }
+      if (fotoMaterial?.files?.length) {
+        for (const f of fotoMaterial.files) materialImgs.push(await fileToJpegDataURL(f));
+      }
+
+      return { ticketImgs, materialImgs };
     }
 
-    const c = document.createElement("canvas");
-    c.width = w; c.height = h;
-    const ctx = c.getContext("2d");
-    ctx.drawImage(img, 0, 0, w, h);
+    function addHeader(doc, meta) {
+      const M = 14;
+      let y = 16;
 
-    resolve(c.toDataURL("image/jpeg", 0.85));
-  };
-  img.onerror = reject;
-  img.src = src;
-});
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text("PARTE · INSTALACIÓN", M, y);
 
-// File -> JPEG DataURL (robusto)
-const fileToJpegDataURL = async (file) => {
-  const raw = await fileToDataURL(file);
-  return await dataUrlToJpeg(raw);
-};
+      y += 8;
+      doc.setDrawColor(30);
+      doc.setLineWidth(0.3);
+      doc.line(M, y, 210 - M, y);
+      y += 8;
 
-// Coge TODAS las fotos disponibles: (a) cámara propia arrays + (b) fototeca files
-async function collectImages() {
-  const ticketImgs = [];
-  const materialImgs = [];
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.text(`Fecha: ${meta.fecha}`, M, y); y += 6;
+      doc.text(`ID Cliente: ${meta.idCliente}`, M, y); y += 6;
+      doc.text(`Técnicos: ${meta.tecnicos}`, M, y); y += 6;
+      doc.text(`Técnico 1: ${meta.tecnico1}`, M, y); y += 6;
+      doc.text(`Técnico 2: ${meta.tecnico2}`, M, y); y += 6;
 
-  // Fotos de cámara propia
-  if (typeof ticketShots !== "undefined") {
-    for (const u of ticketShots) ticketImgs.push(await dataUrlToJpeg(u));
-  }
-  if (typeof materialShots !== "undefined") {
-    for (const u of materialShots) materialImgs.push(await dataUrlToJpeg(u));
-  }
-
-  // Fotos desde Fototeca
-  if (fotoTicket?.files?.length) {
-    for (const f of fotoTicket.files) ticketImgs.push(await fileToJpegDataURL(f));
-  }
-  if (fotoMaterial?.files?.length) {
-    for (const f of fotoMaterial.files) materialImgs.push(await fileToJpegDataURL(f));
-  }
-
-  return { ticketImgs, materialImgs };
-}
-
-// Dibuja texto con estilo “parte”
-// (PDF: A4, unidades mm)
-function addHeader(doc, meta) {
-  const M = 14;
-  let y = 16;
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
-  doc.text("PARTE · INSTALACIÓN", M, y);
-
-  y += 8;
-  doc.setDrawColor(30);
-  doc.setLineWidth(0.3);
-  doc.line(M, y, 210 - M, y);
-  y += 8;
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(11);
-  doc.text(`Fecha: ${meta.fecha}`, M, y); y += 6;
-  doc.text(`ID Cliente: ${meta.idCliente}`, M, y); y += 6;
-  doc.text(`Técnicos: ${meta.tecnicos}`, M, y); y += 6;
-  doc.text(`Técnico: ${meta.tecnico}`, M, y); y += 6;
-  return y + 2;
-}
-
-function addTable(doc, startY, rows) {
-  const M = 14;
-  const W = 210 - M * 2;
-  const col1 = M;
-  const col2 = M + 95;
-  const col3 = M + 140;
-
-  let y = startY;
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.text("DETALLE", M, y);
-  y += 6;
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(11);
-
-  // Encabezado
-  doc.setDrawColor(220);
-  doc.setLineWidth(0.3);
-  doc.line(M, y, M + W, y);
-  y += 6;
-
-  for (const r of rows) {
-    // salto página si hace falta
-    if (y > 270) {
-      doc.addPage();
-      y = 16;
-    }
-    doc.text(r.label, col1, y);
-    doc.text(r.qty, col2, y, { align: "right" });
-    doc.text(r.amount, col3, y, { align: "right" });
-    y += 6;
-  }
-
-  doc.setDrawColor(220);
-  doc.line(M, y, M + W, y);
-  y += 10;
-
-  return y;
-}
-
-function addTotal(doc, y, totalStr) {
-  const M = 14;
-  const W = 210 - M * 2;
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.text("TOTAL", M, y);
-  doc.text(totalStr, M + W, y, { align: "right" });
-  return y + 10;
-}
-
-function addObservaciones(doc, y, obs) {
-  const M = 14;
-  const W = 210 - M * 2;
-
-  if (y > 255) {
-    doc.addPage();
-    y = 16;
-  }
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.text("OBSERVACIONES", M, y);
-  y += 6;
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(11);
-
-  const text = obs?.trim() ? obs.trim() : "—";
-  const lines = doc.splitTextToSize(text, W);
-  doc.text(lines, M, y);
-
-  return y + (lines.length * 5) + 6;
-}
-
-// Añade fotos como “grid” con título por sección
-async function addPhotos(doc, y, title, images) {
-  const M = 14;
-  const W = 210 - M * 2;
-
-  if (!images || !images.length) return y;
-
-  // Título
-  if (y > 240) {
-    doc.addPage();
-    y = 16;
-  }
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.text(title, M, y);
-  y += 8;
-
-  // Grid 2 columnas
-  const gap = 6;
-  const cellW = (W - gap) / 2;
-  const cellH = 60;
-
-  // helper: obtener tamaño real de la imagen para mantener proporción
-  const getImgSize = (dataUrl) => new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve({ w: img.naturalWidth || img.width, h: img.naturalHeight || img.height });
-    img.onerror = reject;
-    img.src = dataUrl;
-  });
-
-  let col = 0;
-  let x = M;
-
-  for (let i = 0; i < images.length; i++) {
-    // Si no cabe la fila completa, nueva página
-    if (y + cellH > 285) {
-      doc.addPage();
-      y = 16;
-      col = 0;
-      x = M;
+      return y + 2;
     }
 
-    // Caja
-    doc.setDrawColor(220);
-    doc.rect(x, y, cellW, cellH);
+    function addTable(doc, startY, rows) {
+      const M = 14;
+      const W = 210 - M * 2;
+      const col1 = M;
+      const col2 = M + 95;
+      const col3 = M + 140;
 
-    // Mantener proporción dentro de la caja (margen 2mm)
-    const pad = 2;
-    const maxW = cellW - pad * 2;
-    const maxH = cellH - pad * 2;
+      let y = startY;
 
-    let iw = 1, ih = 1;
-    try {
-      const sz = await getImgSize(images[i]);
-      iw = sz.w; ih = sz.h;
-    } catch (_) {}
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.text("DETALLE", M, y);
+      y += 6;
 
-    const scale = Math.min(maxW / iw, maxH / ih);
-    const dw = iw * scale;
-    const dh = ih * scale;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
 
-    const dx = x + (cellW - dw) / 2;
-    const dy = y + (cellH - dh) / 2;
+      doc.setDrawColor(220);
+      doc.setLineWidth(0.3);
+      doc.line(M, y, M + W, y);
+      y += 6;
 
-    // Todas las imágenes ya vienen como JPEG (por tu normalización)
-    doc.addImage(images[i], "JPEG", dx, dy, dw, dh);
+      for (const r of rows) {
+        if (y > 270) { doc.addPage(); y = 16; }
+        doc.text(r.label, col1, y);
+        doc.text(r.qty, col2, y, { align: "right" });
+        doc.text(r.amount, col3, y, { align: "right" });
+        y += 6;
+      }
 
-    // Siguiente columna
-    col++;
+      doc.setDrawColor(220);
+      doc.line(M, y, M + W, y);
+      y += 10;
 
-    if (col === 2) {
-      // Cerramos fila
-      col = 0;
-      x = M;
-      y += (cellH + gap);
-    } else {
-      // Segunda columna
-      x = M + cellW + gap;
+      return y;
     }
-  }
 
-  // Si la última fila quedó a medias (1 sola foto), bajamos igualmente
-  if (col === 1) {
-    y += (cellH + gap);
-  }
+    function addTotal(doc, y, totalStr) {
+      const M = 14;
+      const W = 210 - M * 2;
 
-  return y;
-}
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.text("TOTAL", M, y);
+      doc.text(totalStr, M + W, y, { align: "right" });
+      return y + 10;
+    }
 
-btnPDF.addEventListener("click", async () => {
-  err.textContent = "";
-  ok.textContent = "";
+    function addObservaciones(doc, y, obs) {
+      const M = 14;
+      const W = 210 - M * 2;
 
-  if (!header.idCliente) {
-    err.textContent = "Falta ID Cliente (vuelve atrás y créalo desde Nuevo Parte).";
-    return;
-  }
-if (!tecnicoSel.value) {
-  err.textContent = "Selecciona tu nombre (Técnico).";
-  return;
-}
-  try {
-    // Datos
-    const hi = clamp0(toNum(hInst.value));
-    const hd = clamp0(toNum(hDespl.value));
-    const km = clamp0(toNum(kms.value));
-    const co = clamp0(toNum(comida.value));
-    const ma = clamp0(toNum(material.value));
-    const fu = furgonOn.checked ? FURGON : 0;
+      if (y > 255) { doc.addPage(); y = 16; }
 
-    const impInst = hi * P_INST * TECNICOS_INST;
-const impDespl = hd * P_DESPL * TECNICOS_INST;
-    const impKm = km * P_KM;
-    const total = impInst + impDespl + impKm + co + ma + fu;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.text("OBSERVACIONES", M, y);
+      y += 6;
 
-    const obs = document.getElementById("obs").value || "";
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
 
-    // Fotos
-const { ticketImgs, materialImgs } = await collectImages();
+      const text = obs?.trim() ? obs.trim() : "—";
+      const lines = doc.splitTextToSize(text, W);
+      doc.text(lines, M, y);
 
-    // PDF
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit: "mm", format: "a4" });
+      return y + (lines.length * 5) + 6;
+    }
 
-let y = addHeader(doc, {
-  fecha: header.fecha || "—",
-  idCliente: header.idCliente || "—",
-  tecnicos: TECNICOS_INST,
-  tecnico: tecnicoSel.value || "—"
-});
-    const rows = [
-      { label: "Horas instalación x2", qty: `${hi.toFixed(1).replace(".", ",")} h`, amount: EUR(impInst) },
-      { label: "Horas despl. x2",      qty: `${hd.toFixed(1).replace(".", ",")} h`, amount: EUR(impDespl) },
-      { label: "Kilómetros",        qty: `${String(km).replace(".", ",")}`,      amount: EUR(impKm) },
-      { label: "Comida",            qty: "",                                     amount: EUR(co) },
-      { label: "Material",          qty: "",                                     amount: EUR(ma) },
-      { label: "Furgón",            qty: furgonOn.checked ? "Sí" : "No",         amount: EUR(fu) },
-    ];
+    async function addPhotos(doc, y, title, images) {
+      const M = 14;
+      const W = 210 - M * 2;
 
-    y = addTable(doc, y, rows);
-    y = addTotal(doc, y, EUR(total));
-    y = addObservaciones(doc, y, obs);
+      if (!images || !images.length) return y;
 
+      if (y > 240) { doc.addPage(); y = 16; }
 
-// Fotos (si las hay)
-y = await addPhotos(doc, y, `FOTOS · Ticket comida (${ticketImgs.length})`, ticketImgs);
-y = await addPhotos(doc, y, `FOTOS · Material (${materialImgs.length})`, materialImgs);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.text(title, M, y);
+      y += 8;
 
-    const pdfBlob = doc.output("blob");
-    const filename = `Parte_Instalacion_${header.idCliente || "cliente"}_${header.fecha || "fecha"}.pdf`;
-    const file = new File([pdfBlob], filename, { type: "application/pdf" });
+      const gap = 6;
+      const cellW = (W - gap) / 2;
+      const cellH = 60;
 
-    // Compartir como archivo (iOS share sheet -> WhatsApp)
-    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        title: "Parte de instalación",
-        text: "Adjunto parte en PDF."
+      const getImgSize = (dataUrl) => new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve({ w: img.naturalWidth || img.width, h: img.naturalHeight || img.height });
+        img.onerror = reject;
+        img.src = dataUrl;
       });
-      ok.textContent = "PDF compartido ✅";
-      return;
+
+      let col = 0;
+      let x = M;
+
+      for (let i = 0; i < images.length; i++) {
+        if (y + cellH > 285) {
+          doc.addPage();
+          y = 16;
+          col = 0;
+          x = M;
+        }
+
+        doc.setDrawColor(220);
+        doc.rect(x, y, cellW, cellH);
+
+        const pad = 2;
+        const maxW = cellW - pad * 2;
+        const maxH = cellH - pad * 2;
+
+        let iw = 1, ih = 1;
+        try {
+          const sz = await getImgSize(images[i]);
+          iw = sz.w; ih = sz.h;
+        } catch (_) {}
+
+        const scale = Math.min(maxW / iw, maxH / ih);
+        const dw = iw * scale;
+        const dh = ih * scale;
+
+        const dx = x + (cellW - dw) / 2;
+        const dy = y + (cellH - dh) / 2;
+
+        doc.addImage(images[i], "JPEG", dx, dy, dw, dh);
+
+        col++;
+
+        if (col === 2) {
+          col = 0;
+          x = M;
+          y += (cellH + gap);
+        } else {
+          x = M + cellW + gap;
+        }
+      }
+
+      if (col === 1) y += (cellH + gap);
+      return y;
     }
 
-    // Fallback: descargar
-    const url = URL.createObjectURL(pdfBlob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-    ok.textContent = "PDF descargado (fallback) ✅";
+    btnPDF.addEventListener("click", async () => {
+      err.textContent = "";
+      ok.textContent = "";
 
-} catch (e) {
-  console.error(e);
-  err.textContent = "PDF ERROR: " + (e?.message ? e.message : String(e));
-}
-});
+      if (!header.idCliente) {
+        err.textContent = "Falta ID Cliente (vuelve atrás y créalo desde Nuevo Parte).";
+        return;
+      }
+      if (!tec1.value || !tec2.value) {
+        err.textContent = "Selecciona Técnico 1 y Técnico 2.";
+        return;
+      }
+      if (tec1.value === tec2.value) {
+        err.textContent = "Técnico 1 y Técnico 2 no pueden ser el mismo.";
+        return;
+      }
+
+      try {
+        const hi = clamp0(toNum(hInst.value));
+        const hd = clamp0(toNum(hDespl.value));
+        const km = clamp0(toNum(kms.value));
+        const co = clamp0(toNum(comida.value));
+        const ma = clamp0(toNum(material.value));
+        const fu = furgonOn.checked ? FURGON : 0;
+
+        const impInst = hi * P_INST * TECNICOS_INST;
+        const impDespl = hd * P_DESPL * TECNICOS_INST;
+        const impKm = km * P_KM;
+        const total = impInst + impDespl + impKm + co + ma + fu;
+
+        const obs = document.getElementById("obs").value || "";
+        const { ticketImgs, materialImgs } = await collectImages();
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: "mm", format: "a4" });
+
+        let y = addHeader(doc, {
+          fecha: header.fecha || "—",
+          idCliente: header.idCliente || "—",
+          tecnicos: TECNICOS_INST,
+          tecnico1: tec1.value || "—",
+          tecnico2: tec2.value || "—"
+        });
+
+        const rows = [
+          { label: "Horas instalación x2", qty: `${hi.toFixed(1).replace(".", ",")} h`, amount: EUR(impInst) },
+          { label: "Horas despl. x2",      qty: `${hd.toFixed(1).replace(".", ",")} h`, amount: EUR(impDespl) },
+          { label: "Kilómetros",          qty: `${String(km).replace(".", ",")}`,      amount: EUR(impKm) },
+          { label: "Comida",              qty: "",                                     amount: EUR(co) },
+          { label: "Material",            qty: "",                                     amount: EUR(ma) },
+          { label: "Furgón",              qty: furgonOn.checked ? "Sí" : "No",         amount: EUR(fu) },
+        ];
+
+        y = addTable(doc, y, rows);
+        y = addTotal(doc, y, EUR(total));
+        y = addObservaciones(doc, y, obs);
+
+        y = await addPhotos(doc, y, `FOTOS · Ticket comida (${ticketImgs.length})`, ticketImgs);
+        y = await addPhotos(doc, y, `FOTOS · Material (${materialImgs.length})`, materialImgs);
+
+        const pdfBlob = doc.output("blob");
+        const filename = `Parte_Instalacion_${header.idCliente || "cliente"}_${header.fecha || "fecha"}.pdf`;
+        const file = new File([pdfBlob], filename, { type: "application/pdf" });
+
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: "Parte de instalación",
+            text: "Adjunto parte en PDF."
+          });
+          ok.textContent = "PDF compartido ✅";
+          return;
+        }
+
+        const url = URL.createObjectURL(pdfBlob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+        ok.textContent = "PDF descargado (fallback) ✅";
+      } catch (e) {
+        console.error(e);
+        err.textContent = "PDF ERROR: " + (e?.message ? e.message : String(e));
+      }
+    });
+
+    // Inicialización final
+    syncDisplays();
+    recalc();
+    updatePhotoCounts();
   </script>
 
   <style>
@@ -1094,19 +1023,10 @@ y = await addPhotos(doc, y, `FOTOS · Material (${materialImgs.length})`, materi
     .rate{ font-weight:900; color:var(--muted); }
 
     .field.onecol{ grid-template-columns: 1fr; grid-template-rows:auto; }
+
     .quick{
       display:flex; gap:8px; flex-wrap:wrap;
       margin-top:10px;
-    }
-    .q{
-      height:44px;
-      padding:0 14px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background:#fff;
-      font-size:18px;
-      font-weight:900;
-      color:var(--primary);
     }
 
     .totline{
@@ -1194,156 +1114,159 @@ y = await addPhotos(doc, y, `FOTOS · Material (${materialImgs.length})`, materi
       font-weight:1000;
     }
     .msg.ok{ color:#15803d; }
+
     .stepper{
-  display:grid;
-  grid-template-columns: 1fr 1.2fr 1fr;
-  gap:10px;
-  align-items:center;
-  margin-top:6px;
-}
+      display:grid;
+      grid-template-columns: 1fr 1.2fr 1fr;
+      gap:10px;
+      align-items:center;
+      margin-top:6px;
+    }
 
-.step{
-  height:56px;
-  border-radius:16px;
-  border:1px solid var(--line);
-  background:#fff;
-  font-size:18px;
-  font-weight:1000;
-  color:var(--primary);
-}
+    .step{
+      height:56px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-size:18px;
+      font-weight:1000;
+      color:var(--primary);
+    }
 
-.stepval{
-  height:56px;
-  border-radius:16px;
-  border:1px solid var(--line);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:22px;
-  font-weight:1000;
-  background:#fff;
-}
+    .stepval{
+      height:56px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:22px;
+      font-weight:1000;
+      background:#fff;
+    }
 
-.quick .qdelta,
-.quick .qreset{
-  height:44px;
-  padding:0 14px;
-  border-radius:14px;
-  border:1px solid var(--line);
-  background:#fff;
-  font-size:18px;
-  font-weight:1000;
-  color:var(--primary);
-}
+    .quick .qdelta,
+    .quick .qreset{
+      height:44px;
+      padding:0 14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-size:18px;
+      font-weight:1000;
+      color:var(--primary);
+    }
+
     .btn-attach.alt{
-  background:#ffffff;
-  color:var(--primary);
-  border:1px solid rgba(11,92,255,.35);
-}
+      background:#ffffff;
+      color:var(--primary);
+      border:1px solid rgba(11,92,255,.35);
+    }
 
-.camModal{
-  position:fixed;
-  inset:0;
-  background:rgba(2,8,23,.55);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:16px;
-  z-index:9999;
-}
+    .camModal{
+      position:fixed;
+      inset:0;
+      background:rgba(2,8,23,.55);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:9999;
+    }
 
-.camPanel{
-  width:min(720px, 100%);
-  background:#fff;
-  border-radius:18px;
-  overflow:hidden;
-  border:1px solid var(--line);
-  box-shadow: 0 18px 50px rgba(2,8,23,.25);
-}
+    .camPanel{
+      width:min(720px, 100%);
+      background:#fff;
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid var(--line);
+      box-shadow: 0 18px 50px rgba(2,8,23,.25);
+    }
 
-.camTop{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px 14px;
-  border-bottom:1px solid var(--line);
-}
+    .camTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:12px 14px;
+      border-bottom:1px solid var(--line);
+    }
 
-.camClose{
-  border:none;
-  background:transparent;
-  font-size:20px;
-  font-weight:900;
-  color:var(--primary);
-}
+    .camClose{
+      border:none;
+      background:transparent;
+      font-size:20px;
+      font-weight:900;
+      color:var(--primary);
+    }
 
-#camVideo{
-  width:100%;
-  height:55vh;
-  background:#000;
-  object-fit:cover;
-}
+    #camVideo{
+      width:100%;
+      height:55vh;
+      background:#000;
+      object-fit:cover;
+    }
 
-.camBottom{
-  display:flex;
-  gap:10px;
-  padding:12px 14px;
-  border-top:1px solid var(--line);
-}
+    .camBottom{
+      display:flex;
+      gap:10px;
+      padding:12px 14px;
+      border-top:1px solid var(--line);
+    }
 
-.camBtnPrimary{
-  flex:1.4;
-  height:54px;
-  border-radius:14px;
-  border:none;
-  background:var(--primary);
-  color:#fff;
-  font-weight:1000;
-  font-size:18px;
-}
+    .camBtnPrimary{
+      flex:1.4;
+      height:54px;
+      border-radius:14px;
+      border:none;
+      background:var(--primary);
+      color:#fff;
+      font-weight:1000;
+      font-size:18px;
+    }
 
-.camBtn{
-  flex:1;
-  height:54px;
-  border-radius:14px;
-  border:1px solid var(--line);
-  background:#fff;
-  color:var(--primary);
-  font-weight:1000;
-  font-size:16px;
-}
+    .camBtn{
+      flex:1;
+      height:54px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--primary);
+      font-weight:1000;
+      font-size:16px;
+    }
 
-.camBtn:disabled,
-.camBtnPrimary:disabled{
-  opacity:.45;
-}
+    .camBtn:disabled,
+    .camBtnPrimary:disabled{
+      opacity:.45;
+    }
 
-.camMsg{
-  margin:0;
-  padding:0 14px 14px;
-  color:#b91c1c;
-  font-weight:800;
-  min-height:20px;
-}
-    /* FIX: que el atributo hidden funcione aunque .camModal tenga display:flex */
-.camModal[hidden] { 
-  display: none !important; 
-}
+    .camMsg{
+      margin:0;
+      padding:0 14px 14px;
+      color:#b91c1c;
+      font-weight:800;
+      min-height:20px;
+    }
+
+    .camModal[hidden]{
+      display:none !important;
+    }
+
     .btnRow{
-  display:grid;
-  gap:10px;
-}
+      display:grid;
+      gap:10px;
+    }
 
-.btn-secondary{
-  width:100%;
-  height:64px;
-  border-radius:18px;
-  border:1px solid rgba(11,92,255,.35);
-  background:#fff;
-  color:var(--primary);
-  font-size:20px;
-  font-weight:1000;
-}
+    .btn-secondary{
+      width:100%;
+      height:64px;
+      border-radius:18px;
+      border:1px solid rgba(11,92,255,.35);
+      background:#fff;
+      color:var(--primary);
+      font-size:20px;
+      font-weight:1000;
+    }
   </style>
 </body>
 </html>

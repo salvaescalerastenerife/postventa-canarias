@@ -22,7 +22,7 @@
 
       <div class="field onecol">
         <span>Fecha</span>
-        <input id="fFecha" inputmode="numeric" placeholder="YYYY-MM-DD" />
+        <input id="fFecha" type="date" />
       </div>
 
       <div class="field onecol">
@@ -67,7 +67,7 @@
 
     const todayISO = () => new Date().toISOString().slice(0,10);
 
-    // Carga defaults
+    // Defaults
     fFecha.value = todayISO();
     try {
       const lastTec = localStorage.getItem(LAST_TEC_KEY) || "";
@@ -87,7 +87,11 @@
       localStorage.setItem(PARTS_KEY, JSON.stringify(arr));
     };
 
-    // Devuelve lista de técnicos asociados al parte
+    // --- Helpers datos ---
+    const partDate = (p) => (p?.header?.fecha || "");
+    const partId = (p) => (p?.part_id || "");
+
+    // técnicos asociados al parte (1 o 2)
     const partTechs = (p) => {
       const h = p?.header || {};
       const t = [];
@@ -97,15 +101,73 @@
       return [...new Set(t)].filter(Boolean);
     };
 
-    const partDate = (p) => (p?.header?.fecha || "");
+    // Estado ENVIADO por técnico (nuevo), fallback al viejo sent_at
+    const isSentForTec = (p, tec) => {
+      if (!tec) return Boolean(p?.sent_at); // si está en "Todos", mostramos estado global (legacy)
+      const sb = p?.sent_by || {};
+      if (sb && sb[tec] && sb[tec].sent_at) return true;
+      // compatibilidad retro si había sent_at global
+      return Boolean(p?.sent_at);
+    };
 
-    const isSent = (p) => Boolean(p?.sent_at);
+    // Garantiza part_id en todos los registros (retrocompatible)
+    const ensureIds = (all) => {
+      let changed = false;
+      const now = Date.now();
+      const out = all.map((p, i) => {
+        if (p && !p.part_id) {
+          changed = true;
+          const f = p?.header?.fecha || "nodate";
+          const idc = p?.header?.idCliente || "noclient";
+          const typ = p?.tipo || "tipo";
+          const ts = p?.saved_at || new Date(now + i).toISOString();
+          return { ...p, part_id: `${f}::${idc}::${typ}::${ts}::${i}` };
+        }
+        return p;
+      });
+      if (changed) saveAll(out);
+      return out;
+    };
+
+    // Total estimado para instalación si no guardaste totales
+    const computeTotalFallback = (p) => {
+      const d = p?.datos || {};
+      const t = p?.tarifas || {};
+      const tipo = p?.tipo || "";
+
+      const toN = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0);
+
+      if (tipo === "instalacion") {
+        const hi = toN(d.horas_inst);
+        const hd = toN(d.horas_despl);
+        const km = toN(d.kms);
+        const co = toN(d.comida);
+        const ma = toN(d.material);
+        const fu = d.furgon ? toN(t.FURGON ?? 80) : 0;
+
+        const P_INST = toN(t.P_INST ?? 27.95);
+        const P_DESPL = toN(t.P_DESPL ?? 19.28);
+        const P_KM = toN(t.P_KM ?? 0.31);
+        const TEC = 2;
+
+        const a = hi * P_INST * TEC;
+        const b = hd * P_DESPL * TEC;
+        const c = km * P_KM;
+        return a + b + c + co + ma + fu;
+      }
+
+      return toN(p?.totales?.total ?? 0);
+    };
+
+    // XSS escape simple
+    const esc = (s) => String(s || "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
     const render = () => {
       ok.textContent = "";
       err.textContent = "";
 
-      const all = loadAll();
+      let all = ensureIds(loadAll());
+
       const date = (fFecha.value || "").trim();
       const tec = (fTec.value || "").trim();
 
@@ -119,51 +181,48 @@
         return;
       }
 
-      const esc = (s) => String(s || "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-
-      list.innerHTML = filtered.map((p, idx) => {
+      list.innerHTML = filtered.map((p) => {
         const tipo = p.tipo || "—";
         const id = p.header?.idCliente || "—";
         const fecha = p.header?.fecha || "—";
         const techs = partTechs(p).join(" + ") || "—";
-        const tot = p?.totales?.total ?? null; // si existe
-        const sent = isSent(p) ? "ENVIADO" : "PENDIENTE";
+
+        const tot = (typeof p?.totales?.total === "number") ? p.totales.total : computeTotalFallback(p);
+        const sent = isSentForTec(p, tec) ? "ENVIADO" : "PENDIENTE";
+        const sentColor = isSentForTec(p, tec) ? "#15803d" : "#b45309";
 
         return `
           <div class="card" style="margin:12px 0; box-shadow:none;">
             <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
               <div style="font-weight:1000; font-size:18px;">${esc(tipo).toUpperCase()} · ${esc(id)}</div>
-              <div style="font-weight:1000; font-size:14px; color:${isSent(p) ? '#15803d' : '#b45309'};">${sent}</div>
+              <div style="font-weight:1000; font-size:14px; color:${sentColor};">${sent}</div>
             </div>
 
             <div style="margin-top:8px; color:var(--muted); font-weight:800;">
               <div>Fecha: <strong style="color:var(--text)">${esc(fecha)}</strong></div>
               <div>Técnicos: <strong style="color:var(--text)">${esc(techs)}</strong></div>
-              ${tot !== null ? `<div>Total: <strong style="color:var(--text)">${esc(EUR(tot))}</strong></div>` : ``}
+              <div>Total: <strong style="color:var(--text)">${esc(EUR(tot))}</strong></div>
             </div>
 
             <div class="btnRow" style="margin-top:12px;">
-              <button class="btn-secondary" type="button" data-act="del" data-i="${idx}">BORRAR</button>
+              <button class="btn-secondary" type="button" data-act="del" data-id="${esc(p.part_id)}">BORRAR</button>
             </div>
           </div>
         `;
       }).join("");
 
-      // borrar (en lista filtrada hay que mapear al original)
-      const original = all;
-      const filteredRefs = filtered.map(p => original.indexOf(p));
-
+      // BORRAR por part_id (robusto)
       list.querySelectorAll("button[data-act='del']").forEach(btn => {
         btn.addEventListener("click", () => {
-          const iFiltered = Number(btn.dataset.i);
-          const iOrig = filteredRefs[iFiltered];
-          if (iOrig < 0) return;
+          const id = btn.dataset.id;
+          if (!id) return;
 
           const okDel = confirm("¿Borrar este parte del teléfono?");
           if (!okDel) return;
 
-          original.splice(iOrig, 1);
-          saveAll(original);
+          const allNow = loadAll();
+          const next = allNow.filter(p => (p?.part_id || "") !== id);
+          saveAll(next);
           render();
         });
       });
@@ -181,37 +240,6 @@
       return tec;
     };
 
-    const computeTotalFallback = (p) => {
-      // si no hay totales guardados, intenta estimarlos con los campos clásicos
-      // (no es perfecto para reparación/mantenimiento si aún no lo has normalizado, pero evita 'NaN')
-      const d = p?.datos || {};
-      const t = p?.tarifas || {};
-      const tipo = p?.tipo || "";
-
-      const toN = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0);
-
-      if (tipo === "instalacion") {
-        const hi = toN(d.horas_inst);
-        const hd = toN(d.horas_despl);
-        const km = toN(d.kms);
-        const co = toN(d.comida);
-        const ma = toN(d.material);
-        const fu = d.furgon ? toN(t.FURGON ?? 80) : 0;
-        const P_INST = toN(t.P_INST ?? 27.95);
-        const P_DESPL = toN(t.P_DESPL ?? 19.28);
-        const P_KM = toN(t.P_KM ?? 0.31);
-        const TEC = 2;
-
-        const a = hi * P_INST * TEC;
-        const b = hd * P_DESPL * TEC;
-        const c = km * P_KM;
-        return a + b + c + co + ma + fu;
-      }
-
-      // si aún no hay reglas firmes para otros tipos, devuelve suma básica
-      return toN(p?.totales?.total ?? 0);
-    };
-
     const dataUrlToJpeg = (src) => new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
@@ -226,8 +254,7 @@
 
         const c = document.createElement("canvas");
         c.width = w; c.height = h;
-        const ctx = c.getContext("2d");
-        ctx.drawImage(img, 0, 0, w, h);
+        c.getContext("2d").drawImage(img, 0, 0, w, h);
 
         resolve(c.toDataURL("image/jpeg", 0.85));
       };
@@ -310,13 +337,12 @@
 
       const date = (fFecha.value || "").trim();
       if (!date) {
-        err.textContent = "Pon una fecha válida (YYYY-MM-DD).";
+        err.textContent = "Selecciona una fecha.";
         return;
       }
 
-      const all = loadAll();
+      let all = ensureIds(loadAll());
 
-      // Partes del técnico para ese día
       const parts = all
         .filter(p => partDate(p) === date)
         .filter(p => partTechs(p).includes(tec));
@@ -380,13 +406,12 @@
           doc.text(`Total parte: ${EUR(tot)}`, M, y);
           y += 6;
 
-          // Observaciones
           const obs = (p.observaciones || "").trim() || "—";
           const obsLines = doc.splitTextToSize(`Obs: ${obs}`, W);
           doc.text(obsLines, M, y);
           y += obsLines.length * 4.6 + 4;
 
-          // Fotos (si están guardadas en el payload)
+          // Fotos desde el payload (ya guardadas como DataURL)
           const tImgsRaw = p?.fotos?.ticket_dataurls || [];
           const mImgsRaw = p?.fotos?.material_dataurls || [];
 
@@ -398,7 +423,6 @@
           y = await addPhotos(doc, y, `FOTOS · Ticket (${tImgs.length})`, tImgs);
           y = await addPhotos(doc, y, `FOTOS · Material (${mImgs.length})`, mImgs);
 
-          // separador
           if (y > 260) { doc.addPage(); y = 16; }
           doc.setDrawColor(220);
           doc.setLineWidth(0.3);
@@ -406,7 +430,6 @@
           y += 8;
         }
 
-        // Resumen final
         if (y > 260) { doc.addPage(); y = 16; }
         doc.setFont("helvetica", "bold");
         doc.setFontSize(14);
@@ -416,16 +439,19 @@
         const filename = `Cierre_${date}_${tec.replaceAll(" ", "_")}.pdf`;
         const file = new File([pdfBlob], filename, { type: "application/pdf" });
 
-        // Marca como enviado (sent_at) SOLO los partes de ese técnico y ese día
+        // Marca ENVIADO SOLO para ese técnico (sent_by)
         const batchId = `${date}::${tec}::${Date.now()}`;
         const nowISO = new Date().toISOString();
+
         const updated = all.map(p => {
           if (partDate(p) !== date) return p;
           if (!partTechs(p).includes(tec)) return p;
-          // Ojo: marcamos el parte como enviado. Si ese parte tiene 2 técnicos,
-          // igualmente queda marcado. Si esto te molesta, lo refinamos a “sent_by”.
-          return { ...p, sent_at: nowISO, sent_batch_id: batchId };
+
+          const sent_by = { ...(p.sent_by || {}) };
+          sent_by[tec] = { sent_at: nowISO, batch_id: batchId };
+          return { ...p, sent_by };
         });
+
         saveAll(updated);
 
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {

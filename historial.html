@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Historial · Postventa Canarias</title>
+
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#0b5cff">
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="back" href="./index.html" aria-label="Volver">←</a>
+    <h1>Historial</h1>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>Filtro</h2>
+
+      <div class="field onecol">
+        <span>Fecha</span>
+        <input id="fFecha" inputmode="numeric" placeholder="YYYY-MM-DD" />
+      </div>
+
+      <div class="field onecol">
+        <span>Técnico</span>
+        <select id="fTec" style="width:100%; height:56px; border-radius:14px; border:1px solid var(--line); font-size:18px; padding:0 12px;">
+          <option value="">Todos</option>
+          <option value="JUAN PABLO CABRERA PEREZ">JUAN PABLO CABRERA PEREZ</option>
+          <option value="DAMASO ROLDAN PEREZ">DAMASO ROLDAN PEREZ</option>
+          <option value="PABLO ECHEDEY ESPINO ORTEGA">PABLO ECHEDEY ESPINO ORTEGA</option>
+          <option value="YISHAR ROMAN MEDINA">YISHAR ROMAN MEDINA</option>
+        </select>
+      </div>
+
+      <div class="btnRow" style="margin-top:12px;">
+        <button id="btnRefresh" class="btn-secondary" type="button">ACTUALIZAR LISTA</button>
+        <button id="btnCierre" class="btn-primary" type="button">📄 CIERRE DEL DÍA (PDF)</button>
+      </div>
+
+      <p class="msg ok" id="ok" aria-live="polite"></p>
+      <p class="msg" id="err" aria-live="polite"></p>
+    </section>
+
+    <section class="card">
+      <h2>Partes</h2>
+      <div id="list"></div>
+    </section>
+  </main>
+
+  <script>
+    const EUR = (n) => new Intl.NumberFormat("es-ES", { style:"currency", currency:"EUR" }).format(n);
+
+    const ok = document.getElementById("ok");
+    const err = document.getElementById("err");
+    const list = document.getElementById("list");
+    const fFecha = document.getElementById("fFecha");
+    const fTec = document.getElementById("fTec");
+    const btnRefresh = document.getElementById("btnRefresh");
+    const btnCierre = document.getElementById("btnCierre");
+
+    const PARTS_KEY = "pv_partes";
+    const LAST_TEC_KEY = "pv_hist_tec";
+
+    const todayISO = () => new Date().toISOString().slice(0,10);
+
+    // Carga defaults
+    fFecha.value = todayISO();
+    try {
+      const lastTec = localStorage.getItem(LAST_TEC_KEY) || "";
+      if (lastTec) fTec.value = lastTec;
+    } catch {}
+
+    fTec.addEventListener("change", () => {
+      try { localStorage.setItem(LAST_TEC_KEY, fTec.value || ""); } catch {}
+    });
+
+    const loadAll = () => {
+      try { return JSON.parse(localStorage.getItem(PARTS_KEY) || "[]"); }
+      catch { return []; }
+    };
+
+    const saveAll = (arr) => {
+      localStorage.setItem(PARTS_KEY, JSON.stringify(arr));
+    };
+
+    // Devuelve lista de técnicos asociados al parte
+    const partTechs = (p) => {
+      const h = p?.header || {};
+      const t = [];
+      if (h.tecnico) t.push(h.tecnico);
+      if (h.tecnico1) t.push(h.tecnico1);
+      if (h.tecnico2) t.push(h.tecnico2);
+      return [...new Set(t)].filter(Boolean);
+    };
+
+    const partDate = (p) => (p?.header?.fecha || "");
+
+    const isSent = (p) => Boolean(p?.sent_at);
+
+    const render = () => {
+      ok.textContent = "";
+      err.textContent = "";
+
+      const all = loadAll();
+      const date = (fFecha.value || "").trim();
+      const tec = (fTec.value || "").trim();
+
+      const filtered = all
+        .filter(p => !date || partDate(p) === date)
+        .filter(p => !tec || partTechs(p).includes(tec))
+        .sort((a,b) => (b.saved_at || "").localeCompare(a.saved_at || ""));
+
+      if (!filtered.length) {
+        list.innerHTML = `<p style="color:var(--muted); font-weight:800;">No hay partes para ese filtro.</p>`;
+        return;
+      }
+
+      const esc = (s) => String(s || "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+      list.innerHTML = filtered.map((p, idx) => {
+        const tipo = p.tipo || "—";
+        const id = p.header?.idCliente || "—";
+        const fecha = p.header?.fecha || "—";
+        const techs = partTechs(p).join(" + ") || "—";
+        const tot = p?.totales?.total ?? null; // si existe
+        const sent = isSent(p) ? "ENVIADO" : "PENDIENTE";
+
+        return `
+          <div class="card" style="margin:12px 0; box-shadow:none;">
+            <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+              <div style="font-weight:1000; font-size:18px;">${esc(tipo).toUpperCase()} · ${esc(id)}</div>
+              <div style="font-weight:1000; font-size:14px; color:${isSent(p) ? '#15803d' : '#b45309'};">${sent}</div>
+            </div>
+
+            <div style="margin-top:8px; color:var(--muted); font-weight:800;">
+              <div>Fecha: <strong style="color:var(--text)">${esc(fecha)}</strong></div>
+              <div>Técnicos: <strong style="color:var(--text)">${esc(techs)}</strong></div>
+              ${tot !== null ? `<div>Total: <strong style="color:var(--text)">${esc(EUR(tot))}</strong></div>` : ``}
+            </div>
+
+            <div class="btnRow" style="margin-top:12px;">
+              <button class="btn-secondary" type="button" data-act="del" data-i="${idx}">BORRAR</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      // borrar (en lista filtrada hay que mapear al original)
+      const original = all;
+      const filteredRefs = filtered.map(p => original.indexOf(p));
+
+      list.querySelectorAll("button[data-act='del']").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const iFiltered = Number(btn.dataset.i);
+          const iOrig = filteredRefs[iFiltered];
+          if (iOrig < 0) return;
+
+          const okDel = confirm("¿Borrar este parte del teléfono?");
+          if (!okDel) return;
+
+          original.splice(iOrig, 1);
+          saveAll(original);
+          render();
+        });
+      });
+    };
+
+    btnRefresh.addEventListener("click", render);
+
+    // ---------- PDF Cierre del día (por técnico) ----------
+    const requireTecSelected = () => {
+      const tec = (fTec.value || "").trim();
+      if (!tec) {
+        err.textContent = "Selecciona un técnico (no puede ser 'Todos') para generar su cierre.";
+        return null;
+      }
+      return tec;
+    };
+
+    const computeTotalFallback = (p) => {
+      // si no hay totales guardados, intenta estimarlos con los campos clásicos
+      // (no es perfecto para reparación/mantenimiento si aún no lo has normalizado, pero evita 'NaN')
+      const d = p?.datos || {};
+      const t = p?.tarifas || {};
+      const tipo = p?.tipo || "";
+
+      const toN = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0);
+
+      if (tipo === "instalacion") {
+        const hi = toN(d.horas_inst);
+        const hd = toN(d.horas_despl);
+        const km = toN(d.kms);
+        const co = toN(d.comida);
+        const ma = toN(d.material);
+        const fu = d.furgon ? toN(t.FURGON ?? 80) : 0;
+        const P_INST = toN(t.P_INST ?? 27.95);
+        const P_DESPL = toN(t.P_DESPL ?? 19.28);
+        const P_KM = toN(t.P_KM ?? 0.31);
+        const TEC = 2;
+
+        const a = hi * P_INST * TEC;
+        const b = hd * P_DESPL * TEC;
+        const c = km * P_KM;
+        return a + b + c + co + ma + fu;
+      }
+
+      // si aún no hay reglas firmes para otros tipos, devuelve suma básica
+      return toN(p?.totales?.total ?? 0);
+    };
+
+    const dataUrlToJpeg = (src) => new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX_W = 1400;
+        let w = img.naturalWidth || img.width;
+        let h = img.naturalHeight || img.height;
+
+        if (w > MAX_W) {
+          h = Math.round(h * (MAX_W / w));
+          w = MAX_W;
+        }
+
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        const ctx = c.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+
+        resolve(c.toDataURL("image/jpeg", 0.85));
+      };
+      img.onerror = reject;
+      img.src = src;
+    });
+
+    async function addPhotos(doc, y, title, images) {
+      const M = 14;
+      const W = 210 - M * 2;
+
+      if (!images || !images.length) return y;
+
+      if (y > 240) { doc.addPage(); y = 16; }
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.text(title, M, y);
+      y += 8;
+
+      const gap = 6;
+      const cellW = (W - gap) / 2;
+      const cellH = 60;
+
+      const getImgSize = (dataUrl) => new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve({ w: img.naturalWidth || img.width, h: img.naturalHeight || img.height });
+        img.onerror = reject;
+        img.src = dataUrl;
+      });
+
+      let col = 0;
+      let x = M;
+
+      for (let i = 0; i < images.length; i++) {
+        if (y + cellH > 285) {
+          doc.addPage();
+          y = 16;
+          col = 0;
+          x = M;
+        }
+
+        doc.setDrawColor(220);
+        doc.rect(x, y, cellW, cellH);
+
+        const pad = 2;
+        const maxW = cellW - pad * 2;
+        const maxH = cellH - pad * 2;
+
+        let iw = 1, ih = 1;
+        try {
+          const sz = await getImgSize(images[i]);
+          iw = sz.w; ih = sz.h;
+        } catch (_) {}
+
+        const scale = Math.min(maxW / iw, maxH / ih);
+        const dw = iw * scale;
+        const dh = ih * scale;
+
+        const dx = x + (cellW - dw) / 2;
+        const dy = y + (cellH - dh) / 2;
+
+        doc.addImage(images[i], "JPEG", dx, dy, dw, dh);
+
+        col++;
+        if (col === 2) { col = 0; x = M; y += (cellH + gap); }
+        else { x = M + cellW + gap; }
+      }
+
+      if (col === 1) y += (cellH + gap);
+      return y;
+    }
+
+    btnCierre.addEventListener("click", async () => {
+      ok.textContent = "";
+      err.textContent = "";
+
+      const tec = requireTecSelected();
+      if (!tec) return;
+
+      const date = (fFecha.value || "").trim();
+      if (!date) {
+        err.textContent = "Pon una fecha válida (YYYY-MM-DD).";
+        return;
+      }
+
+      const all = loadAll();
+
+      // Partes del técnico para ese día
+      const parts = all
+        .filter(p => partDate(p) === date)
+        .filter(p => partTechs(p).includes(tec));
+
+      if (!parts.length) {
+        err.textContent = "No hay partes para ese técnico en esa fecha.";
+        return;
+      }
+
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: "mm", format: "a4" });
+
+        const M = 14;
+        const W = 210 - M * 2;
+        let y = 16;
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        doc.text("CIERRE DEL DÍA", M, y);
+
+        y += 7;
+        doc.setFontSize(12);
+        doc.text(`Técnico: ${tec}`, M, y);
+
+        y += 6;
+        doc.setFontSize(11);
+        doc.text(`Fecha: ${date}`, M, y);
+
+        y += 6;
+        doc.setDrawColor(30);
+        doc.setLineWidth(0.3);
+        doc.line(M, y, 210 - M, y);
+        y += 8;
+
+        let sumTotal = 0;
+
+        for (let i = 0; i < parts.length; i++) {
+          const p = parts[i];
+          const tipo = (p.tipo || "—").toUpperCase();
+          const id = p.header?.idCliente || "—";
+          const techs = partTechs(p).join(" + ") || "—";
+
+          const tot = (typeof p?.totales?.total === "number")
+            ? p.totales.total
+            : computeTotalFallback(p);
+
+          sumTotal += (Number.isFinite(tot) ? tot : 0);
+
+          if (y > 260) { doc.addPage(); y = 16; }
+
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(12);
+          doc.text(`${i+1}. ${tipo} · Cliente ${id}`, M, y);
+          y += 6;
+
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(10.5);
+          doc.text(`Técnicos en parte: ${techs}`, M, y);
+          y += 5;
+          doc.text(`Total parte: ${EUR(tot)}`, M, y);
+          y += 6;
+
+          // Observaciones
+          const obs = (p.observaciones || "").trim() || "—";
+          const obsLines = doc.splitTextToSize(`Obs: ${obs}`, W);
+          doc.text(obsLines, M, y);
+          y += obsLines.length * 4.6 + 4;
+
+          // Fotos (si están guardadas en el payload)
+          const tImgsRaw = p?.fotos?.ticket_dataurls || [];
+          const mImgsRaw = p?.fotos?.material_dataurls || [];
+
+          const tImgs = [];
+          const mImgs = [];
+          for (const u of tImgsRaw) { try { tImgs.push(await dataUrlToJpeg(u)); } catch(_) {} }
+          for (const u of mImgsRaw) { try { mImgs.push(await dataUrlToJpeg(u)); } catch(_) {} }
+
+          y = await addPhotos(doc, y, `FOTOS · Ticket (${tImgs.length})`, tImgs);
+          y = await addPhotos(doc, y, `FOTOS · Material (${mImgs.length})`, mImgs);
+
+          // separador
+          if (y > 260) { doc.addPage(); y = 16; }
+          doc.setDrawColor(220);
+          doc.setLineWidth(0.3);
+          doc.line(M, y, 210 - M, y);
+          y += 8;
+        }
+
+        // Resumen final
+        if (y > 260) { doc.addPage(); y = 16; }
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.text(`TOTAL DEL DÍA: ${EUR(sumTotal)}`, M, y);
+
+        const pdfBlob = doc.output("blob");
+        const filename = `Cierre_${date}_${tec.replaceAll(" ", "_")}.pdf`;
+        const file = new File([pdfBlob], filename, { type: "application/pdf" });
+
+        // Marca como enviado (sent_at) SOLO los partes de ese técnico y ese día
+        const batchId = `${date}::${tec}::${Date.now()}`;
+        const nowISO = new Date().toISOString();
+        const updated = all.map(p => {
+          if (partDate(p) !== date) return p;
+          if (!partTechs(p).includes(tec)) return p;
+          // Ojo: marcamos el parte como enviado. Si ese parte tiene 2 técnicos,
+          // igualmente queda marcado. Si esto te molesta, lo refinamos a “sent_by”.
+          return { ...p, sent_at: nowISO, sent_batch_id: batchId };
+        });
+        saveAll(updated);
+
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: "Cierre del día", text: "Adjunto cierre del día en PDF." });
+          ok.textContent = "Cierre compartido ✅";
+        } else {
+          const url = URL.createObjectURL(pdfBlob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = filename;
+          a.click();
+          URL.revokeObjectURL(url);
+          ok.textContent = "PDF descargado (fallback) ✅";
+        }
+
+        render();
+      } catch (e) {
+        console.error(e);
+        err.textContent = "ERROR PDF: " + (e?.message ? e.message : String(e));
+      }
+    });
+
+    // init
+    render();
+  </script>
+
+  <style>
+    .back{
+      position:absolute;
+      left:16px;
+      top:16px;
+      text-decoration:none;
+      font-size:22px;
+      font-weight:900;
+      color:var(--primary);
+    }
+    .btnRow{ display:grid; gap:10px; }
+  </style>
+</body>
+</html>

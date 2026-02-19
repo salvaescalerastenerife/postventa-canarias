@@ -27,13 +27,27 @@
       </div>
       <div class="field onecol" style="margin-top:10px;">
   <label style="font-weight:900; display:block; margin-bottom:6px;">Técnico</label>
-  <select id="tecnico" style="width:100%; height:56px; border-radius:14px; border:1px solid var(--line); font-size:18px; padding:0 12px;">
-    <option value="" selected>Selecciona tu nombre…</option>
+<div class="field onecol" style="margin-top:10px;">
+  <label style="font-weight:900; display:block; margin-bottom:6px;">Técnico 1</label>
+  <select id="tec1" style="width:100%; height:56px; border-radius:14px; border:1px solid var(--line); font-size:18px; padding:0 12px;">
+    <option value="" selected>Selecciona…</option>
     <option value="JUAN PABLO CABRERA PEREZ">JUAN PABLO CABRERA PEREZ</option>
     <option value="DAMASO ROLDAN PEREZ">DAMASO ROLDAN PEREZ</option>
     <option value="PABLO ECHEDEY ESPINO ORTEGA">PABLO ECHEDEY ESPINO ORTEGA</option>
     <option value="YISHAR ROMAN MEDINA">YISHAR ROMAN MEDINA</option>
   </select>
+</div>
+
+<div class="field onecol" style="margin-top:10px;">
+  <label style="font-weight:900; display:block; margin-bottom:6px;">Técnico 2</label>
+  <select id="tec2" style="width:100%; height:56px; border-radius:14px; border:1px solid var(--line); font-size:18px; padding:0 12px;">
+    <option value="" selected>Selecciona…</option>
+    <option value="JUAN PABLO CABRERA PEREZ">JUAN PABLO CABRERA PEREZ</option>
+    <option value="DAMASO ROLDAN PEREZ">DAMASO ROLDAN PEREZ</option>
+    <option value="PABLO ECHEDEY ESPINO ORTEGA">PABLO ECHEDEY ESPINO ORTEGA</option>
+    <option value="YISHAR ROMAN MEDINA">YISHAR ROMAN MEDINA</option>
+  </select>
+</div>
 </div>
     </section>
 
@@ -267,12 +281,26 @@
     // Guardas por si alguien entra directo
     document.getElementById("mFecha").textContent = header.fecha || "—";
     document.getElementById("mId").textContent = header.idCliente || "—";
-    // ------- Técnico (selector) -------
-const tecnicoSel = document.getElementById("tecnico");
-tecnicoSel.value = localStorage.getItem("pv_tecnico") || "";
-tecnicoSel.addEventListener("change", () => {
-  localStorage.setItem("pv_tecnico", tecnicoSel.value);
-});
+// ------- Técnicos (2 selectores) -------
+const tec1 = document.getElementById("tec1");
+const tec2 = document.getElementById("tec2");
+
+// carga últimos usados
+try {
+  const last = JSON.parse(localStorage.getItem("pv_tecnicos_inst") || "{}");
+  tec1.value = last.tec1 || "";
+  tec2.value = last.tec2 || "";
+} catch {}
+
+// guarda al cambiar
+const saveTechs = () => {
+  localStorage.setItem("pv_tecnicos_inst", JSON.stringify({
+    tec1: tec1.value || "",
+    tec2: tec2.value || ""
+  }));
+};
+tec1.addEventListener("change", saveTechs);
+tec2.addEventListener("change", saveTechs);
     // ------- Inputs -------
     const hInst = document.getElementById("hInst");
     const hDespl = document.getElementById("hDespl");

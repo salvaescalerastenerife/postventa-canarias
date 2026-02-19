@@ -1,11 +1,4 @@
 (function () {
-  // ---- Service Worker ----
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js").catch(() => {});
-    });
-  }
-
   const $ = (id) => document.getElementById(id);
 
   const fecha = $("fecha");
@@ -14,10 +7,8 @@
   const btnContinuar = $("btnContinuar");
   const msg = $("msg");
 
-  // Estado simple
   let tipo = null; // "instalacion" | "reparacion" | "mantenimiento"
 
-  // Fecha por defecto: hoy
   const todayISO = () => {
     const d = new Date();
     const yyyy = d.getFullYear();
@@ -26,7 +17,6 @@
     return `${yyyy}-${mm}-${dd}`;
   };
 
-  // Máximo: mañana (regla tuya)
   const tomorrowISO = () => {
     const d = new Date();
     d.setDate(d.getDate() + 1);
@@ -54,7 +44,6 @@
       btn.setAttribute("aria-pressed", "true");
 
       msg.textContent = "";
-      // Guardar selección
       localStorage.setItem("pv_tipo", tipo);
     });
   });
@@ -68,6 +57,12 @@
       b.setAttribute("aria-pressed", "true");
     }
   }
+
+  const routes = {
+    instalacion: "./instalacion.html",
+    reparacion: "./reparacion.html",
+    mantenimiento: "./mantenimiento.html",
+  };
 
   btnContinuar.addEventListener("click", () => {
     msg.textContent = "";
@@ -88,17 +83,15 @@
       return;
     }
 
-    // Guardar datos de cabecera
     const header = { tipo, fecha: f, idCliente: id };
     localStorage.setItem("pv_header", JSON.stringify(header));
 
-    // Navegación por tipo (por ahora solo instalación está creada)
-    if (tipo === "instalacion") {
-      window.location.href = "./instalacion.html";
+    const url = routes[tipo];
+    if (url) {
+      window.location.href = url;
       return;
     }
 
-    // Para no bloquearte: de momento avisamos en pantalla
-    msg.textContent = "Este formulario aún no está creado. Ahora mismo solo Instalación.";
+    msg.textContent = "Este formulario aún no está creado.";
   });
 })();

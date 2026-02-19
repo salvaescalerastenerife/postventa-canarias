@@ -3,57 +3,94 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Nuevo Parte · Postventa Canarias</title>
+  <title>Postventa Canarias</title>
 
   <link rel="manifest" href="./manifest.webmanifest">
   <meta name="theme-color" content="#0b5cff">
-  <link rel="apple-touch-icon" href="./icons/icon-192.png">
-
   <link rel="stylesheet" href="./styles.css" />
 </head>
+
 <body>
-  <header class="topbar">
-    <h1>Nuevo Parte</h1>
-  </header>
+  <main class="lp">
+    <div class="lp-card">
+      <img class="lp-logo" src="./logo-canarias-accesible.jpg" alt="Canarias accesible" />
 
-  <main class="container">
-    <section class="card">
-      <h2>Selecciona el tipo de intervención</h2>
-
-      <div class="chips">
-        <button type="button" class="chip chip-inst" data-tipo="instalacion" aria-pressed="false">
-          Instalación
-        </button>
-        <button type="button" class="chip chip-repa" data-tipo="reparacion" aria-pressed="false">
-          Reparación
-        </button>
-        <button type="button" class="chip chip-mant" data-tipo="mantenimiento" aria-pressed="false">
-          Mantenimiento
-        </button>
+      <div class="lp-actions">
+        <a class="lp-btn primary" href="./nuevo-parte.html">NUEVO PARTE</a>
+        <a class="lp-btn" href="./historial.html">HISTORIAL</a>
       </div>
-    </section>
 
-    <section class="card">
-      <h2>Datos</h2>
-
-      <label class="field">
-        <span>Fecha</span>
-        <input id="fecha" type="date" />
-        <button id="btnHoy" class="btn-small" type="button">HOY</button>
-      </label>
-
-      <label class="field">
-        <span>ID Cliente</span>
-        <input id="idCliente" inputmode="numeric" pattern="[0-9]*" placeholder="Ej: 10294" />
-      </label>
-    </section>
-
-    <section class="card">
-      <button id="btnContinuar" class="btn-primary" type="button">CONTINUAR</button>
-      <p id="msg" class="msg" aria-live="polite"></p>
-    </section>
+      <p class="lp-foot">Postventa · Partes en el móvil</p>
+    </div>
   </main>
 
-  <script src="./app.js"></script>
+  <style>
+    :root{
+      --primary: var(--primary, #0b5cff);
+      --line: var(--line, rgba(148,163,184,.35));
+      --text: var(--text, #0f172a);
+      --muted: var(--muted, #64748b);
+      --font: var(--font, system-ui, -apple-system, Segoe UI, Roboto, Arial);
+      --bg: #ffffff;
+    }
+
+    body{ margin:0; font-family:var(--font); color:var(--text); background:var(--bg); }
+
+    .lp{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+    }
+
+    .lp-card{
+      width:min(520px, 100%);
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:22px;
+      box-shadow:0 18px 55px rgba(2,8,23,.08);
+      background:#fff;
+      text-align:center;
+    }
+
+    .lp-logo{
+      width:min(360px, 100%);
+      height:auto;
+      display:block;
+      margin:6px auto 18px;
+      user-select:none;
+      -webkit-user-drag:none;
+    }
+
+    .lp-actions{ display:grid; gap:12px; margin-top:10px; }
+
+    .lp-btn{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      height:72px;
+      border-radius:20px;
+      text-decoration:none;
+      font-weight:1000;
+      font-size:22px;
+      letter-spacing:.4px;
+      border:1px solid rgba(11,92,255,.35);
+      color:var(--primary);
+      background:#fff;
+      -webkit-tap-highlight-color:transparent;
+      transition:transform .04s ease;
+    }
+
+    .lp-btn:active{ transform: translateY(1px); }
+
+    .lp-btn.primary{
+      background:var(--primary);
+      color:#fff;
+      border-color:transparent;
+    }
+
+    .lp-foot{ margin:14px 0 0; color:var(--muted); font-weight:800; font-size:14px; }
+  </style>
 </body>
 </html>

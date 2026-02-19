@@ -1,1 +1,60 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Nuevo Parte · Postventa Canarias</title>
+
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#0b5cff">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>Nuevo Parte</h1>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>Selecciona el tipo de intervención</h2>
+
+      <div class="chips">
+        <button type="button" class="chip chip-inst" data-tipo="instalacion" aria-pressed="false">
+          Instalación
+        </button>
+        <button type="button" class="chip chip-repa" data-tipo="reparacion" aria-pressed="false">
+          Reparación
+        </button>
+        <button type="button" class="chip chip-mant" data-tipo="mantenimiento" aria-pressed="false">
+          Mantenimiento
+        </button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Datos</h2>
+
+      <label class="field">
+        <span>Fecha</span>
+        <input id="fecha" type="date" />
+        <button id="btnHoy" class="btn-small" type="button">HOY</button>
+      </label>
+
+      <label class="field">
+        <span>ID Cliente</span>
+        <input id="idCliente" inputmode="numeric" pattern="[0-9]*" placeholder="Ej: 10294" />
+      </label>
+    </section>
+
+    <section class="card">
+      <button id="btnContinuar" class="btn-primary" type="button">CONTINUAR</button>
+      <p id="msg" class="msg" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
 

@@ -146,6 +146,7 @@
           <input id="fotoTicket" type="file" accept="image/*" />
         </label>
 
+        <button type="button" class="btn-trash" id="btnDelTicket" title="Borrar foto ticket">🗑️</button>
         <span class="count" id="cTicket">0 fotos</span>
       </div>
     </section>
@@ -169,6 +170,7 @@
           <input id="fotoMaterial" type="file" accept="image/*" />
         </label>
 
+        <button type="button" class="btn-trash" id="btnDelMaterial" title="Borrar foto material">🗑️</button>
         <span class="count" id="cMat">0 fotos</span>
       </div>
     </section>
@@ -269,6 +271,10 @@
     const FURGON = 80.00;
     const TECNICOS_INST = 2;
 
+    // Fotos: límite por campo
+    const MAX_TICKET = 1;
+    const MAX_MATERIAL = 1;
+
     // ------- Cargar cabecera -------
     const header = (() => {
       try { return JSON.parse(localStorage.getItem("pv_header") || "{}"); }
@@ -325,6 +331,13 @@
     const fotoMaterial = document.getElementById("fotoMaterial");
     const cTicket = document.getElementById("cTicket");
     const cMat = document.getElementById("cMat");
+
+    const btnDelTicket = document.getElementById("btnDelTicket");
+    const btnDelMaterial = document.getElementById("btnDelMaterial");
+
+    // Mensajes
+    const ok = document.getElementById("ok");
+    const err = document.getElementById("err");
 
     // ------- Cálculos -------
     const tInst = document.getElementById("tInst");
@@ -432,6 +445,66 @@
       });
     });
 
+    // -------- Fotos (cámara propia + fototeca) --------
+    let ticketShots = [];
+    let materialShots = [];
+
+    const getTicketCount = () => (ticketShots.length + (fotoTicket.files?.length || 0));
+    const getMaterialCount = () => (materialShots.length + (fotoMaterial.files?.length || 0));
+
+    const updatePhotoCounts = () => {
+      cTicket.textContent = `${getTicketCount()} foto`;
+      cMat.textContent = `${getMaterialCount()} foto`;
+    };
+
+    const enforceSingleFile = (inputEl) => {
+      if (!inputEl?.files) return;
+      if (inputEl.files.length <= 1) return;
+      const dt = new DataTransfer();
+      dt.items.add(inputEl.files[0]);
+      inputEl.files = dt.files;
+    };
+
+    const clearTicketPhoto = () => {
+      ticketShots = [];
+      fotoTicket.value = "";
+      updatePhotoCounts();
+    };
+
+    const clearMaterialPhoto = () => {
+      materialShots = [];
+      fotoMaterial.value = "";
+      updatePhotoCounts();
+    };
+
+    btnDelTicket.addEventListener("click", () => { err.textContent = ""; ok.textContent=""; clearTicketPhoto(); });
+    btnDelMaterial.addEventListener("click", () => { err.textContent = ""; ok.textContent=""; clearMaterialPhoto(); });
+
+    // Fototeca: 1 máximo y si ya hay foto -> no deja
+    fotoTicket.addEventListener("change", () => {
+      enforceSingleFile(fotoTicket);
+
+      if (ticketShots.length >= MAX_TICKET) {
+        err.textContent = "Solo 1 foto de Ticket por parte. Borra la anterior (🗑️) para cambiarla.";
+        fotoTicket.value = "";
+        return;
+      }
+      err.textContent = "";
+      updatePhotoCounts();
+    });
+
+    fotoMaterial.addEventListener("change", () => {
+      enforceSingleFile(fotoMaterial);
+
+      if (materialShots.length >= MAX_MATERIAL) {
+        err.textContent = "Solo 1 foto de Material por parte. Borra la anterior (🗑️) para cambiarla.";
+        fotoMaterial.value = "";
+        return;
+      }
+      err.textContent = "";
+      updatePhotoCounts();
+    });
+
     // -------- Cámara propia --------
     const camModal = document.getElementById("camModal");
     camModal.hidden = true;
@@ -447,21 +520,22 @@
     const btnCamTicket = document.getElementById("btnCamTicket");
     const btnCamMaterial = document.getElementById("btnCamMaterial");
 
-    let ticketShots = [];
-    let materialShots = [];
     let currentTarget = null;
     let stream = null;
     let lastDataUrl = null;
 
-    const getTicketCount = () => (ticketShots.length + (fotoTicket.files?.length || 0));
-    const getMaterialCount = () => (materialShots.length + (fotoMaterial.files?.length || 0));
-
-    const updatePhotoCounts = () => {
-      cTicket.textContent = `${getTicketCount()} fotos`;
-      cMat.textContent = `${getMaterialCount()} fotos`;
-    };
-
     const openCam = async (target) => {
+      // Bloqueo por límite 1
+      if (target === "ticket" && getTicketCount() >= MAX_TICKET) {
+        err.textContent = "Ya hay 1 foto de Ticket. Borra la anterior (🗑️) para cambiarla.";
+        return;
+      }
+      if (target === "material" && getMaterialCount() >= MAX_MATERIAL) {
+        err.textContent = "Ya hay 1 foto de Material. Borra la anterior (🗑️) para cambiarla.";
+        return;
+      }
+
+      err.textContent = "";
       currentTarget = target;
       lastDataUrl = null;
       camMsg.textContent = "";
@@ -522,8 +596,22 @@
     camUse.addEventListener("click", () => {
       if (!lastDataUrl) return;
 
-      if (currentTarget === "ticket") ticketShots.push(lastDataUrl);
-      if (currentTarget === "material") materialShots.push(lastDataUrl);
+      // Fuerza 1 máximo (y respeta el límite total)
+      if (currentTarget === "ticket") {
+        if (getTicketCount() >= MAX_TICKET) {
+          camMsg.textContent = "Ya hay 1 foto de Ticket. Borra la anterior (🗑️) para cambiarla.";
+          return;
+        }
+        ticketShots = [lastDataUrl];
+      }
+
+      if (currentTarget === "material") {
+        if (getMaterialCount() >= MAX_MATERIAL) {
+          camMsg.textContent = "Ya hay 1 foto de Material. Borra la anterior (🗑️) para cambiarla.";
+          return;
+        }
+        materialShots = [lastDataUrl];
+      }
 
       updatePhotoCounts();
       closeCam();
@@ -540,12 +628,43 @@
     btnCamTicket.addEventListener("click", () => openCam("ticket"));
     btnCamMaterial.addEventListener("click", () => openCam("material"));
 
-    fotoTicket.addEventListener("change", updatePhotoCounts);
-    fotoMaterial.addEventListener("change", updatePhotoCounts);
+    // ------- Helpers imagen -> JPEG DataURL (persistir en local/PDF) -------
+    const fileToDataURL = (file) => new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+
+    const dataUrlToJpeg = (src) => new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX_W = 1400;
+        let w = img.naturalWidth || img.width;
+        let h = img.naturalHeight || img.height;
+        if (w > MAX_W) { h = Math.round(h * (MAX_W / w)); w = MAX_W; }
+
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        c.getContext("2d").drawImage(img, 0, 0, w, h);
+        resolve(c.toDataURL("image/jpeg", 0.85));
+      };
+      img.onerror = reject;
+      img.src = src;
+    });
+
+    const fileToJpegDataURL = async (file) => dataUrlToJpeg(await fileToDataURL(file));
+
+    const collectFototecaJpegs = async (inputEl) => {
+      const out = [];
+      const files = inputEl?.files ? Array.from(inputEl.files) : [];
+      for (const f of files) {
+        try { out.push(await fileToJpegDataURL(f)); } catch(_) {}
+      }
+      return out;
+    };
 
     // ------- Guardado local -------
-    const ok = document.getElementById("ok");
-    const err = document.getElementById("err");
     const btnGuardar = document.getElementById("btnGuardar");
 
     btnGuardar.addEventListener("click", async () => {
@@ -565,6 +684,13 @@
         return;
       }
 
+      // Normaliza y guarda 1 foto máximo por campo (cámara + fototeca)
+      const ticketFototeca = await collectFototecaJpegs(fotoTicket);
+      const materialFototeca = await collectFototecaJpegs(fotoMaterial);
+
+      const ticketAll = [...ticketShots, ...ticketFototeca].slice(0, 1);
+      const materialAll = [...materialShots, ...materialFototeca].slice(0, 1);
+
       const payload = {
         header: { ...header, tecnico1: tec1.value || "", tecnico2: tec2.value || "" },
         tipo: "instalacion",
@@ -579,10 +705,10 @@
         },
         observaciones: document.getElementById("obs").value || "",
         fotos: {
-          ticket_count: getTicketCount(),
-          material_count: getMaterialCount(),
-          ticket_dataurls: ticketShots,
-          material_dataurls: materialShots
+          ticket_count: ticketAll.length,
+          material_count: materialAll.length,
+          ticket_dataurls: ticketAll,
+          material_dataurls: materialAll
         },
         saved_at: new Date().toISOString()
       };
@@ -693,54 +819,16 @@
     // -------- PDF + COMPARTIR (con fotos) --------
     const btnPDF = document.getElementById("btnPDF");
 
-    const fileToDataURL = (file) => new Promise((resolve, reject) => {
-      const r = new FileReader();
-      r.onload = () => resolve(r.result);
-      r.onerror = reject;
-      r.readAsDataURL(file);
-    });
-
-    const dataUrlToJpeg = (src) => new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        const MAX_W = 1400;
-        let w = img.naturalWidth || img.width;
-        let h = img.naturalHeight || img.height;
-
-        if (w > MAX_W) {
-          h = Math.round(h * (MAX_W / w));
-          w = MAX_W;
-        }
-
-        const c = document.createElement("canvas");
-        c.width = w; c.height = h;
-        const ctx = c.getContext("2d");
-        ctx.drawImage(img, 0, 0, w, h);
-
-        resolve(c.toDataURL("image/jpeg", 0.85));
-      };
-      img.onerror = reject;
-      img.src = src;
-    });
-
-    const fileToJpegDataURL = async (file) => {
-      const raw = await fileToDataURL(file);
-      return await dataUrlToJpeg(raw);
-    };
-
-    async function collectImages() {
+    async function collectImagesLimited() {
+      // 1 máximo por campo: cámara + fototeca
       const ticketImgs = [];
       const materialImgs = [];
 
-      for (const u of ticketShots) ticketImgs.push(await dataUrlToJpeg(u));
-      for (const u of materialShots) materialImgs.push(await dataUrlToJpeg(u));
+      if (ticketShots.length) ticketImgs.push(await dataUrlToJpeg(ticketShots[0]));
+      if (materialShots.length) materialImgs.push(await dataUrlToJpeg(materialShots[0]));
 
-      if (fotoTicket?.files?.length) {
-        for (const f of fotoTicket.files) ticketImgs.push(await fileToJpegDataURL(f));
-      }
-      if (fotoMaterial?.files?.length) {
-        for (const f of fotoMaterial.files) materialImgs.push(await fileToJpegDataURL(f));
-      }
+      if (!ticketImgs.length && fotoTicket?.files?.length) ticketImgs.push(await fileToJpegDataURL(fotoTicket.files[0]));
+      if (!materialImgs.length && fotoMaterial?.files?.length) materialImgs.push(await fileToJpegDataURL(fotoMaterial.files[0]));
 
       return { ticketImgs, materialImgs };
     }
@@ -852,10 +940,18 @@
       doc.text(title, M, y);
       y += 8;
 
-      const gap = 6;
-      const cellW = (W - gap) / 2;
-      const cellH = 60;
+      // 1 sola foto => 1 caja grande centrada
+      const cellW = W;
+      const cellH = 90;
 
+      doc.setDrawColor(220);
+      doc.rect(M, y, cellW, cellH);
+
+      const pad = 2;
+      const maxW = cellW - pad * 2;
+      const maxH = cellH - pad * 2;
+
+      // medir proporción
       const getImgSize = (dataUrl) => new Promise((resolve, reject) => {
         const img = new Image();
         img.onload = () => resolve({ w: img.naturalWidth || img.width, h: img.naturalHeight || img.height });
@@ -863,52 +959,22 @@
         img.src = dataUrl;
       });
 
-      let col = 0;
-      let x = M;
+      let iw = 1, ih = 1;
+      try {
+        const sz = await getImgSize(images[0]);
+        iw = sz.w; ih = sz.h;
+      } catch (_) {}
 
-      for (let i = 0; i < images.length; i++) {
-        if (y + cellH > 285) {
-          doc.addPage();
-          y = 16;
-          col = 0;
-          x = M;
-        }
+      const scale = Math.min(maxW / iw, maxH / ih);
+      const dw = iw * scale;
+      const dh = ih * scale;
 
-        doc.setDrawColor(220);
-        doc.rect(x, y, cellW, cellH);
+      const dx = M + (cellW - dw) / 2;
+      const dy = y + (cellH - dh) / 2;
 
-        const pad = 2;
-        const maxW = cellW - pad * 2;
-        const maxH = cellH - pad * 2;
+      doc.addImage(images[0], "JPEG", dx, dy, dw, dh);
 
-        let iw = 1, ih = 1;
-        try {
-          const sz = await getImgSize(images[i]);
-          iw = sz.w; ih = sz.h;
-        } catch (_) {}
-
-        const scale = Math.min(maxW / iw, maxH / ih);
-        const dw = iw * scale;
-        const dh = ih * scale;
-
-        const dx = x + (cellW - dw) / 2;
-        const dy = y + (cellH - dh) / 2;
-
-        doc.addImage(images[i], "JPEG", dx, dy, dw, dh);
-
-        col++;
-
-        if (col === 2) {
-          col = 0;
-          x = M;
-          y += (cellH + gap);
-        } else {
-          x = M + cellW + gap;
-        }
-      }
-
-      if (col === 1) y += (cellH + gap);
-      return y;
+      return y + cellH + 10;
     }
 
     btnPDF.addEventListener("click", async () => {
@@ -942,7 +1008,7 @@
         const total = impInst + impDespl + impKm + co + ma + fu;
 
         const obs = document.getElementById("obs").value || "";
-        const { ticketImgs, materialImgs } = await collectImages();
+        const { ticketImgs, materialImgs } = await collectImagesLimited();
 
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ unit: "mm", format: "a4" });
@@ -968,8 +1034,8 @@
         y = addTotal(doc, y, EUR(total));
         y = addObservaciones(doc, y, obs);
 
-        y = await addPhotos(doc, y, `FOTOS · Ticket comida (${ticketImgs.length})`, ticketImgs);
-        y = await addPhotos(doc, y, `FOTOS · Material (${materialImgs.length})`, materialImgs);
+        y = await addPhotos(doc, y, `FOTO · Ticket comida (${ticketImgs.length})`, ticketImgs);
+        y = await addPhotos(doc, y, `FOTO · Material (${materialImgs.length})`, materialImgs);
 
         const pdfBlob = doc.output("blob");
         const filename = `Parte_Instalacion_${header.idCliente || "cliente"}_${header.fecha || "fecha"}.pdf`;
@@ -1040,7 +1106,7 @@
 
     .attach{
       display:flex; align-items:center; justify-content:space-between;
-      gap:12px; margin-top:10px;
+      gap:10px; margin-top:10px;
     }
     .btn-attach{
       display:inline-flex; align-items:center; justify-content:center;
@@ -1053,9 +1119,31 @@
       border:none;
       cursor:pointer;
       user-select:none;
+      white-space:nowrap;
     }
     .btn-attach input{ display:none; }
-    .count{ color:var(--muted); font-weight:800; }
+
+    .btn-attach.alt{
+      background:#ffffff;
+      color:var(--primary);
+      border:1px solid rgba(11,92,255,.35);
+    }
+
+    .btn-trash{
+      height:52px;
+      width:52px;
+      border-radius:14px;
+      border:1px solid rgba(148,163,184,.6);
+      background:#fff;
+      font-size:18px;
+      font-weight:900;
+      color:#0f172a;
+      cursor:pointer;
+      flex:0 0 auto;
+    }
+    .btn-trash:active{ transform: translateY(1px); }
+
+    .count{ color:var(--muted); font-weight:800; min-width:64px; text-align:right; }
 
     .switchrow{
       display:grid;
@@ -1155,12 +1243,6 @@
       font-size:18px;
       font-weight:1000;
       color:var(--primary);
-    }
-
-    .btn-attach.alt{
-      background:#ffffff;
-      color:var(--primary);
-      border:1px solid rgba(11,92,255,.35);
     }
 
     .camModal{

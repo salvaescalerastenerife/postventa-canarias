@@ -400,12 +400,59 @@
           y += 6;
 
           doc.setFont("helvetica", "normal");
-          doc.setFontSize(10.5);
-          doc.text(`Técnicos en parte: ${techs}`, M, y);
-          y += 5;
-          doc.text(`Total parte: ${EUR(tot)}`, M, y);
-          y += 6;
+doc.setFontSize(10.5);
 
+doc.text(`Técnicos en parte: ${techs}`, M, y);
+y += 6;
+
+// === DETALLE FACTURA ===
+const d = p?.datos || {};
+const t = p?.tarifas || {};
+const toN = (x) => Number.isFinite(Number(x)) ? Number(x) : 0;
+
+if (p.tipo === "instalacion") {
+
+  const hi = toN(d.horas_inst);
+  const hd = toN(d.horas_despl);
+  const km = toN(d.kms);
+  const co = toN(d.comida);
+  const ma = toN(d.material);
+  const fu = d.furgon ? toN(t.FURGON ?? 80) : 0;
+
+  const P_INST = toN(t.P_INST ?? 27.95);
+  const P_DESPL = toN(t.P_DESPL ?? 19.28);
+  const P_KM = toN(t.P_KM ?? 0.31);
+
+  const TEC = 2;
+
+  const subtotalInst = hi * P_INST * TEC;
+  const subtotalDespl = hd * P_DESPL * TEC;
+  const subtotalKm = km * P_KM;
+
+  doc.text(`Instalación: ${hi.toFixed(1).replace(".", ",")} h x2 = ${EUR(subtotalInst)}`, M, y);
+  y += 5;
+
+  doc.text(`Desplazamiento: ${hd.toFixed(1).replace(".", ",")} h x2 = ${EUR(subtotalDespl)}`, M, y);
+  y += 5;
+
+  doc.text(`Kilómetros: ${String(km).replace(".", ",")} = ${EUR(subtotalKm)}`, M, y);
+  y += 5;
+
+  doc.text(`Comida: ${EUR(co)}`, M, y);
+  y += 5;
+
+  doc.text(`Material: ${EUR(ma)}`, M, y);
+  y += 5;
+
+  doc.text(`Furgón: ${fu > 0 ? EUR(fu) : EUR(0)}`, M, y);
+  y += 5;
+}
+
+y += 2;
+doc.setFont("helvetica", "bold");
+doc.text(`Total parte: ${EUR(tot)}`, M, y);
+y += 8;
+doc.setFont("helvetica", "normal");
           const obs = (p.observaciones || "").trim() || "—";
           const obsLines = doc.splitTextToSize(`Obs: ${obs}`, W);
           doc.text(obsLines, M, y);

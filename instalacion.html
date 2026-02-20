@@ -714,10 +714,22 @@
       const key = "pv_partes";
       let arr = [];
       try { arr = JSON.parse(localStorage.getItem(key) || "[]"); } catch {}
-      arr.push(payload);
-      localStorage.setItem(key, JSON.stringify(arr));
+      try {
+  arr.push(payload);
+  localStorage.setItem(key, JSON.stringify(arr));
 
-      ok.textContent = "Guardado en el móvil ✅";
+  ok.textContent = "Guardado en el móvil ✅";
+
+  // Volver automáticamente al selector
+  setTimeout(() => {
+    window.location.href = "./index.html";
+  }, 400);
+
+} catch (e) {
+  console.error(e);
+  err.textContent = "Error guardando en el teléfono.";
+  return;
+}
     });
     
     // Inicialización final

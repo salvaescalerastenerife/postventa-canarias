@@ -380,7 +380,14 @@
 
         let sumTotal = 0;
 
-        for (let i = 0; i < parts.length; i++) {
+for (let i = 0; i < parts.length; i++) {
+
+          // ✅ 1 parte = 1 página (a partir del segundo)
+          if (i > 0) {
+            doc.addPage();
+            y = 16;
+          }
+
           const p = parts[i];
           const tipo = (p.tipo || "—").toUpperCase();
           const id = p.header?.idCliente || "—";
@@ -470,17 +477,12 @@ doc.setFont("helvetica", "normal");
           y = await addPhotos(doc, y, `FOTOS · Ticket (${tImgs.length})`, tImgs);
           y = await addPhotos(doc, y, `FOTOS · Material (${mImgs.length})`, mImgs);
 
-          if (y > 260) { doc.addPage(); y = 16; }
-          doc.setDrawColor(220);
-          doc.setLineWidth(0.3);
-          doc.line(M, y, 210 - M, y);
-          y += 8;
-        }
+        doc.addPage();
+y = 16;
 
-        if (y > 260) { doc.addPage(); y = 16; }
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(14);
-        doc.text(`TOTAL DEL DÍA: ${EUR(sumTotal)}`, M, y);
+doc.setFont("helvetica", "bold");
+doc.setFontSize(14);
+doc.text(`TOTAL DEL DÍA: ${EUR(sumTotal)}`, M, y);
 
         const pdfBlob = doc.output("blob");
         const filename = `Cierre_${date}_${tec.replaceAll(" ", "_")}.pdf`;

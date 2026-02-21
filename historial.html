@@ -378,108 +378,96 @@
         doc.line(M, y, 210 - M, y);
         y += 8;
 
-        let sumTotal = 0;
+let sumTotal = 0;
 
 for (let i = 0; i < parts.length; i++) {
+  const p = parts[i];
 
-          // ✅ 1 parte = 1 página (a partir del segundo)
-          if (i > 0) {
-            doc.addPage();
-            y = 16;
-          }
+  // ✅ Cada parte empieza en página nueva (menos la primera)
+  if (i > 0) {
+    doc.addPage();
+    y = 16;
+  }
 
-          const p = parts[i];
-          const tipo = (p.tipo || "—").toUpperCase();
-          const id = p.header?.idCliente || "—";
-          const techs = partTechs(p).join(" + ") || "—";
+  const tipo = (p.tipo || "—").toUpperCase();
+  const id = p.header?.idCliente || "—";
+  const techs = partTechs(p).join(" + ") || "—";
 
-          const tot = (typeof p?.totales?.total === "number")
-            ? p.totales.total
-            : computeTotalFallback(p);
+  const tot = (typeof p?.totales?.total === "number")
+    ? p.totales.total
+    : computeTotalFallback(p);
 
-          sumTotal += (Number.isFinite(tot) ? tot : 0);
+  sumTotal += (Number.isFinite(tot) ? tot : 0);
 
-          if (y > 260) { doc.addPage(); y = 16; }
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text(`${i + 1}. ${tipo} · Cliente ${id}`, M, y);
+  y += 6;
 
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(12);
-          doc.text(`${i+1}. ${tipo} · Cliente ${id}`, M, y);
-          y += 6;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10.5);
 
-          doc.setFont("helvetica", "normal");
-doc.setFontSize(10.5);
+  doc.text(`Técnicos en parte: ${techs}`, M, y);
+  y += 6;
 
-doc.text(`Técnicos en parte: ${techs}`, M, y);
-y += 6;
+  // === DETALLE FACTURA (solo instalación) ===
+  const d = p?.datos || {};
+  const t = p?.tarifas || {};
+  const toN = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0);
 
-// === DETALLE FACTURA ===
-const d = p?.datos || {};
-const t = p?.tarifas || {};
-const toN = (x) => Number.isFinite(Number(x)) ? Number(x) : 0;
+  if (p.tipo === "instalacion") {
+    const hi = toN(d.horas_inst);
+    const hd = toN(d.horas_despl);
+    const km = toN(d.kms);
+    const co = toN(d.comida);
+    const ma = toN(d.material);
+    const fu = d.furgon ? toN(t.FURGON ?? 80) : 0;
 
-if (p.tipo === "instalacion") {
+    const P_INST = toN(t.P_INST ?? 27.95);
+    const P_DESPL = toN(t.P_DESPL ?? 19.28);
+    const P_KM = toN(t.P_KM ?? 0.31);
+    const TEC = 2;
 
-  const hi = toN(d.horas_inst);
-  const hd = toN(d.horas_despl);
-  const km = toN(d.kms);
-  const co = toN(d.comida);
-  const ma = toN(d.material);
-  const fu = d.furgon ? toN(t.FURGON ?? 80) : 0;
+    const subtotalInst = hi * P_INST * TEC;
+    const subtotalDespl = hd * P_DESPL * TEC;
+    const subtotalKm = km * P_KM;
 
-  const P_INST = toN(t.P_INST ?? 27.95);
-  const P_DESPL = toN(t.P_DESPL ?? 19.28);
-  const P_KM = toN(t.P_KM ?? 0.31);
+    doc.text(`Instalación: ${hi.toFixed(1).replace(".", ",")} h x2 = ${EUR(subtotalInst)}`, M, y); y += 5;
+    doc.text(`Desplazamiento: ${hd.toFixed(1).replace(".", ",")} h x2 = ${EUR(subtotalDespl)}`, M, y); y += 5;
+    doc.text(`Kilómetros: ${String(km).replace(".", ",")} = ${EUR(subtotalKm)}`, M, y); y += 5;
+    doc.text(`Comida: ${EUR(co)}`, M, y); y += 5;
+    doc.text(`Material: ${EUR(ma)}`, M, y); y += 5;
+    doc.text(`Furgón: ${EUR(fu)}`, M, y); y += 5;
+  }
 
-  const TEC = 2;
+  y += 2;
+  doc.setFont("helvetica", "bold");
+  doc.text(`Total parte: ${EUR(tot)}`, M, y);
+  y += 8;
+  doc.setFont("helvetica", "normal");
 
-  const subtotalInst = hi * P_INST * TEC;
-  const subtotalDespl = hd * P_DESPL * TEC;
-  const subtotalKm = km * P_KM;
+  // Observaciones
+  const obs = (p.observaciones || "").trim() || "—";
+  const obsLines = doc.splitTextToSize(`Obs: ${obs}`, W);
+  doc.text(obsLines, M, y);
+  y += obsLines.length * 4.6 + 4;
 
-  doc.text(`Instalación: ${hi.toFixed(1).replace(".", ",")} h x2 = ${EUR(subtotalInst)}`, M, y);
-  y += 5;
+  // Fotos
+  const tImgsRaw = p?.fotos?.ticket_dataurls || [];
+  const mImgsRaw = p?.fotos?.material_dataurls || [];
 
-  doc.text(`Desplazamiento: ${hd.toFixed(1).replace(".", ",")} h x2 = ${EUR(subtotalDespl)}`, M, y);
-  y += 5;
+  const tImgs = [];
+  const mImgs = [];
+  for (const u of tImgsRaw) { try { tImgs.push(await dataUrlToJpeg(u)); } catch (_) {} }
+  for (const u of mImgsRaw) { try { mImgs.push(await dataUrlToJpeg(u)); } catch (_) {} }
 
-  doc.text(`Kilómetros: ${String(km).replace(".", ",")} = ${EUR(subtotalKm)}`, M, y);
-  y += 5;
-
-  doc.text(`Comida: ${EUR(co)}`, M, y);
-  y += 5;
-
-  doc.text(`Material: ${EUR(ma)}`, M, y);
-  y += 5;
-
-  doc.text(`Furgón: ${fu > 0 ? EUR(fu) : EUR(0)}`, M, y);
-  y += 5;
+  y = await addPhotos(doc, y, `FOTOS · Ticket (${tImgs.length})`, tImgs);
+  y = await addPhotos(doc, y, `FOTOS · Material (${mImgs.length})`, mImgs);
 }
 
-y += 2;
-doc.setFont("helvetica", "bold");
-doc.text(`Total parte: ${EUR(tot)}`, M, y);
-y += 8;
-doc.setFont("helvetica", "normal");
-          const obs = (p.observaciones || "").trim() || "—";
-          const obsLines = doc.splitTextToSize(`Obs: ${obs}`, W);
-          doc.text(obsLines, M, y);
-          y += obsLines.length * 4.6 + 4;
-
-          // Fotos desde el payload (ya guardadas como DataURL)
-          const tImgsRaw = p?.fotos?.ticket_dataurls || [];
-          const mImgsRaw = p?.fotos?.material_dataurls || [];
-
-          const tImgs = [];
-          const mImgs = [];
-          for (const u of tImgsRaw) { try { tImgs.push(await dataUrlToJpeg(u)); } catch(_) {} }
-          for (const u of mImgsRaw) { try { mImgs.push(await dataUrlToJpeg(u)); } catch(_) {} }
-
-          y = await addPhotos(doc, y, `FOTOS · Ticket (${tImgs.length})`, tImgs);
-          y = await addPhotos(doc, y, `FOTOS · Material (${mImgs.length})`, mImgs);
-
-        doc.addPage();
+// ✅ Resumen final SIEMPRE en página nueva
+doc.addPage();
 y = 16;
-
 doc.setFont("helvetica", "bold");
 doc.setFontSize(14);
 doc.text(`TOTAL DEL DÍA: ${EUR(sumTotal)}`, M, y);

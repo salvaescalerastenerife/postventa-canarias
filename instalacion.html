@@ -715,10 +715,15 @@
       let arr = [];
       try { arr = JSON.parse(localStorage.getItem(key) || "[]"); } catch {}
       try {
-  arr.push(payload);
-  localStorage.setItem(key, JSON.stringify(arr));
+arr.push(payload);
+localStorage.setItem(key, JSON.stringify(arr));
 
-  ok.textContent = "Guardado en el móvil ✅";
+// ✅ TRUCO iOS: deja respirar el event loop para que localStorage se escriba antes de navegar
+ok.textContent = "Guardado en el móvil ✅";
+await new Promise(r => requestAnimationFrame(r));
+await new Promise(r => setTimeout(r, 50));
+
+window.location.href = "./index.html";
 
   // Volver automáticamente al selector
   setTimeout(() => {

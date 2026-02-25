@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Reparación · Postventa Canarias</title>
+
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#0b5cff">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="back" href="./index.html" aria-label="Volver">←</a>
+    <h1>Reparación</h1>
+  </header>
+
+  <main class="container">
+    <!-- Cabecera -->
+    <section class="card">
+      <div class="meta">
+        <div><strong>Intervención:</strong> Reparación</div>
+        <div><strong>Fecha:</strong> <span id="mFecha">—</span></div>
+        <div><strong>ID Cliente:</strong> <span id="mId">—</span></div>
+        <div><strong>Técnicos:</strong> 1</div>
+      </div>
+
+      <div class="field onecol" style="margin-top:12px;">
+        <label style="font-weight:900; display:block; margin-bottom:6px;">Técnico</label>
+        <select id="tec" style="width:100%; height:56px; border-radius:14px; border:1px solid var(--line); font-size:18px; padding:0 12px;">
+          <option value="" selected>Selecciona…</option>
+          <option value="JUAN PABLO CABRERA PEREZ">JUAN PABLO CABRERA PEREZ</option>
+          <option value="DAMASO ROLDAN PEREZ">DAMASO ROLDAN PEREZ</option>
+          <option value="PABLO ECHEDEY ESPINO ORTEGA">PABLO ECHEDEY ESPINO ORTEGA</option>
+          <option value="YISHAR ROMAN MEDINA">YISHAR ROMAN MEDINA</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Horas reparación -->
+    <section class="card">
+      <div class="rowhead">
+        <h2>Horas de reparación</h2>
+        <div class="rate"><span id="rRep">—</span> €/h</div>
+      </div>
+
+      <div class="stepper">
+        <button type="button" class="step" data-target="hRep" data-delta="-0.5">−0,5</button>
+        <div class="stepval"><span id="hRepText">0,0</span> h</div>
+        <button type="button" class="step" data-target="hRep" data-delta="0.5">+0,5</button>
+      </div>
+
+      <div class="quick">
+        <button class="qdelta" type="button" data-target="hRep" data-delta="1">+1</button>
+        <button class="qdelta" type="button" data-target="hRep" data-delta="2">+2</button>
+        <button class="qdelta" type="button" data-target="hRep" data-delta="4">+4</button>
+        <button class="qreset" type="button" data-target="hRep">Reset</button>
+      </div>
+
+      <input id="hRep" type="hidden" value="0" />
+
+      <div class="totline">
+        <span>Total reparación</span>
+        <strong id="tRep">0,00 €</strong>
+      </div>
+    </section>
+
+    <!-- Horas desplazamiento -->
+    <section class="card">
+      <div class="rowhead">
+        <h2>Horas de desplazamiento</h2>
+        <div class="rate"><span id="rDespl">—</span> €/h</div>
+      </div>
+
+      <div class="stepper">
+        <button type="button" class="step" data-target="hDespl" data-delta="-0.5">−0,5</button>
+        <div class="stepval"><span id="hDesplText">0,0</span> h</div>
+        <button type="button" class="step" data-target="hDespl" data-delta="0.5">+0,5</button>
+      </div>
+
+      <div class="quick">
+        <button class="qdelta" type="button" data-target="hDespl" data-delta="1">+1</button>
+        <button class="qdelta" type="button" data-target="hDespl" data-delta="2">+2</button>
+        <button class="qreset" type="button" data-target="hDespl">Reset</button>
+      </div>
+
+      <input id="hDespl" type="hidden" value="0" />
+
+      <div class="totline">
+        <span>Total desplazamiento</span>
+        <strong id="tDespl">0,00 €</strong>
+      </div>
+    </section>
+
+    <!-- Kilómetros -->
+    <section class="card">
+      <div class="rowhead">
+        <h2>Kilómetros</h2>
+        <div class="rate"><span id="rKm">—</span> €/km</div>
+      </div>
+
+      <label class="field onecol">
+        <input id="kms" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
+      </label>
+
+      <div class="totline">
+        <span>Total km</span>
+        <strong id="tKm">0,00 €</strong>
+      </div>
+    </section>
+
+    <!-- Material -->
+    <section class="card">
+      <div class="rowhead">
+        <h2>Material / Piezas</h2>
+        <div class="rate">€</div>
+      </div>
+
+      <label class="field onecol">
+        <input id="material" inputmode="decimal" placeholder="0" />
+      </label>
+
+      <div class="attach">
+        <label class="btn-attach alt">
+          🖼️ Fototeca
+          <input id="fotoMaterial" type="file" accept="image/*" />
+        </label>
+
+        <button type="button" class="btn-attach" id="btnDelMaterial" title="Borrar foto">🗑️</button>
+        <span class="count" id="cMat">0 foto</span>
+      </div>
+    </section>
+
+    <!-- Comida -->
+    <section class="card">
+      <div class="rowhead">
+        <h2>Comida</h2>
+        <div class="rate">€</div>
+      </div>
+
+      <label class="field onecol">
+        <input id="comida" inputmode="decimal" placeholder="0" />
+      </label>
+
+      <div class="attach">
+        <label class="btn-attach alt">
+          🖼️ Fototeca
+          <input id="fotoTicket" type="file" accept="image/*" />
+        </label>
+
+        <button type="button" class="btn-attach" id="btnDelTicket" title="Borrar foto">🗑️</button>
+        <span class="count" id="cTicket">0 foto</span>
+      </div>
+    </section>
+
+    <!-- Observaciones -->
+    <section class="card">
+      <h2>Observaciones</h2>
+      <textarea id="obs" rows="4" placeholder="Escribe aquí si hay algo que anotar..."></textarea>
+    </section>
+
+    <!-- Resumen -->
+    <section class="card">
+      <h2>Resumen</h2>
+
+      <div class="sumline"><span>Reparación</span><strong id="sRep">0,00 €</strong></div>
+      <div class="sumline"><span>Desplazamiento</span><strong id="sDespl">0,00 €</strong></div>
+      <div class="sumline"><span>Kilómetros</span><strong id="sKm">0,00 €</strong></div>
+      <div class="sumline"><span>Comida</span><strong id="sComida">0,00 €</strong></div>
+      <div class="sumline"><span>Material</span><strong id="sMat">0,00 €</strong></div>
+
+      <div class="sumtotal">
+        <span>TOTAL</span>
+        <strong id="total">0,00 €</strong>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="btnRow">
+        <button id="btnGuardar" class="btn-primary" type="button">GUARDAR (LOCAL)</button>
+      </div>
+
+      <p class="msg ok" id="ok" aria-live="polite"></p>
+      <p class="msg" id="err" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <script>
+    const EUR = (n) => new Intl.NumberFormat("es-ES", { style:"currency", currency:"EUR" }).format(n);
+    const toNum = (v) => {
+      if (!v) return 0;
+      const s = String(v).trim().replace(",", ".");
+      const n = Number(s);
+      return Number.isFinite(n) ? n : 0;
+    };
+    const clamp0 = (n) => (n < 0 ? 0 : n);
+
+    // ====== TARIFAS (AJUSTA AQUÍ) ======
+    const P_REP = 27.95;   // €/h reparación (mano de obra)
+    const P_DESPL = 19.28; // €/h desplazamiento
+    const P_KM = 0.31;     // €/km
+    // ================================
+
+    // Fotos: 1 y 1
+    const MAX_TICKET = 1;
+    const MAX_MATERIAL = 1;
+
+    // Cabecera desde pv_header
+    const header = (() => {
+      try { return JSON.parse(localStorage.getItem("pv_header") || "{}"); }
+      catch { return {}; }
+    })();
+
+    document.getElementById("mFecha").textContent = header.fecha || "—";
+    document.getElementById("mId").textContent = header.idCliente || "—";
+
+    // Pintar tarifas
+    document.getElementById("rRep").textContent = String(P_REP).replace(".", ",");
+    document.getElementById("rDespl").textContent = String(P_DESPL).replace(".", ",");
+    document.getElementById("rKm").textContent = String(P_KM).replace(".", ",");
+
+    const tec = document.getElementById("tec");
+    try {
+      const last = localStorage.getItem("pv_tecnico_rep") || "";
+      if (last) tec.value = last;
+    } catch {}
+    tec.addEventListener("change", () => {
+      try { localStorage.setItem("pv_tecnico_rep", tec.value || ""); } catch {}
+    });
+
+    // Inputs
+    const hRep = document.getElementById("hRep");
+    const hDespl = document.getElementById("hDespl");
+    const kms = document.getElementById("kms");
+    const comida = document.getElementById("comida");
+    const material = document.getElementById("material");
+
+    const fotoTicket = document.getElementById("fotoTicket");
+    const fotoMaterial = document.getElementById("fotoMaterial");
+    const cTicket = document.getElementById("cTicket");
+    const cMat = document.getElementById("cMat");
+    const btnDelTicket = document.getElementById("btnDelTicket");
+    const btnDelMaterial = document.getElementById("btnDelMaterial");
+
+    const ok = document.getElementById("ok");
+    const err = document.getElementById("err");
+
+    // Totales UI
+    const tRep = document.getElementById("tRep");
+    const tDespl = document.getElementById("tDespl");
+    const tKm = document.getElementById("tKm");
+    const sRep = document.getElementById("sRep");
+    const sDespl = document.getElementById("sDespl");
+    const sKm = document.getElementById("sKm");
+    const sComida = document.getElementById("sComida");
+    const sMat = document.getElementById("sMat");
+    const totalEl = document.getElementById("total");
+
+    const recalc = () => {
+      const hr = clamp0(toNum(hRep.value));
+      const hd = clamp0(toNum(hDespl.value));
+      const km = clamp0(toNum(kms.value));
+      const co = clamp0(toNum(comida.value));
+      const ma = clamp0(toNum(material.value));
+
+      const a = hr * P_REP;
+      const b = hd * P_DESPL;
+      const c = km * P_KM;
+
+      tRep.textContent = EUR(a);
+      tDespl.textContent = EUR(b);
+      tKm.textContent = EUR(c);
+
+      sRep.textContent = EUR(a);
+      sDespl.textContent = EUR(b);
+      sKm.textContent = EUR(c);
+      sComida.textContent = EUR(co);
+      sMat.textContent = EUR(ma);
+
+      totalEl.textContent = EUR(a + b + c + co + ma);
+    };
+
+    ["input","change"].forEach(evt => {
+      hRep.addEventListener(evt, recalc);
+      hDespl.addEventListener(evt, recalc);
+      kms.addEventListener(evt, recalc);
+      comida.addEventListener(evt, recalc);
+      material.addEventListener(evt, recalc);
+    });
+
+    const setHalfHour = (val) => {
+      let v = Math.round(val * 2) / 2;
+      if (v < 0) v = 0;
+      if (v > 30) v = 30;
+      return v;
+    };
+    const fmtHours = (v) => String(v.toFixed(1)).replace(".", ",");
+
+    const syncDisplays = () => {
+      document.getElementById("hRepText").textContent = fmtHours(toNum(hRep.value || 0));
+      document.getElementById("hDesplText").textContent = fmtHours(toNum(hDespl.value || 0));
+    };
+
+    document.querySelectorAll(".step").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.target;
+        const delta = Number(btn.dataset.delta);
+        const el = document.getElementById(target);
+        el.value = setHalfHour(toNum(el.value || 0) + delta);
+        syncDisplays();
+        recalc();
+      });
+    });
+    document.querySelectorAll(".qdelta").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.target;
+        const delta = Number(btn.dataset.delta);
+        const el = document.getElementById(target);
+        el.value = setHalfHour(toNum(el.value || 0) + delta);
+        syncDisplays();
+        recalc();
+      });
+    });
+    document.querySelectorAll(".qreset").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const el = document.getElementById(btn.dataset.target);
+        el.value = 0;
+        syncDisplays();
+        recalc();
+      });
+    });
+
+    // Fotos 1 y 1
+    const enforceSingleFile = (inputEl) => {
+      if (!inputEl?.files) return;
+      if (inputEl.files.length <= 1) return;
+      const dt = new DataTransfer();
+      dt.items.add(inputEl.files[0]);
+      inputEl.files = dt.files;
+    };
+
+    const getTicketCount = () => (fotoTicket.files?.length || 0);
+    const getMaterialCount = () => (fotoMaterial.files?.length || 0);
+
+    const updatePhotoCounts = () => {
+      cTicket.textContent = `${getTicketCount()} foto`;
+      cMat.textContent = `${getMaterialCount()} foto`;
+    };
+
+    fotoTicket.addEventListener("change", () => {
+      enforceSingleFile(fotoTicket);
+      if (getTicketCount() > MAX_TICKET) fotoTicket.value = "";
+      updatePhotoCounts();
+    });
+    fotoMaterial.addEventListener("change", () => {
+      enforceSingleFile(fotoMaterial);
+      if (getMaterialCount() > MAX_MATERIAL) fotoMaterial.value = "";
+      updatePhotoCounts();
+    });
+
+    btnDelTicket.addEventListener("click", () => { fotoTicket.value = ""; updatePhotoCounts(); });
+    btnDelMaterial.addEventListener("click", () => { fotoMaterial.value = ""; updatePhotoCounts(); });
+
+    // Helpers: file -> JPEG DataURL
+    const fileToDataURL = (file) => new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+
+    const dataUrlToJpeg = (src) => new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX_W = 1400;
+        let w = img.naturalWidth || img.width;
+        let h = img.naturalHeight || img.height;
+        if (w > MAX_W) { h = Math.round(h * (MAX_W / w)); w = MAX_W; }
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        c.getContext("2d").drawImage(img, 0, 0, w, h);
+        resolve(c.toDataURL("image/jpeg", 0.85));
+      };
+      img.onerror = reject;
+      img.src = src;
+    });
+
+    const fileToJpegDataURL = async (file) => dataUrlToJpeg(await fileToDataURL(file));
+
+    // Guardar
+    document.getElementById("btnGuardar").addEventListener("click", async () => {
+      ok.textContent = "";
+      err.textContent = "";
+
+      if (!header.idCliente) { err.textContent = "Falta ID Cliente (vuelve atrás y créalo desde Nuevo Parte)."; return; }
+      if (!tec.value) { err.textContent = "Selecciona Técnico."; return; }
+
+      const ticketAll = [];
+      const materialAll = [];
+
+      try {
+        if (fotoTicket.files?.[0]) ticketAll.push(await fileToJpegDataURL(fotoTicket.files[0]));
+        if (fotoMaterial.files?.[0]) materialAll.push(await fileToJpegDataURL(fotoMaterial.files[0]));
+      } catch (_) {}
+
+      const hr = clamp0(toNum(hRep.value));
+      const hd = clamp0(toNum(hDespl.value));
+      const km = clamp0(toNum(kms.value));
+      const co = clamp0(toNum(comida.value));
+      const ma = clamp0(toNum(material.value));
+
+      const tot = hr*P_REP + hd*P_DESPL + km*P_KM + co + ma;
+
+      const payload = {
+        header: { ...header, tecnico: tec.value || "" },
+        tipo: "reparacion",
+        tarifas: { P_REP, P_DESPL, P_KM },
+        datos: { horas_rep: hr, horas_despl: hd, kms: km, comida: co, material: ma },
+        totales: { total: tot },
+        observaciones: document.getElementById("obs").value || "",
+        fotos: {
+          ticket_count: ticketAll.length,
+          material_count: materialAll.length,
+          ticket_dataurls: ticketAll,
+          material_dataurls: materialAll
+        },
+        saved_at: new Date().toISOString()
+      };
+
+      const key = "pv_partes";
+      let arr = [];
+      try { arr = JSON.parse(localStorage.getItem(key) || "[]"); } catch {}
+      try {
+        arr.push(payload);
+        localStorage.setItem(key, JSON.stringify(arr));
+
+        const test = JSON.parse(localStorage.getItem(key) || "[]");
+        if (!Array.isArray(test) || test.length !== arr.length) throw new Error("Guardado no confirmado");
+
+        ok.textContent = "Guardado en el móvil ✅";
+        await new Promise(r => requestAnimationFrame(r));
+        window.location.href = "./index.html";
+      } catch (e) {
+        console.error(e);
+        err.textContent = "Error guardando en el teléfono (memoria llena o fallo iOS).";
+      }
+    });
+
+    // init
+    syncDisplays();
+    recalc();
+    updatePhotoCounts();
+  </script>
+
+  <style>
+    .back{
+      position:absolute;
+      left:16px;
+      top:16px;
+      text-decoration:none;
+      font-size:22px;
+      font-weight:900;
+      color:var(--primary);
+    }
+    .topbar{ position:sticky; }
+    .topbar h1{ text-align:center; }
+
+    .meta{ display:grid; gap:8px; font-size:16px; }
+    .rowhead{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+    .rate{ font-weight:900; color:var(--muted); }
+
+    .field.onecol{ grid-template-columns: 1fr; grid-template-rows:auto; }
+
+    .quick{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+
+    .totline{
+      display:flex; justify-content:space-between; align-items:center;
+      padding-top:12px; margin-top:8px;
+      border-top:1px solid var(--line);
+      font-size:16px;
+      color:var(--muted);
+    }
+    .totline strong{ color:var(--text); font-size:18px; }
+
+    .attach{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; margin-top:10px;
+    }
+    .btn-attach{
+      display:inline-flex; align-items:center; justify-content:center;
+      height:52px;
+      padding:0 14px;
+      border-radius:14px;
+      background:#0b5cff;
+      color:#fff;
+      font-weight:900;
+      border:none;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn-attach input{ display:none; }
+    .btn-attach.alt{
+      background:#ffffff;
+      color:var(--primary);
+      border:1px solid rgba(11,92,255,.35);
+    }
+    .count{ color:var(--muted); font-weight:800; }
+
+    textarea{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px 14px;
+      font-size:18px;
+      font-family:var(--font);
+      outline:none;
+    }
+
+    .sumline{
+      display:flex; justify-content:space-between; align-items:center;
+      padding:10px 0;
+      border-bottom:1px dashed var(--line);
+      color:var(--muted);
+      font-weight:800;
+    }
+    .sumline strong{ color:var(--text); }
+    .sumtotal{
+      display:flex; justify-content:space-between; align-items:center;
+      padding-top:14px;
+      font-size:22px;
+      font-weight:1000;
+    }
+
+    .stepper{
+      display:grid;
+      grid-template-columns: 1fr 1.2fr 1fr;
+      gap:10px;
+      align-items:center;
+      margin-top:6px;
+    }
+    .step{
+      height:56px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-size:18px;
+      font-weight:1000;
+      color:var(--primary);
+    }
+    .stepval{
+      height:56px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:22px;
+      font-weight:1000;
+      background:#fff;
+    }
+    .quick .qdelta,
+    .quick .qreset{
+      height:44px;
+      padding:0 14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-size:18px;
+      font-weight:1000;
+      color:var(--primary);
+    }
+    .btnRow{ display:grid; gap:10px; }
+  </style>
+</body>
+</html>

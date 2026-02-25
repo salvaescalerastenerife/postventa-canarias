@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Mantenimiento · Postventa Canarias</title>
+
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#0b5cff">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="back" href="./nuevo-parte.html" aria-label="Volver">←</a>
+    <h1>Mantenimiento</h1>
+  </header>
+
+  <main class="container">
+    <!-- Cabecera -->
+    <section class="card">
+      <div class="meta">
+        <div><strong>Intervención:</strong> Mantenimiento</div>
+        <div><strong>Fecha:</strong> <span id="mFecha">—</span></div>
+        <div><strong>ID Cliente:</strong> <span id="mId">—</span></div>
+      </div>
+
+      <div class="field onecol" style="margin-top:12px;">
+        <label style="font-weight:900; display:block; margin-bottom:6px;">Técnico</label>
+        <select id="tec" style="width:100%; height:56px; border-radius:14px; border:1px solid var(--line); font-size:18px; padding:0 12px;">
+          <option value="" selected>Selecciona…</option>
+          <option value="JUAN PABLO CABRERA PEREZ">JUAN PABLO CABRERA PEREZ</option>
+          <option value="DAMASO ROLDAN PEREZ">DAMASO ROLDAN PEREZ</option>
+          <option value="PABLO ECHEDEY ESPINO ORTEGA">PABLO ECHEDEY ESPINO ORTEGA</option>
+          <option value="YISHAR ROMAN MEDINA">YISHAR ROMAN MEDINA</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Precio fijo -->
+    <section class="card">
+      <div class="rowhead">
+        <h2>Precio</h2>
+        <div class="rate">Fijo</div>
+      </div>
+
+      <div class="sumtotal" style="padding-top:10px;">
+        <span>TOTAL</span>
+        <strong id="total">99,00 €</strong>
+      </div>
+      <p style="margin:10px 0 0; color:var(--muted); font-weight:800;">
+        Mantenimiento con tarifa fija de 99 €.
+      </p>
+    </section>
+
+    <!-- Observaciones -->
+    <section class="card">
+      <h2>Observaciones</h2>
+      <textarea id="obs" rows="4" placeholder="Escribe aquí si hay algo que anotar..."></textarea>
+    </section>
+
+    <!-- Guardar -->
+    <section class="card">
+      <div class="btnRow">
+        <button id="btnGuardar" class="btn-primary" type="button">GUARDAR (LOCAL)</button>
+      </div>
+
+      <p class="msg ok" id="ok" aria-live="polite"></p>
+      <p class="msg" id="err" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <script>
+    const EUR = (n) => new Intl.NumberFormat("es-ES", { style:"currency", currency:"EUR" }).format(n);
+
+    const MANTENIMIENTO_FIJO = 99.00;
+
+    const ok = document.getElementById("ok");
+    const err = document.getElementById("err");
+    const tec = document.getElementById("tec");
+
+    // ------- Cargar cabecera -------
+    const header = (() => {
+      try { return JSON.parse(localStorage.getItem("pv_header") || "{}"); }
+      catch { return {}; }
+    })();
+
+    document.getElementById("mFecha").textContent = header.fecha || "—";
+    document.getElementById("mId").textContent = header.idCliente || "—";
+    document.getElementById("total").textContent = EUR(MANTENIMIENTO_FIJO);
+
+    // Recordar último técnico (para mantenimiento)
+    try {
+      const last = localStorage.getItem("pv_tecnico_mant") || "";
+      if (last) tec.value = last;
+    } catch {}
+
+    tec.addEventListener("change", () => {
+      try { localStorage.setItem("pv_tecnico_mant", tec.value || ""); } catch {}
+    });
+
+    // ------- Guardado local -------
+    document.getElementById("btnGuardar").addEventListener("click", () => {
+      ok.textContent = "";
+      err.textContent = "";
+
+      if (!header.idCliente) {
+        err.textContent = "Falta ID Cliente (vuelve atrás y créalo desde Nuevo Parte).";
+        return;
+      }
+      if (!tec.value) {
+        err.textContent = "Selecciona un técnico.";
+        return;
+      }
+
+      const payload = {
+        header: { ...header, tecnico: tec.value || "" },
+        tipo: "mantenimiento",
+        tarifas: { FIJO: MANTENIMIENTO_FIJO },
+        datos: { fijo: MANTENIMIENTO_FIJO },
+        totales: { total: MANTENIMIENTO_FIJO },
+        observaciones: document.getElementById("obs").value || "",
+        saved_at: new Date().toISOString()
+      };
+
+      const key = "pv_partes";
+      let arr = [];
+      try { arr = JSON.parse(localStorage.getItem(key) || "[]"); } catch {}
+      arr.push(payload);
+      localStorage.setItem(key, JSON.stringify(arr));
+
+      ok.textContent = "Guardado en el móvil ✅";
+      // ✅ volver al inicio SOLO si guardó bien
+      setTimeout(() => { window.location.href = "./index.html"; }, 350);
+    });
+  </script>
+
+  <style>
+    .back{
+      position:absolute;
+      left:16px;
+      top:16px;
+      text-decoration:none;
+      font-size:22px;
+      font-weight:900;
+      color:var(--primary);
+    }
+    .topbar{ position:sticky; }
+    .topbar h1{ text-align:center; }
+
+    .meta{ display:grid; gap:8px; font-size:16px; }
+    .rowhead{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+    .rate{ font-weight:900; color:var(--muted); }
+
+    textarea{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px 14px;
+      font-size:18px;
+      font-family:var(--font);
+      outline:none;
+    }
+    textarea:focus{
+      border-color: rgba(11,92,255,.45);
+      box-shadow: 0 0 0 4px rgba(11,92,255,.12);
+    }
+    .btnRow{ display:grid; gap:10px; }
+  </style>
+</body>
+</html>

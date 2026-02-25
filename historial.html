@@ -515,8 +515,13 @@ for (let i = 0; i < parts.length; i++) {
   }
 
   if (p.tipo === "mantenimiento") {
-    const fijo = toN(d.fijo) || toN(p?.totales?.total) || 0;
+    const fijo = toN(d.fijo);
+    const mat = toN(d.material);
+    const bat = toN(d.bateria);
+
     doc.text(`Mantenimiento (fijo): ${EUR(fijo)}`, M, y); y += 5;
+    if (mat > 0) { doc.text(`Material: ${EUR(mat)}`, M, y); y += 5; }
+    if (bat > 0) { doc.text(`Batería: ${EUR(bat)}`, M, y); y += 5; }
   }
 
   y += 2;

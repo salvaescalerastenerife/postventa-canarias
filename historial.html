@@ -361,31 +361,74 @@ const { jsPDF } = window.jspdf;
         let y = 16;
 
         // ===== PORTADA (solo portada) =====
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(18);
-        doc.text("CIERRE DEL DÍA", M, y);
 
-        y += 10;
-        doc.setFontSize(12);
+        // Total del día (robusto): si algún parte viejo no trae totales, usamos fallback
+        const toN0 = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0);
+        const getPartTotal = (p) => {
+          const direct = toN0(p?.totales?.total);
+          if (direct > 0) return direct;
+          return toN0(computeTotalFallback(p)); // instalación fallback, resto normalmente ya trae totales
+        };
+        const sumTotal = parts.reduce((acc, p) => acc + getPartTotal(p), 0);
+
+        // Cargar logo (mismo que usas en index). Si falla, seguimos sin romper el PDF.
+        async function loadAsDataURL(url) {
+          const res = await fetch(url, { cache: "force-cache" });
+          if (!res.ok) throw new Error("Logo no disponible");
+          const blob = await res.blob();
+          return await new Promise((resolve, reject) => {
+            const r = new FileReader();
+            r.onload = () => resolve(String(r.result));
+            r.onerror = reject;
+            r.readAsDataURL(blob);
+          });
+        }
+
+        // Título grande centrado
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(28);
+        doc.text("CIERRE DEL DÍA", 105, y, { align: "center" });
+
+        // Logo centrado debajo del título
+        try {
+          const logoDataUrl = await loadAsDataURL("./public/assets/img/logo-canarias-accesible-2.png");
+          const logoW = 70;
+          const logoH = 70;
+          const logoX = (210 - logoW) / 2;
+          const logoY = y + 10;
+          doc.addImage(logoDataUrl, "PNG", logoX, logoY, logoW, logoH);
+          y = logoY + logoH + 12;
+        } catch (_) {
+          // Si el logo no carga, dejamos aire y seguimos
+          y += 18;
+        }
+
+        doc.setFontSize(13);
         doc.text(`Técnico: ${tec}`, M, y);
 
-        y += 7;
+        y += 8;
         doc.setFont("helvetica", "normal");
-        doc.setFontSize(11);
+        doc.setFontSize(12);
         doc.text(`Fecha: ${date}`, M, y);
 
-        y += 7;
+        y += 8;
         doc.text(`Nº de partes: ${parts.length}`, M, y);
 
-        y += 8;
+        // Total del día en portada (y así quitamos la página final)
+        y += 12;
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        doc.text(`TOTAL DEL DÍA: ${EUR(sumTotal)}`, M, y);
+
+        y += 10;
         doc.setDrawColor(30);
-        doc.setLineWidth(0.3);
+        doc.setLineWidth(0.5);
         doc.line(M, y, 210 - M, y);
 
         // Las partes empiezan SIEMPRE en página nueva
         doc.addPage();
         y = 16;
-let sumTotal = 0;
+// sumTotal ya calculado en portada
 
 for (let i = 0; i < parts.length; i++) {
   const p = parts[i];
@@ -404,7 +447,7 @@ for (let i = 0; i < parts.length; i++) {
     ? p.totales.total
     : computeTotalFallback(p);
 
-  sumTotal += (Number.isFinite(tot) ? tot : 0);
+  // Total del día ya calculado en portada
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(12);
@@ -501,12 +544,7 @@ for (let i = 0; i < parts.length; i++) {
   y = await addPhotos(doc, y, `FOTOS · Material (${mImgs.length})`, mImgs);
 }
 
-// ✅ Resumen final SIEMPRE en página nueva
-doc.addPage();
-y = 16;
-doc.setFont("helvetica", "bold");
-doc.setFontSize(14);
-doc.text(`TOTAL DEL DÍA: ${EUR(sumTotal)}`, M, y);
+// Total del día ya figura en portada (sin página final)
 
         const pdfBlob = doc.output("blob");
         const filename = `Cierre_${date}_${tec.replaceAll(" ", "_")}.pdf`;

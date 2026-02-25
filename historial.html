@@ -353,31 +353,38 @@
       }
 
       try {
-        const { jsPDF } = window.jspdf;
+const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ unit: "mm", format: "a4" });
 
         const M = 14;
         const W = 210 - M * 2;
         let y = 16;
 
+        // ===== PORTADA (solo portada) =====
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(16);
+        doc.setFontSize(18);
         doc.text("CIERRE DEL DÍA", M, y);
 
-        y += 7;
+        y += 10;
         doc.setFontSize(12);
         doc.text(`Técnico: ${tec}`, M, y);
 
-        y += 6;
+        y += 7;
+        doc.setFont("helvetica", "normal");
         doc.setFontSize(11);
         doc.text(`Fecha: ${date}`, M, y);
 
-        y += 6;
+        y += 7;
+        doc.text(`Nº de partes: ${parts.length}`, M, y);
+
+        y += 8;
         doc.setDrawColor(30);
         doc.setLineWidth(0.3);
         doc.line(M, y, 210 - M, y);
-        y += 8;
 
+        // Las partes empiezan SIEMPRE en página nueva
+        doc.addPage();
+        y = 16;
 let sumTotal = 0;
 
 for (let i = 0; i < parts.length; i++) {
@@ -410,7 +417,7 @@ for (let i = 0; i < parts.length; i++) {
   doc.text(`Técnicos en parte: ${techs}`, M, y);
   y += 6;
 
-  // === DETALLE FACTURA (solo instalación) ===
+// === DETALLE POR TIPO ===
   const d = p?.datos || {};
   const t = p?.tarifas || {};
   const toN = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0);
@@ -438,6 +445,35 @@ for (let i = 0; i < parts.length; i++) {
     doc.text(`Comida: ${EUR(co)}`, M, y); y += 5;
     doc.text(`Material: ${EUR(ma)}`, M, y); y += 5;
     doc.text(`Furgón: ${EUR(fu)}`, M, y); y += 5;
+  }
+
+  if (p.tipo === "reparacion") {
+    const hr = toN(d.horas_rep);
+    const hd = toN(d.horas_despl);
+    const km = toN(d.kms);
+    const co = toN(d.comida);
+    const maBase = toN(d.material);
+    const bat = toN(d.bateria);
+
+    const P_REP = toN(t.P_REP ?? 27.95);
+    const P_DESPL = toN(t.P_DESPL ?? 19.28);
+    const P_KM = toN(t.P_KM ?? 0.31);
+
+    const subtotalRep = hr * P_REP;
+    const subtotalDespl = hd * P_DESPL;
+    const subtotalKm = km * P_KM;
+
+    doc.text(`Reparación: ${hr.toFixed(1).replace(".", ",")} h = ${EUR(subtotalRep)}`, M, y); y += 5;
+    doc.text(`Desplazamiento: ${hd.toFixed(1).replace(".", ",")} h = ${EUR(subtotalDespl)}`, M, y); y += 5;
+    doc.text(`Kilómetros: ${String(km).replace(".", ",")} = ${EUR(subtotalKm)}`, M, y); y += 5;
+    doc.text(`Comida: ${EUR(co)}`, M, y); y += 5;
+    doc.text(`Material: ${EUR(maBase)}`, M, y); y += 5;
+    if (bat > 0) { doc.text(`Batería: ${EUR(bat)}`, M, y); y += 5; }
+  }
+
+  if (p.tipo === "mantenimiento") {
+    const fijo = toN(d.fijo) || toN(p?.totales?.total) || 0;
+    doc.text(`Mantenimiento (fijo): ${EUR(fijo)}`, M, y); y += 5;
   }
 
   y += 2;

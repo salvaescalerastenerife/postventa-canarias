@@ -119,7 +119,21 @@
       <label class="field onecol">
         <input id="material" inputmode="decimal" placeholder="0" />
       </label>
+<!-- Selector batería -->
+<div style="margin-top:14px;">
+  <label style="font-weight:900; display:block; margin-bottom:6px;">
+    Batería
+  </label>
 
+  <select id="bateria"
+    style="width:100%; height:56px; border-radius:14px; border:1px solid var(--line); font-size:16px; padding:0 12px;">
+    <option value="0" selected>Sin batería</option>
+    <option value="73.15">Batería 12V 9Amp · 73,15€</option>
+    <option value="108.10">Batería 12V 12Amp · 108,10€</option>
+    <option value="36.84">Batería 12V 2Amp · 36,84€</option>
+    <option value="126.42">Batería 12V 18Amp · 126,42€</option>
+  </select>
+</div>
       <div class="attach">
         <label class="btn-attach alt">
           🖼️ Fototeca
@@ -234,7 +248,7 @@
     const kms = document.getElementById("kms");
     const comida = document.getElementById("comida");
     const material = document.getElementById("material");
-
+    const bateria = document.getElementById("bateria");
     const fotoTicket = document.getElementById("fotoTicket");
     const fotoMaterial = document.getElementById("fotoMaterial");
     const cTicket = document.getElementById("cTicket");
@@ -261,7 +275,9 @@
       const hd = clamp0(toNum(hDespl.value));
       const km = clamp0(toNum(kms.value));
       const co = clamp0(toNum(comida.value));
-      const ma = clamp0(toNum(material.value));
+const maBase = clamp0(toNum(material.value));
+const bat = clamp0(toNum(bateria.value));
+const ma = maBase + bat;
 
       const a = hr * P_REP;
       const b = hd * P_DESPL;
@@ -286,6 +302,7 @@
       kms.addEventListener(evt, recalc);
       comida.addEventListener(evt, recalc);
       material.addEventListener(evt, recalc);
+      bateria.addEventListener(evt, recalc); 
     });
 
     const setHalfHour = (val) => {
@@ -409,24 +426,34 @@
       const co = clamp0(toNum(comida.value));
       const ma = clamp0(toNum(material.value));
 
-      const tot = hr*P_REP + hd*P_DESPL + km*P_KM + co + ma;
+      const maBase = clamp0(toNum(material.value));
+const bat = clamp0(toNum(bateria.value));
+const ma = maBase + bat;
 
-      const payload = {
-        header: { ...header, tecnico: tec.value || "" },
-        tipo: "reparacion",
-        tarifas: { P_REP, P_DESPL, P_KM },
-        datos: { horas_rep: hr, horas_despl: hd, kms: km, comida: co, material: ma },
-        totales: { total: tot },
-        observaciones: document.getElementById("obs").value || "",
-        fotos: {
-          ticket_count: ticketAll.length,
-          material_count: materialAll.length,
-          ticket_dataurls: ticketAll,
-          material_dataurls: materialAll
-        },
-        saved_at: new Date().toISOString()
-      };
+const tot = hr*P_REP + hd*P_DESPL + km*P_KM + co + ma;
 
+const payload = {
+  header: { ...header, tecnico: tec.value || "" },
+  tipo: "reparacion",
+  tarifas: { P_REP, P_DESPL, P_KM },
+  datos: {
+    horas_rep: hr,
+    horas_despl: hd,
+    kms: km,
+    comida: co,
+    material: maBase,
+    bateria: bat
+  },
+  totales: { total: tot },
+  observaciones: document.getElementById("obs").value || "",
+  fotos: {
+    ticket_count: ticketAll.length,
+    material_count: materialAll.length,
+    ticket_dataurls: ticketAll,
+    material_dataurls: materialAll
+  },
+  saved_at: new Date().toISOString()
+};
       const key = "pv_partes";
       let arr = [];
       try { arr = JSON.parse(localStorage.getItem(key) || "[]"); } catch {}

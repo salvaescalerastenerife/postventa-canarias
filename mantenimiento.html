@@ -36,20 +36,31 @@
       </div>
     </section>
 
-    <!-- Precio fijo -->
+    <!-- Precio y Material -->
     <section class="card">
       <div class="rowhead">
-        <h2>Precio</h2>
-        <div class="rate">Fijo</div>
+        <h2>Importes</h2>
+        <div class="rate">Fijo + Extras</div>
+      </div>
+
+      <div class="field onecol">
+        <label>Material (€)</label>
+        <input id="material" type="number" inputmode="decimal" step="0.01" placeholder="0,00">
+      </div>
+
+      <div class="field onecol">
+        <label>Batería</label>
+        <select id="bateria" style="width:100%; height:56px; border-radius:14px; border:1px solid var(--line); font-size:18px; padding:0 12px;">
+          <option value="0">Sin batería</option>
+          <option value="73.15">1 batería (73,15 €)</option>
+          <option value="146.30">2 baterías (146,30 €)</option>
+        </select>
       </div>
 
       <div class="sumtotal" style="padding-top:10px;">
         <span>TOTAL</span>
         <strong id="total">99,00 €</strong>
       </div>
-      <p style="margin:10px 0 0; color:var(--muted); font-weight:800;">
-        Mantenimiento con tarifa fija de 99 €.
-      </p>
     </section>
 
     <!-- Observaciones -->
@@ -57,7 +68,11 @@
       <h2>Observaciones</h2>
       <textarea id="obs" rows="4" placeholder="Escribe aquí si hay algo que anotar..."></textarea>
     </section>
-
+    <!-- Fotos Material -->
+    <section class="card">
+      <h2>Fotos · Material</h2>
+      <input id="fotoMaterial" type="file" accept="image/*" capture="environment" multiple style="margin-top:8px;">
+    </section>
     <!-- Guardar -->
     <section class="card">
       <div class="btnRow">
@@ -87,7 +102,21 @@
     document.getElementById("mFecha").textContent = header.fecha || "—";
     document.getElementById("mId").textContent = header.idCliente || "—";
     document.getElementById("total").textContent = EUR(MANTENIMIENTO_FIJO);
+const materialInput = document.getElementById("material");
+const bateriaSelect = document.getElementById("bateria");
+const totalEl = document.getElementById("total");
 
+const toNum = (v) => Number(v) || 0;
+
+function recalc() {
+  const mat = toNum(materialInput.value);
+  const bat = toNum(bateriaSelect.value);
+  const total = MANTENIMIENTO_FIJO + mat + bat;
+  totalEl.textContent = EUR(total);
+}
+
+materialInput.addEventListener("input", recalc);
+bateriaSelect.addEventListener("change", recalc);
     // Recordar último técnico (para mantenimiento)
     try {
       const last = localStorage.getItem("pv_tecnico_mant") || "";
@@ -115,20 +144,41 @@
 const savedAt = new Date().toISOString();
 const partId = `${header?.fecha || "nodate"}::${header?.idCliente || "noclient"}::mantenimiento::${savedAt}`;
 
+const mat = toNum(materialInput.value);
+const bat = toNum(bateriaSelect.value);
+const totalFinal = MANTENIMIENTO_FIJO + mat + bat;
+
+const files = Array.from(document.getElementById("fotoMaterial").files || []);
+const materialImages = [];
+
+for (const f of files) {
+  const data = await new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(f);
+  });
+  materialImages.push(data);
+}
+
 const payload = {
         part_id: partId,
         sent_by: {},
         header: { ...header, tecnico: tec.value || "" },
         tipo: "mantenimiento",
         tarifas: { FIJO: MANTENIMIENTO_FIJO },
-        datos: { fijo: MANTENIMIENTO_FIJO },
-        totales: { total: MANTENIMIENTO_FIJO },
+        datos: {
+          fijo: MANTENIMIENTO_FIJO,
+          material: mat,
+          bateria: bat
+        },
+        totales: { total: totalFinal },
         observaciones: document.getElementById("obs").value || "",
         fotos: {
           ticket_count: 0,
-          material_count: 0,
+          material_count: materialImages.length,
           ticket_dataurls: [],
-          material_dataurls: []
+          material_dataurls: materialImages
         },
         saved_at: savedAt
       };

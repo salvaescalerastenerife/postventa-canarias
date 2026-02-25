@@ -112,25 +112,45 @@
         return;
       }
 
-      const payload = {
+const savedAt = new Date().toISOString();
+const partId = `${header?.fecha || "nodate"}::${header?.idCliente || "noclient"}::mantenimiento::${savedAt}`;
+
+const payload = {
+        part_id: partId,
+        sent_by: {},
         header: { ...header, tecnico: tec.value || "" },
         tipo: "mantenimiento",
         tarifas: { FIJO: MANTENIMIENTO_FIJO },
         datos: { fijo: MANTENIMIENTO_FIJO },
         totales: { total: MANTENIMIENTO_FIJO },
         observaciones: document.getElementById("obs").value || "",
-        saved_at: new Date().toISOString()
+        fotos: {
+          ticket_count: 0,
+          material_count: 0,
+          ticket_dataurls: [],
+          material_dataurls: []
+        },
+        saved_at: savedAt
       };
 
-      const key = "pv_partes";
+const key = "pv_partes";
       let arr = [];
       try { arr = JSON.parse(localStorage.getItem(key) || "[]"); } catch {}
-      arr.push(payload);
-      localStorage.setItem(key, JSON.stringify(arr));
+      try {
+        arr.push(payload);
+        localStorage.setItem(key, JSON.stringify(arr));
 
-      ok.textContent = "Guardado en el móvil ✅";
-      // ✅ volver al inicio SOLO si guardó bien
-      setTimeout(() => { window.location.href = "./index.html"; }, 350);
+        const test = JSON.parse(localStorage.getItem(key) || "[]");
+        if (!Array.isArray(test) || test.length !== arr.length) throw new Error("Guardado no confirmado");
+
+        try { localStorage.removeItem("pv_header"); } catch {}
+
+        ok.textContent = "Guardado en el móvil ✅";
+        setTimeout(() => { window.location.href = "./index.html"; }, 350);
+      } catch (e) {
+        console.error(e);
+        err.textContent = "Error guardando en el teléfono (memoria llena o fallo iOS).";
+      }
     });
   </script>
 

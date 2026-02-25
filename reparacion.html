@@ -420,17 +420,16 @@ const ma = maBase + bat;
         if (fotoMaterial.files?.[0]) materialAll.push(await fileToJpegDataURL(fotoMaterial.files[0]));
       } catch (_) {}
 
-      const hr = clamp0(toNum(hRep.value));
+            const hr = clamp0(toNum(hRep.value));
       const hd = clamp0(toNum(hDespl.value));
       const km = clamp0(toNum(kms.value));
       const co = clamp0(toNum(comida.value));
-      const ma = clamp0(toNum(material.value));
 
       const maBase = clamp0(toNum(material.value));
-const bat = clamp0(toNum(bateria.value));
-const ma = maBase + bat;
+      const bat = clamp0(toNum(bateria.value));
+      const ma = maBase + bat;
 
-const tot = hr*P_REP + hd*P_DESPL + km*P_KM + co + ma;
+      const tot = hr*P_REP + hd*P_DESPL + km*P_KM + co + ma;
 
 const savedAt = new Date().toISOString();
 const partId = `${header?.fecha || "nodate"}::${header?.idCliente || "noclient"}::reparacion::${savedAt}`;

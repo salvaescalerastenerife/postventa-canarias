@@ -736,18 +736,20 @@ const payload = {
 arr.push(payload);
 localStorage.setItem(key, JSON.stringify(arr));
 
-// ✅ TRUCO iOS: deja respirar el event loop para que localStorage se escriba antes de navegar
+// Confirmación simple (iOS/localStorage edge)
+const test = JSON.parse(localStorage.getItem(key) || "[]");
+if (!Array.isArray(test) || test.length !== arr.length) throw new Error("Guardado no confirmado");
+
+// Limpia cabecera del “nuevo parte” (evita arrastrar datos)
+try { localStorage.removeItem("pv_header"); } catch {}
+
 ok.textContent = "Guardado en el móvil ✅";
+
+// deja respirar el event loop antes de navegar (iOS)
 await new Promise(r => requestAnimationFrame(r));
 await new Promise(r => setTimeout(r, 50));
 
 window.location.href = "./index.html";
-
-  // Volver automáticamente al selector
-  setTimeout(() => {
-    window.location.href = "./index.html";
-  }, 400);
-
 } catch (e) {
   console.error(e);
   err.textContent = "Error guardando en el teléfono.";

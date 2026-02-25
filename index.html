@@ -19,6 +19,7 @@
       <div class="lp-actions">
         <a class="lp-btn primary" href="./nuevo-parte.html">NUEVO PARTE</a>
         <a class="lp-btn" href="./historial.html">HISTORIAL</a>
+        <button class="lp-btn danger" id="btn-clear-sent" type="button">BORRAR ENVIADOS</button>
       </div>
 
       <p class="lp-foot">Postventa · Partes en el móvil</p>
@@ -32,6 +33,59 @@
         navigator.serviceWorker.register("./service-worker.js").catch(() => {});
       });
     }
+
+    // Borrar enviados (sin tocar pendientes)
+    (function () {
+      const btn = document.getElementById("btn-clear-sent");
+      if (!btn) return;
+
+      const KEY = "pv_partes";
+
+      function safeParseArray(json) {
+        try {
+          const v = JSON.parse(json || "[]");
+          return Array.isArray(v) ? v : [];
+        } catch {
+          return [];
+        }
+      }
+
+      // “Enviado” si:
+      // - tiene sent_by con alguna clave (marcado por Historial al exportar)
+      // - o tiene sent_at (legacy)
+      function isSent(p) {
+        const sb = p && p.sent_by;
+        const hasSentBy = sb && typeof sb === "object" && Object.keys(sb).length > 0;
+        const hasLegacy = Boolean(p && p.sent_at);
+        return hasSentBy || hasLegacy;
+      }
+
+      btn.addEventListener("click", () => {
+        const all = safeParseArray(localStorage.getItem(KEY));
+        if (!all.length) {
+          alert("No hay partes guardados.");
+          return;
+        }
+
+        const sentCount = all.reduce((n, p) => n + (isSent(p) ? 1 : 0), 0);
+        if (!sentCount) {
+          alert("No hay partes ENVIADOS para borrar.");
+          return;
+        }
+
+        const msg =
+          `Vas a borrar ${sentCount} parte(s) ENVIADO(s).\n` +
+          `Los PENDIENTES NO se borran.\n\n` +
+          `¿Continuar?`;
+
+        if (!confirm(msg)) return;
+
+        const kept = all.filter(p => !isSent(p));
+        localStorage.setItem(KEY, JSON.stringify(kept));
+
+        alert(`Listo ✅ Borrados: ${sentCount}. Pendientes conservados: ${kept.length}.`);
+      });
+    })();
   </script>
 
   <style>
@@ -108,6 +162,12 @@
       background: var(--primary, #0b5cff);
       color:#fff;
       border-color: transparent;
+    }
+
+    .lp-btn.danger{
+      background:#fff;
+      color:#b91c1c;
+      border:1px solid rgba(185,28,28,.35);
     }
 
     .lp-foot{

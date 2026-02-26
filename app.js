@@ -26,6 +26,43 @@
     return `${yyyy}-${mm}-${dd}`;
   };
 
+  // ---- Badge versión SW (vN => N/100) ----
+  (function initSwVersionBadge() {
+    const el = $("sw-version"); // debe existir en index.html
+    if (!el) return;
+    if (!("serviceWorker" in navigator)) return;
+
+    function requestVersion() {
+      try {
+        if (navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({ type: "GET_VERSION" });
+        }
+      } catch (_) {}
+    }
+
+    navigator.serviceWorker.addEventListener("message", (event) => {
+      const d = event.data || {};
+      if (d.type === "SW_VERSION") {
+        const v = Number(d.version || 0);
+        const shown = (v / 100).toFixed(2);
+        el.textContent = `Versión ${shown}`;
+        el.title = d.cache ? `Cache: ${d.cache}` : "";
+      }
+    });
+
+    // Pide versión al cargar (si ya controla)
+    requestVersion();
+
+    // En iOS a veces el controller llega después
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      setTimeout(requestVersion, 150);
+    });
+
+    navigator.serviceWorker.ready.then(() => {
+      setTimeout(requestVersion, 150);
+    });
+  })();
+
   fecha.value = todayISO();
 
   // Permitir fechas anteriores para digitalizar partes antiguos.

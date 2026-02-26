@@ -1,4 +1,4 @@
-const CACHE = "postventa-canarias-v7";
+const CACHE = "postventa-canarias-v8";
 
 /**
  * Precache SOLO rutas que existen en el ZIP.
@@ -33,10 +33,21 @@ const CACHE_VERSION = (() => {
 // Permite a la app preguntar la versión que tiene el SW/cache
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "GET_VERSION") {
-    event.source?.postMessage({
+    const payload = {
       type: "SW_VERSION",
       version: CACHE_VERSION,
       cache: CACHE
+    };
+
+    // Respuesta directa si existe source
+    if (event.source && typeof event.source.postMessage === "function") {
+      event.source.postMessage(payload);
+      return;
+    }
+
+    // Fallback iOS: enviar a todos los clientes del scope
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      clients.forEach((c) => c.postMessage(payload));
     });
   }
 });

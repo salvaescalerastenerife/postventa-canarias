@@ -26,13 +26,52 @@
     return `${yyyy}-${mm}-${dd}`;
   };
 
-  // ---- Badge versión SW (vN => N/100) ----
+  // ---- Badge versión cacheada (robusto en iOS): lee caches + (opcional) pregunta al SW ----
   (function initSwVersionBadge() {
     const el = $("sw-version"); // debe existir en index.html
     if (!el) return;
-    if (!("serviceWorker" in navigator)) return;
 
-    function requestVersion() {
+    const show = (vNum, cacheName) => {
+      const shown = (Number(vNum || 0) / 100).toFixed(2);
+      el.textContent = `Versión ${shown}`;
+      el.title = cacheName ? `Cache: ${cacheName}` : "";
+    };
+
+    const showUnknown = () => {
+      el.textContent = "Versión —";
+      el.title = "No se detectó cache";
+    };
+
+    // 1) Fallback fuerte: leer directamente los caches existentes en el navegador
+    async function readFromCaches() {
+      if (!("caches" in window)) return false;
+      try {
+        const keys = await caches.keys();
+        // Busca caches tipo "postventa-canarias-v5"
+        let bestV = -1;
+        let bestName = null;
+
+        for (const k of keys) {
+          const m = String(k).match(/postventa-canarias-v(\d+)\b/i);
+          if (!m) continue;
+          const v = parseInt(m[1], 10);
+          if (Number.isFinite(v) && v > bestV) {
+            bestV = v;
+            bestName = k;
+          }
+        }
+
+        if (bestV >= 0) {
+          show(bestV, bestName);
+          return true;
+        }
+      } catch (_) {}
+      return false;
+    }
+
+    // 2) Extra (si hay controller): pedir versión al SW (no siempre funciona en iOS, pero suma)
+    function requestFromSW() {
+      if (!("serviceWorker" in navigator)) return;
       try {
         if (navigator.serviceWorker.controller) {
           navigator.serviceWorker.controller.postMessage({ type: "GET_VERSION" });
@@ -40,29 +79,34 @@
       } catch (_) {}
     }
 
-    navigator.serviceWorker.addEventListener("message", (event) => {
-      const d = event.data || {};
-      if (d.type === "SW_VERSION") {
-        const v = Number(d.version || 0);
-        const shown = (v / 100).toFixed(2);
-        el.textContent = `Versión ${shown}`;
-        el.title = d.cache ? `Cache: ${d.cache}` : "";
-      }
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.addEventListener("message", (event) => {
+        const d = event.data || {};
+        if (d.type === "SW_VERSION") {
+          show(d.version, d.cache);
+        }
+      });
+    }
+
+    // Pintado inicial: caches -> si no, deja "—"
+    readFromCaches().then((ok) => {
+      if (!ok) showUnknown();
+      requestFromSW();
     });
 
-    // Pide versión al cargar (si ya controla)
-    requestVersion();
+    // Reintentos (por si el SW se instala/activa después)
+    setTimeout(() => { readFromCaches(); requestFromSW(); }, 400);
+    setTimeout(() => { readFromCaches(); requestFromSW(); }, 1200);
 
-    // En iOS a veces el controller llega después
-    navigator.serviceWorker.addEventListener("controllerchange", () => {
-      setTimeout(requestVersion, 150);
-    });
-
-    navigator.serviceWorker.ready.then(() => {
-      setTimeout(requestVersion, 150);
-    });
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        setTimeout(() => { readFromCaches(); requestFromSW(); }, 150);
+      });
+      navigator.serviceWorker.ready.then(() => {
+        setTimeout(() => { readFromCaches(); requestFromSW(); }, 150);
+      });
+    }
   })();
-
   fecha.value = todayISO();
 
   // Permitir fechas anteriores para digitalizar partes antiguos.

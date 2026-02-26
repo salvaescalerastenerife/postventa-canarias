@@ -27,8 +27,11 @@
   };
 
   fecha.value = todayISO();
-  fecha.min = todayISO();
-  fecha.max = tomorrowISO();
+
+  // Permitir fechas anteriores para digitalizar partes antiguos.
+  // Bloqueamos fechas futuras (más allá de hoy) para evitar errores.
+  fecha.min = "2000-01-01";
+  fecha.max = todayISO();
 
   btnHoy.addEventListener("click", () => {
     fecha.value = todayISO();

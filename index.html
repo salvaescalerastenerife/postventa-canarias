@@ -76,11 +76,15 @@
 
       function requestFromSW() {
         if (!("serviceWorker" in navigator)) return;
-        try {
-          if (navigator.serviceWorker.controller) {
-            navigator.serviceWorker.controller.postMessage({ type: "GET_VERSION" });
-          }
-        } catch (_) {}
+
+        // En iOS muchas veces navigator.serviceWorker.controller es null aunque el SW esté activo.
+        // En ese caso, enviamos el mensaje al worker activo del registro (esto sí funciona).
+        navigator.serviceWorker.ready.then((reg) => {
+          try {
+            const sw = reg.active || reg.waiting || reg.installing;
+            if (sw) sw.postMessage({ type: "GET_VERSION" });
+          } catch (_) {}
+        }).catch(() => {});
       }
 
       if ("serviceWorker" in navigator) {

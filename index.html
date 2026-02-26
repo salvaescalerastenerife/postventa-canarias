@@ -33,6 +33,84 @@
       });
     }
 
+    // Badge versión: robusto en iOS -> lee caches directamente + (si puede) pregunta al SW
+    (function () {
+      const el = document.getElementById("sw-version");
+      if (!el) return;
+
+      const show = (vNum, cacheName) => {
+        const shown = (Number(vNum || 0) / 100).toFixed(2);
+        el.textContent = `Versión ${shown}`;
+        el.title = cacheName ? `Cache: ${cacheName}` : "";
+      };
+
+      const showUnknown = () => {
+        el.textContent = "Versión —";
+        el.title = "No se detectó cache";
+      };
+
+      async function readFromCaches() {
+        if (!("caches" in window)) return false;
+        try {
+          const keys = await caches.keys();
+          let bestV = -1;
+          let bestName = null;
+
+          for (const k of keys) {
+            const m = String(k).match(/postventa-canarias-v(\d+)\b/i);
+            if (!m) continue;
+            const v = parseInt(m[1], 10);
+            if (Number.isFinite(v) && v > bestV) {
+              bestV = v;
+              bestName = k;
+            }
+          }
+
+          if (bestV >= 0) {
+            show(bestV, bestName);
+            return true;
+          }
+        } catch (_) {}
+        return false;
+      }
+
+      function requestFromSW() {
+        if (!("serviceWorker" in navigator)) return;
+        try {
+          if (navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({ type: "GET_VERSION" });
+          }
+        } catch (_) {}
+      }
+
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.addEventListener("message", (event) => {
+          const d = event.data || {};
+          if (d.type === "SW_VERSION") {
+            show(d.version, d.cache);
+          }
+        });
+
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          setTimeout(() => { readFromCaches(); requestFromSW(); }, 150);
+        });
+
+        navigator.serviceWorker.ready.then(() => {
+          setTimeout(() => { readFromCaches(); requestFromSW(); }, 150);
+        });
+      }
+
+      // Pintado inicial
+      readFromCaches().then((ok) => {
+        if (!ok) showUnknown();
+        requestFromSW();
+      });
+
+      // Reintentos por si el SW se instala/activa después en iOS
+      setTimeout(() => { readFromCaches(); requestFromSW(); }, 400);
+      setTimeout(() => { readFromCaches(); requestFromSW(); }, 1200);
+    })();
+
     // Borrar enviados (sin tocar pendientes)
     (function () {
       const btn = document.getElementById("btn-clear-sent");

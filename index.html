@@ -30,6 +30,30 @@
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
         navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+
+        // Badge versión (iOS-safe): pedir al SW activo del registro
+        const elVer = document.getElementById("sw-version");
+        if (!elVer) return;
+
+        const setVer = (vNum, cacheName) => {
+          const shown = (Number(vNum || 0) / 100).toFixed(2);
+          elVer.textContent = `Versión ${shown}`;
+          elVer.title = cacheName ? `Cache: ${cacheName}` : "";
+        };
+
+        // Recibir respuesta del SW (viene por postMessage)
+        navigator.serviceWorker.addEventListener("message", (event) => {
+          const d = event.data || {};
+          if (d.type === "SW_VERSION") {
+            setVer(d.version, d.cache);
+          }
+        });
+
+        // Pedir versión al SW activo (NO al controller, que en iOS suele ser null)
+        navigator.serviceWorker.ready.then((reg) => {
+          const sw = reg.active || reg.waiting || reg.installing;
+          if (sw) sw.postMessage({ type: "GET_VERSION" });
+        }).catch(() => {});
       });
     }
 

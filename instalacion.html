@@ -232,7 +232,8 @@
       <div class="sumline"><span>Instalación</span><strong id="sInst">0,00 €</strong></div>
       <div class="sumline"><span>Desplazamiento</span><strong id="sDespl">0,00 €</strong></div>
       <div class="sumline"><span>Kilómetros</span><strong id="sKm">0,00 €</strong></div>
-      <div class="sumline"><span>Comida</span><strong id="sComida">0,00 €</strong></div>
+      <div class="sumline"><span>Almuerzo</span><strong id="sAlmuerzo">0,00 €</strong></div>
+      <div class="sumline"><span>Cena</span><strong id="sCena">0,00 €</strong></div>
       <div class="sumline"><span>Material</span><strong id="sMat">0,00 €</strong></div>
       <div class="sumline"><span>Furgón</span><strong id="sFurgon">80,00 €</strong></div>
 
@@ -342,19 +343,24 @@
     syncTechOptions();
 
     // ------- Inputs -------
-    const hInst = document.getElementById("hInst");
+        const hInst = document.getElementById("hInst");
     const hDespl = document.getElementById("hDespl");
     const kms = document.getElementById("kms");
-    const comida = document.getElementById("comida");
+    const almuerzo = document.getElementById("almuerzo");
+    const cena = document.getElementById("cena");
     const material = document.getElementById("material");
     const furgonOn = document.getElementById("furgonOn");
 
-    const fotoTicket = document.getElementById("fotoTicket");
+    const fotoAlmuerzo = document.getElementById("fotoAlmuerzo");
+    const fotoCena = document.getElementById("fotoCena");
     const fotoMaterial = document.getElementById("fotoMaterial");
-    const cTicket = document.getElementById("cTicket");
+
+    const cAlmuerzo = document.getElementById("cAlmuerzo");
+    const cCena = document.getElementById("cCena");
     const cMat = document.getElementById("cMat");
 
-    const btnDelTicket = document.getElementById("btnDelTicket");
+    const btnDelAlmuerzo = document.getElementById("btnDelAlmuerzo");
+    const btnDelCena = document.getElementById("btnDelCena");
     const btnDelMaterial = document.getElementById("btnDelMaterial");
 
     // Mensajes
@@ -370,7 +376,8 @@
     const sInst = document.getElementById("sInst");
     const sDespl = document.getElementById("sDespl");
     const sKm = document.getElementById("sKm");
-    const sComida = document.getElementById("sComida");
+    const sAlmuerzo = document.getElementById("sAlmuerzo");
+    const sCena = document.getElementById("sCena");
     const sMat = document.getElementById("sMat");
     const sFurgon = document.getElementById("sFurgon");
     const totalEl = document.getElementById("total");
@@ -379,7 +386,8 @@
       const hi = clamp0(toNum(hInst.value));
       const hd = clamp0(toNum(hDespl.value));
       const km = clamp0(toNum(kms.value));
-      const co = clamp0(toNum(comida.value));
+      const al = clamp0(toNum(almuerzo.value));
+      const ce = clamp0(toNum(cena.value));
       const ma = clamp0(toNum(material.value));
       const fu = furgonOn.checked ? FURGON : 0;
 
@@ -397,11 +405,12 @@
       sInst.textContent = EUR(a);
       sDespl.textContent = EUR(b);
       sKm.textContent = EUR(c);
-      sComida.textContent = EUR(co);
+      sAlmuerzo.textContent = EUR(al);
+      sCena.textContent = EUR(ce);
       sMat.textContent = EUR(ma);
       sFurgon.textContent = tf;
 
-      const tot = a + b + c + co + ma + fu;
+      const tot = a + b + c + al + ce + ma + fu;
       totalEl.textContent = EUR(tot);
     };
 
@@ -409,7 +418,8 @@
       hInst.addEventListener(evt, recalc);
       hDespl.addEventListener(evt, recalc);
       kms.addEventListener(evt, recalc);
-      comida.addEventListener(evt, recalc);
+      almuerzo.addEventListener(evt, recalc);
+      cena.addEventListener(evt, recalc);
       material.addEventListener(evt, recalc);
       furgonOn.addEventListener(evt, recalc);
     });

@@ -490,7 +490,20 @@ for (let i = 0; i < parts.length; i++) {
     doc.text(`Instalación: ${hi.toFixed(1).replace(".", ",")} h x2 = ${EUR(subtotalInst)}`, M, y); y += 5;
     doc.text(`Desplazamiento: ${hd.toFixed(1).replace(".", ",")} h x2 = ${EUR(subtotalDespl)}`, M, y); y += 5;
     doc.text(`Kilómetros: ${String(km).replace(".", ",")} = ${EUR(subtotalKm)}`, M, y); y += 5;
-    doc.text(`Comida: ${EUR(co)}`, M, y); y += 5;
+    // Nuevo: Almuerzo/Cena. Legacy: Comida.
+    const al = toN(d.almuerzo);
+    const ce = toN(d.cena);
+    const coLegacy = toN(d.comida);
+
+    // Consideramos "modelo nuevo" si existen las claves (aunque importe sea 0)
+    const hasNewDietas = ("almuerzo" in d) || ("cena" in d);
+
+    if (hasNewDietas) {
+      doc.text(`Almuerzo: ${EUR(al)}`, M, y); y += 5;
+      doc.text(`Cena: ${EUR(ce)}`, M, y); y += 5;
+    } else {
+      doc.text(`Comida: ${EUR(coLegacy)}`, M, y); y += 5;
+    }
     doc.text(`Material: ${EUR(ma)}`, M, y); y += 5;
     doc.text(`Furgón: ${EUR(fu)}`, M, y); y += 5;
   }

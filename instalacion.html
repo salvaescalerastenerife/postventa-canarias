@@ -478,14 +478,20 @@
     });
 
     // -------- Fotos (cámara propia + fototeca) --------
-    let ticketShots = [];
+    let almuerzoShots = [];
+    let cenaShots = [];
     let materialShots = [];
 
-    const getTicketCount = () => (ticketShots.length + (fotoTicket.files?.length || 0));
+    const MAX_ALMUERZO = 1;
+    const MAX_CENA = 1;
+
+    const getAlmuerzoCount = () => (almuerzoShots.length + (fotoAlmuerzo.files?.length || 0));
+    const getCenaCount = () => (cenaShots.length + (fotoCena.files?.length || 0));
     const getMaterialCount = () => (materialShots.length + (fotoMaterial.files?.length || 0));
 
     const updatePhotoCounts = () => {
-      cTicket.textContent = `${getTicketCount()} foto`;
+      cAlmuerzo.textContent = `${getAlmuerzoCount()} foto`;
+      cCena.textContent = `${getCenaCount()} foto`;
       cMat.textContent = `${getMaterialCount()} foto`;
     };
 
@@ -497,9 +503,15 @@
       inputEl.files = dt.files;
     };
 
-    const clearTicketPhoto = () => {
-      ticketShots = [];
-      fotoTicket.value = "";
+    const clearAlmuerzoPhoto = () => {
+      almuerzoShots = [];
+      fotoAlmuerzo.value = "";
+      updatePhotoCounts();
+    };
+
+    const clearCenaPhoto = () => {
+      cenaShots = [];
+      fotoCena.value = "";
       updatePhotoCounts();
     };
 
@@ -509,16 +521,29 @@
       updatePhotoCounts();
     };
 
-    btnDelTicket.addEventListener("click", () => { err.textContent = ""; ok.textContent=""; clearTicketPhoto(); });
+    btnDelAlmuerzo.addEventListener("click", () => { err.textContent = ""; ok.textContent=""; clearAlmuerzoPhoto(); });
+    btnDelCena.addEventListener("click", () => { err.textContent = ""; ok.textContent=""; clearCenaPhoto(); });
     btnDelMaterial.addEventListener("click", () => { err.textContent = ""; ok.textContent=""; clearMaterialPhoto(); });
 
     // Fototeca: 1 máximo y si ya hay foto -> no deja
-    fotoTicket.addEventListener("change", () => {
-      enforceSingleFile(fotoTicket);
+    fotoAlmuerzo.addEventListener("change", () => {
+      enforceSingleFile(fotoAlmuerzo);
 
-      if (ticketShots.length >= MAX_TICKET) {
-        err.textContent = "Solo 1 foto de Ticket por parte. Borra la anterior (🗑️) para cambiarla.";
-        fotoTicket.value = "";
+      if (almuerzoShots.length >= MAX_ALMUERZO) {
+        err.textContent = "Solo 1 foto de Almuerzo por parte. Borra la anterior (🗑️) para cambiarla.";
+        fotoAlmuerzo.value = "";
+        return;
+      }
+      err.textContent = "";
+      updatePhotoCounts();
+    });
+
+    fotoCena.addEventListener("change", () => {
+      enforceSingleFile(fotoCena);
+
+      if (cenaShots.length >= MAX_CENA) {
+        err.textContent = "Solo 1 foto de Cena por parte. Borra la anterior (🗑️) para cambiarla.";
+        fotoCena.value = "";
         return;
       }
       err.textContent = "";
@@ -549,7 +574,8 @@
     const camMsg = document.getElementById("camMsg");
     const camTitle = document.getElementById("camTitle");
 
-    const btnCamTicket = document.getElementById("btnCamTicket");
+    const btnCamAlmuerzo = document.getElementById("btnCamAlmuerzo");
+    const btnCamCena = document.getElementById("btnCamCena");
     const btnCamMaterial = document.getElementById("btnCamMaterial");
 
     let currentTarget = null;
@@ -558,8 +584,12 @@
 
     const openCam = async (target) => {
       // Bloqueo por límite 1
-      if (target === "ticket" && getTicketCount() >= MAX_TICKET) {
-        err.textContent = "Ya hay 1 foto de Ticket. Borra la anterior (🗑️) para cambiarla.";
+      if (target === "almuerzo" && getAlmuerzoCount() >= MAX_ALMUERZO) {
+        err.textContent = "Ya hay 1 foto de Almuerzo. Borra la anterior (🗑️) para cambiarla.";
+        return;
+      }
+      if (target === "cena" && getCenaCount() >= MAX_CENA) {
+        err.textContent = "Ya hay 1 foto de Cena. Borra la anterior (🗑️) para cambiarla.";
         return;
       }
       if (target === "material" && getMaterialCount() >= MAX_MATERIAL) {
@@ -575,7 +605,11 @@
       camRetake.disabled = true;
       camShot.disabled = false;
 
-      camTitle.textContent = target === "ticket" ? "Cámara · Ticket" : "Cámara · Material";
+      camTitle.textContent =
+        target === "almuerzo" ? "Cámara · Almuerzo"
+        : target === "cena" ? "Cámara · Cena"
+        : "Cámara · Material";
+
       camModal.hidden = false;
 
       try {
@@ -628,13 +662,20 @@
     camUse.addEventListener("click", () => {
       if (!lastDataUrl) return;
 
-      // Fuerza 1 máximo (y respeta el límite total)
-      if (currentTarget === "ticket") {
-        if (getTicketCount() >= MAX_TICKET) {
-          camMsg.textContent = "Ya hay 1 foto de Ticket. Borra la anterior (🗑️) para cambiarla.";
+      if (currentTarget === "almuerzo") {
+        if (getAlmuerzoCount() >= MAX_ALMUERZO) {
+          camMsg.textContent = "Ya hay 1 foto de Almuerzo. Borra la anterior (🗑️) para cambiarla.";
           return;
         }
-        ticketShots = [lastDataUrl];
+        almuerzoShots = [lastDataUrl];
+      }
+
+      if (currentTarget === "cena") {
+        if (getCenaCount() >= MAX_CENA) {
+          camMsg.textContent = "Ya hay 1 foto de Cena. Borra la anterior (🗑️) para cambiarla.";
+          return;
+        }
+        cenaShots = [lastDataUrl];
       }
 
       if (currentTarget === "material") {
@@ -657,7 +698,8 @@
       camMsg.textContent = "";
     });
 
-    btnCamTicket.addEventListener("click", () => openCam("ticket"));
+    btnCamAlmuerzo.addEventListener("click", () => openCam("almuerzo"));
+    btnCamCena.addEventListener("click", () => openCam("cena"));
     btnCamMaterial.addEventListener("click", () => openCam("material"));
 
     // ------- Helpers imagen -> JPEG DataURL (persistir en local/PDF) -------
@@ -717,23 +759,26 @@
       }
 
       // Normaliza y guarda 1 foto máximo por campo (cámara + fototeca)
-      const ticketFototeca = await collectFototecaJpegs(fotoTicket);
+      const almuerzoFototeca = await collectFototecaJpegs(fotoAlmuerzo);
+      const cenaFototeca = await collectFototecaJpegs(fotoCena);
       const materialFototeca = await collectFototecaJpegs(fotoMaterial);
 
-      const ticketAll = [...ticketShots, ...ticketFototeca].slice(0, 1);
+      const almuerzoAll = [...almuerzoShots, ...almuerzoFototeca].slice(0, 1);
+      const cenaAll = [...cenaShots, ...cenaFototeca].slice(0, 1);
       const materialAll = [...materialShots, ...materialFototeca].slice(0, 1);
 
       const hi = clamp0(toNum(hInst.value));
 const hd = clamp0(toNum(hDespl.value));
 const km = clamp0(toNum(kms.value));
-const co = clamp0(toNum(comida.value));
+const al = clamp0(toNum(almuerzo.value));
+const ce = clamp0(toNum(cena.value));
 const ma = clamp0(toNum(material.value));
 const fu = furgonOn.checked ? FURGON : 0;
 
 const a = hi * P_INST * TECNICOS_INST;
 const b = hd * P_DESPL * TECNICOS_INST;
 const c = km * P_KM;
-const tot = a + b + c + co + ma + fu;
+const tot = a + b + c + al + ce + ma + fu;
 
 const savedAt = new Date().toISOString();
 const partId = `${header?.fecha || "nodate"}::${header?.idCliente || "noclient"}::instalacion::${savedAt}`;
@@ -748,16 +793,19 @@ const payload = {
           horas_inst: toNum(hInst.value),
           horas_despl: toNum(hDespl.value),
           kms: toNum(kms.value),
-          comida: toNum(comida.value),
+          almuerzo: toNum(almuerzo.value),
+          cena: toNum(cena.value),
           material: toNum(material.value),
           furgon: furgonOn.checked
         },
         totales: { total: tot },
         observaciones: document.getElementById("obs").value || "",
         fotos: {
-          ticket_count: ticketAll.length,
+          almuerzo_count: almuerzoAll.length,
+          cena_count: cenaAll.length,
           material_count: materialAll.length,
-          ticket_dataurls: ticketAll,
+          almuerzo_dataurls: almuerzoAll,
+          cena_dataurls: cenaAll,
           material_dataurls: materialAll
         },
         saved_at: savedAt

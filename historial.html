@@ -141,7 +141,13 @@
         const hi = toN(d.horas_inst);
         const hd = toN(d.horas_despl);
         const km = toN(d.kms);
-        const co = toN(d.comida);
+
+        // Nuevo: almuerzo + cena. Legacy: comida.
+        const al = toN(d.almuerzo);
+        const ce = toN(d.cena);
+        const coLegacy = toN(d.comida);
+        const dietas = (al || ce) ? (al + ce) : coLegacy;
+
         const ma = toN(d.material);
         const fu = d.furgon ? toN(t.FURGON ?? 80) : 0;
 
@@ -153,9 +159,8 @@
         const a = hi * P_INST * TEC;
         const b = hd * P_DESPL * TEC;
         const c = km * P_KM;
-        return a + b + c + co + ma + fu;
+        return a + b + c + dietas + ma + fu;
       }
-
       return toN(p?.totales?.total ?? 0);
     };
 
@@ -537,15 +542,31 @@ for (let i = 0; i < parts.length; i++) {
   y += obsLines.length * 4.6 + 4;
 
   // Fotos
-  const tImgsRaw = p?.fotos?.ticket_dataurls || [];
-  const mImgsRaw = p?.fotos?.material_dataurls || [];
+    const mImgsRaw = p?.fotos?.material_dataurls || [];
 
+  // Instalación nueva: almuerzo/cena. Legacy: ticket.
+  const aImgsRaw = p?.fotos?.almuerzo_dataurls || [];
+  const cImgsRaw = p?.fotos?.cena_dataurls || [];
+  const tImgsRaw = p?.fotos?.ticket_dataurls || []; // legacy
+
+  const aImgs = [];
+  const cImgs = [];
   const tImgs = [];
   const mImgs = [];
+
+  for (const u of aImgsRaw) { try { aImgs.push(await dataUrlToJpeg(u)); } catch (_) {} }
+  for (const u of cImgsRaw) { try { cImgs.push(await dataUrlToJpeg(u)); } catch (_) {} }
   for (const u of tImgsRaw) { try { tImgs.push(await dataUrlToJpeg(u)); } catch (_) {} }
   for (const u of mImgsRaw) { try { mImgs.push(await dataUrlToJpeg(u)); } catch (_) {} }
 
-  y = await addPhotos(doc, y, `FOTOS · Ticket (${tImgs.length})`, tImgs);
+  if ((aImgsRaw.length || cImgsRaw.length) || (p.tipo === "instalacion" && (aImgs.length || cImgs.length))) {
+    y = await addPhotos(doc, y, `FOTOS · Almuerzo (${aImgs.length})`, aImgs);
+    y = await addPhotos(doc, y, `FOTOS · Cena (${cImgs.length})`, cImgs);
+  } else {
+    // fallback legacy (o para otros tipos que sigan usando ticket)
+    y = await addPhotos(doc, y, `FOTOS · Ticket (${tImgs.length})`, tImgs);
+  }
+
   y = await addPhotos(doc, y, `FOTOS · Material (${mImgs.length})`, mImgs);
 }
 

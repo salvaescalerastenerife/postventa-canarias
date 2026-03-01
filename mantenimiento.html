@@ -127,8 +127,7 @@ bateriaSelect.addEventListener("change", recalc);
       try { localStorage.setItem("pv_tecnico_mant", tec.value || ""); } catch {}
     });
 
-    // ------- Guardado local -------
-    document.getElementById("btnGuardar").addEventListener("click", () => {
+    // ------- Guardado local -------    document.getElementById("btnGuardar").addEventListener("click", async () => {
       ok.textContent = "";
       err.textContent = "";
 
@@ -141,27 +140,27 @@ bateriaSelect.addEventListener("change", recalc);
         return;
       }
 
-const savedAt = new Date().toISOString();
-const partId = `${header?.fecha || "nodate"}::${header?.idCliente || "noclient"}::mantenimiento::${savedAt}`;
+      const savedAt = new Date().toISOString();
+      const partId = `${header?.fecha || "nodate"}::${header?.idCliente || "noclient"}::mantenimiento::${savedAt}`;
 
-const mat = toNum(materialInput.value);
-const bat = toNum(bateriaSelect.value);
-const totalFinal = MANTENIMIENTO_FIJO + mat + bat;
+      const mat = toNum(materialInput.value);
+      const bat = toNum(bateriaSelect.value);
+      const totalFinal = MANTENIMIENTO_FIJO + mat + bat;
 
-const files = Array.from(document.getElementById("fotoMaterial").files || []);
-const materialImages = [];
+      const files = Array.from(document.getElementById("fotoMaterial").files || []);
+      const materialImages = [];
 
-for (const f of files) {
-  const data = await new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(r.result);
-    r.onerror = reject;
-    r.readAsDataURL(f);
-  });
-  materialImages.push(data);
-}
+      for (const f of files) {
+        const data = await new Promise((resolve, reject) => {
+          const r = new FileReader();
+          r.onload = () => resolve(r.result);
+          r.onerror = reject;
+          r.readAsDataURL(f);
+        });
+        materialImages.push(data);
+      }
 
-const payload = {
+      const payload = {
         part_id: partId,
         sent_by: {},
         header: { ...header, tecnico: tec.value || "" },
@@ -183,9 +182,10 @@ const payload = {
         saved_at: savedAt
       };
 
-const key = "pv_partes";
+      const key = "pv_partes";
       let arr = [];
       try { arr = JSON.parse(localStorage.getItem(key) || "[]"); } catch {}
+
       try {
         arr.push(payload);
         localStorage.setItem(key, JSON.stringify(arr));

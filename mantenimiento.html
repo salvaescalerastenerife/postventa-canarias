@@ -117,6 +117,9 @@ function recalc() {
 
 materialInput.addEventListener("input", recalc);
 bateriaSelect.addEventListener("change", recalc);
+
+// Recalcular al cargar (Safari iOS a veces no dispara nada hasta tocar)
+recalc();
     // Recordar último técnico (para mantenimiento)
     try {
       const last = localStorage.getItem("pv_tecnico_mant") || "";
@@ -236,8 +239,5 @@ bateriaSelect.addEventListener("change", recalc);
     }
     .btnRow{ display:grid; gap:10px; }
   </style>
-  <script>
-alert(localStorage.getItem("pv_header"));
-</script>
 </body>
 </html>

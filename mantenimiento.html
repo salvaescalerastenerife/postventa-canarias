@@ -45,7 +45,7 @@
 
       <div class="field onecol">
         <label>Material (€)</label>
-        <input id="material" type="number" inputmode="decimal" step="0.01" placeholder="0,00">
+        <input id="material" type="text" inputmode="decimal" autocomplete="off" placeholder="0,00">
       </div>
 
       <div class="field onecol">
@@ -241,6 +241,22 @@ recalc();
       font-size:18px;
       font-family:var(--font);
       outline:none;
+    }
+        /* iOS Safari: evita zoom + “deformación” al enfocar inputs */
+    input, select, textarea{
+      font-size:16px;              /* clave: iOS no hace zoom si >=16px */
+      box-sizing:border-box;
+      max-width:100%;
+    }
+
+    /* Mejora estabilidad del layout cuando aparece teclado */
+    html, body{
+      height:auto;
+      overflow-x:hidden;
+    }
+
+    .container{
+      min-height: 100dvh;          /* viewport dinámico (iOS moderno) */
     }
     textarea:focus{
       border-color: rgba(11,92,255,.45);

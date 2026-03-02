@@ -60,6 +60,12 @@
         </select>
       </div>
 
+      <!-- Pilas -->
+      <div class="field onecol">
+        <label>Pilas (1 €/pila)</label>
+        <input id="pilas" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="0">
+      </div>
+
       <div class="sumtotal" style="padding-top:10px;">
         <span>TOTAL</span>
         <strong id="total">99,00 €</strong>
@@ -71,6 +77,7 @@
       <h2>Observaciones</h2>
       <textarea id="obs" rows="4" placeholder="Escribe aquí si hay algo que anotar..."></textarea>
     </section>
+
     <!-- Fotos · Material -->
     <section class="card">
       <div class="rowhead">
@@ -88,6 +95,7 @@
         <span class="count" id="cMat">0 fotos</span>
       </div>
     </section>
+
     <!-- Guardar -->
     <section class="card">
       <div class="btnRow">
@@ -103,6 +111,7 @@
     const EUR = (n) => new Intl.NumberFormat("es-ES", { style:"currency", currency:"EUR" }).format(n);
 
     const MANTENIMIENTO_FIJO = 99.00;
+    const P_PILA = 1.00;
 
     const ok = document.getElementById("ok");
     const err = document.getElementById("err");
@@ -116,30 +125,40 @@
 
     document.getElementById("mFecha").textContent = header.fecha || "—";
     document.getElementById("mId").textContent = header.idCliente || "—";
-    document.getElementById("total").textContent = EUR(MANTENIMIENTO_FIJO);
-const materialInput = document.getElementById("material");
-const bateriaSelect = document.getElementById("bateria");
-const totalEl = document.getElementById("total");
 
-const toNum = (v) => {
-  if (v === null || v === undefined) return 0;
-  const s = String(v).trim().replace(/\s/g, "").replace("€", "").replace(",", ".");
-  const n = Number(s);
-  return Number.isFinite(n) ? n : 0;
-};
+    const materialInput = document.getElementById("material");
+    const bateriaSelect = document.getElementById("bateria");
+    const pilasInput = document.getElementById("pilas");
+    const totalEl = document.getElementById("total");
 
-function recalc() {
-  const mat = toNum(materialInput.value);
-  const bat = toNum(bateriaSelect.value);
-  const total = MANTENIMIENTO_FIJO + mat + bat;
-  totalEl.textContent = EUR(total);
-}
+    const toNum = (v) => {
+      if (v === null || v === undefined) return 0;
+      const s = String(v).trim().replace(/\s/g, "").replace("€", "").replace(",", ".");
+      const n = Number(s);
+      return Number.isFinite(n) ? n : 0;
+    };
 
-materialInput.addEventListener("input", recalc);
-bateriaSelect.addEventListener("change", recalc);
+    const toInt0 = (v) => {
+      const n = Math.floor(toNum(v));
+      return Number.isFinite(n) && n > 0 ? n : 0;
+    };
 
-// Recalcular al cargar (Safari iOS a veces no dispara nada hasta tocar)
-recalc();
+    function recalc() {
+      const mat = toNum(materialInput.value);
+      const bat = toNum(bateriaSelect.value);
+      const pil = toInt0(pilasInput.value);
+      const total = MANTENIMIENTO_FIJO + mat + bat + (pil * P_PILA);
+      totalEl.textContent = EUR(total);
+    }
+
+    materialInput.addEventListener("input", recalc);
+    bateriaSelect.addEventListener("change", recalc);
+    pilasInput.addEventListener("input", recalc);
+    pilasInput.addEventListener("change", recalc);
+
+    // Recalcular al cargar (Safari iOS a veces no dispara nada hasta tocar)
+    recalc();
+
     // Recordar último técnico (para mantenimiento)
     try {
       const last = localStorage.getItem("pv_tecnico_mant") || "";
@@ -150,7 +169,67 @@ recalc();
       try { localStorage.setItem("pv_tecnico_mant", tec.value || ""); } catch {}
     });
 
-    // ------- Guardado local -------   
+    // ===== MÓDULO FOTOS (fuera del guardar) =====
+    const fotoMaterial = document.getElementById("fotoMaterial");
+    const btnDelMaterial = document.getElementById("btnDelMaterial");
+    const cMat = document.getElementById("cMat");
+
+    // Mantener solo 1 foto (como instalaciones)
+    function keepOneFile(inputEl) {
+      if (!inputEl || !inputEl.files) return;
+      if (inputEl.files.length <= 1) return;
+      const dt = new DataTransfer();
+      dt.items.add(inputEl.files[0]);
+      inputEl.files = dt.files;
+    }
+
+    function updateMatCount() {
+      const n = fotoMaterial?.files?.length || 0;
+      cMat.textContent = `${n} foto${n === 1 ? "" : "s"}`;
+    }
+
+    btnDelMaterial.addEventListener("click", () => {
+      fotoMaterial.value = "";
+      updateMatCount();
+    });
+
+    fotoMaterial.addEventListener("change", () => {
+      keepOneFile(fotoMaterial);
+      updateMatCount();
+    });
+
+    updateMatCount();
+
+    // Convertir a JPEG y limitar tamaño (más estable en iOS/localStorage)
+    async function fileToJpegDataURL(file) {
+      const src = await new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+
+      const img = await new Promise((resolve, reject) => {
+        const im = new Image();
+        im.onload = () => resolve(im);
+        im.onerror = reject;
+        im.src = src;
+      });
+
+      const MAX_W = 1400;
+      let w = img.naturalWidth || img.width;
+      let h = img.naturalHeight || img.height;
+      if (w > MAX_W) { h = Math.round(h * (MAX_W / w)); w = MAX_W; }
+
+      const c = document.createElement("canvas");
+      c.width = w; c.height = h;
+      c.getContext("2d").drawImage(img, 0, 0, w, h);
+
+      return c.toDataURL("image/jpeg", 0.85);
+    }
+    // ===========================================
+
+    // ------- Guardado local -------
     document.getElementById("btnGuardar").addEventListener("click", async () => {
       ok.textContent = "";
       err.textContent = "";
@@ -169,77 +248,18 @@ recalc();
 
       const mat = toNum(materialInput.value);
       const bat = toNum(bateriaSelect.value);
-      const totalFinal = MANTENIMIENTO_FIJO + mat + bat;
+      const pil = toInt0(pilasInput.value);
+      const totalFinal = MANTENIMIENTO_FIJO + mat + bat + (pil * P_PILA);
 
-      const fotoMaterial = document.getElementById("fotoMaterial");
-const btnDelMaterial = document.getElementById("btnDelMaterial");
-const cMat = document.getElementById("cMat");
-
-// Mantener solo 1 foto (como instalaciones)
-function keepOneFile(inputEl) {
-  if (!inputEl || !inputEl.files) return;
-  if (inputEl.files.length <= 1) return;
-  const dt = new DataTransfer();
-  dt.items.add(inputEl.files[0]);
-  inputEl.files = dt.files;
-}
-
-function updateMatCount() {
-  const n = fotoMaterial?.files?.length || 0;
-  cMat.textContent = `${n} foto${n === 1 ? "" : "s"}`;
-}
-
-btnDelMaterial.addEventListener("click", () => {
-  fotoMaterial.value = "";
-  updateMatCount();
-});
-
-fotoMaterial.addEventListener("change", () => {
-  keepOneFile(fotoMaterial);
-  updateMatCount();
-});
-
-updateMatCount();
-
-// Leer 0..1 imágenes
-const files = Array.from(fotoMaterial.files || []).slice(0, 1);
-const materialImages = [];
-
-      // Convertir a JPEG y limitar tamaño (más estable en iOS/localStorage)
-      async function fileToJpegDataURL(file) {
-        const src = await new Promise((resolve, reject) => {
-          const r = new FileReader();
-          r.onload = () => resolve(r.result);
-          r.onerror = reject;
-          r.readAsDataURL(file);
-        });
-
-        const img = await new Promise((resolve, reject) => {
-          const im = new Image();
-          im.onload = () => resolve(im);
-          im.onerror = reject;
-          im.src = src;
-        });
-
-        const MAX_W = 1400;
-        let w = img.naturalWidth || img.width;
-        let h = img.naturalHeight || img.height;
-        if (w > MAX_W) { h = Math.round(h * (MAX_W / w)); w = MAX_W; }
-
-        const c = document.createElement("canvas");
-        c.width = w; c.height = h;
-        c.getContext("2d").drawImage(img, 0, 0, w, h);
-
-        return c.toDataURL("image/jpeg", 0.85);
-      }
+      // Leer 0..1 imágenes
+      const files = Array.from(fotoMaterial.files || []).slice(0, 1);
+      const materialImages = [];
 
       for (const f of files) {
         try {
           const data = await fileToJpegDataURL(f);
           materialImages.push(data);
-        } catch (e) {
-          // Si falla una imagen, no rompemos el parte
-        }
+        } catch (e) {}
       }
 
       const payload = {
@@ -247,11 +267,12 @@ const materialImages = [];
         sent_by: {},
         header: { ...header, tecnico: tec.value || "" },
         tipo: "mantenimiento",
-        tarifas: { FIJO: MANTENIMIENTO_FIJO },
+        tarifas: { FIJO: MANTENIMIENTO_FIJO, P_PILA },
         datos: {
           fijo: MANTENIMIENTO_FIJO,
           material: mat,
-          bateria: bat
+          bateria: bat,
+          pilas: pil
         },
         totales: { total: totalFinal },
         observaciones: document.getElementById("obs").value || "",
@@ -312,7 +333,7 @@ const materialImages = [];
       font-family:var(--font);
       outline:none;
     }
-        /* iOS Safari: evita zoom + “deformación” al enfocar inputs */
+    /* iOS Safari: evita zoom + “deformación” al enfocar inputs */
     input, select, textarea{
       font-size:16px;              /* clave: iOS no hace zoom si >=16px */
       box-sizing:border-box;

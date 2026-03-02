@@ -134,6 +134,24 @@
     <option value="126.42">Batería 12V 18Amp · 126,42€</option>
   </select>
 </div>
+
+<!-- Pilas -->
+<div style="margin-top:14px;">
+  <div class="rowhead">
+    <h2 style="margin:0; font-size:18px;">Pilas</h2>
+    <div class="rate">1 €/pila</div>
+  </div>
+
+  <label class="field onecol" style="margin-top:10px;">
+    <input id="pilas" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
+  </label>
+
+  <div class="totline">
+    <span>Total pilas</span>
+    <strong id="tPilas">0,00 €</strong>
+  </div>
+</div>
+
       <div class="attach">
         <label class="btn-attach alt">
           🖼️ Fototeca
@@ -182,6 +200,7 @@
       <div class="sumline"><span>Kilómetros</span><strong id="sKm">0,00 €</strong></div>
       <div class="sumline"><span>Comida</span><strong id="sComida">0,00 €</strong></div>
       <div class="sumline"><span>Material</span><strong id="sMat">0,00 €</strong></div>
+      <div class="sumline"><span>Pilas</span><strong id="sPilas">0,00 €</strong></div>
 
       <div class="sumtotal">
         <span>TOTAL</span>
@@ -213,6 +232,7 @@
     const P_REP = 32.14;   // €/h reparación (mano de obra)
     const P_DESPL = 19.28; // €/h desplazamiento
     const P_KM = 0.31;     // €/km
+    const P_PILA = 1.00;   // €/pila
     // ================================
 
     // Fotos: 1 y 1
@@ -249,6 +269,8 @@
     const comida = document.getElementById("comida");
     const material = document.getElementById("material");
     const bateria = document.getElementById("bateria");
+    const pilas = document.getElementById("pilas");
+
     const fotoTicket = document.getElementById("fotoTicket");
     const fotoMaterial = document.getElementById("fotoMaterial");
     const cTicket = document.getElementById("cTicket");
@@ -263,21 +285,34 @@
     const tRep = document.getElementById("tRep");
     const tDespl = document.getElementById("tDespl");
     const tKm = document.getElementById("tKm");
+    const tPilas = document.getElementById("tPilas");
+
     const sRep = document.getElementById("sRep");
     const sDespl = document.getElementById("sDespl");
     const sKm = document.getElementById("sKm");
     const sComida = document.getElementById("sComida");
     const sMat = document.getElementById("sMat");
+    const sPilas = document.getElementById("sPilas");
+
     const totalEl = document.getElementById("total");
+
+    const toInt0 = (v) => {
+      const n = Math.floor(toNum(v));
+      return Number.isFinite(n) && n > 0 ? n : 0;
+    };
 
     const recalc = () => {
       const hr = clamp0(toNum(hRep.value));
       const hd = clamp0(toNum(hDespl.value));
       const km = clamp0(toNum(kms.value));
       const co = clamp0(toNum(comida.value));
-const maBase = clamp0(toNum(material.value));
-const bat = clamp0(toNum(bateria.value));
-const ma = maBase + bat;
+
+      const maBase = clamp0(toNum(material.value));
+      const bat = clamp0(toNum(bateria.value));
+      const ma = maBase + bat;
+
+      const pil = toInt0(pilas.value);
+      const psub = pil * P_PILA;
 
       const a = hr * P_REP;
       const b = hd * P_DESPL;
@@ -286,14 +321,16 @@ const ma = maBase + bat;
       tRep.textContent = EUR(a);
       tDespl.textContent = EUR(b);
       tKm.textContent = EUR(c);
+      tPilas.textContent = EUR(psub);
 
       sRep.textContent = EUR(a);
       sDespl.textContent = EUR(b);
       sKm.textContent = EUR(c);
       sComida.textContent = EUR(co);
       sMat.textContent = EUR(ma);
+      sPilas.textContent = EUR(psub);
 
-      totalEl.textContent = EUR(a + b + c + co + ma);
+      totalEl.textContent = EUR(a + b + c + co + ma + psub);
     };
 
     ["input","change"].forEach(evt => {
@@ -302,7 +339,8 @@ const ma = maBase + bat;
       kms.addEventListener(evt, recalc);
       comida.addEventListener(evt, recalc);
       material.addEventListener(evt, recalc);
-      bateria.addEventListener(evt, recalc); 
+      bateria.addEventListener(evt, recalc);
+      pilas.addEventListener(evt, recalc);
     });
 
     const setHalfHour = (val) => {
@@ -420,7 +458,7 @@ const ma = maBase + bat;
         if (fotoMaterial.files?.[0]) materialAll.push(await fileToJpegDataURL(fotoMaterial.files[0]));
       } catch (_) {}
 
-            const hr = clamp0(toNum(hRep.value));
+      const hr = clamp0(toNum(hRep.value));
       const hd = clamp0(toNum(hDespl.value));
       const km = clamp0(toNum(kms.value));
       const co = clamp0(toNum(comida.value));
@@ -429,35 +467,38 @@ const ma = maBase + bat;
       const bat = clamp0(toNum(bateria.value));
       const ma = maBase + bat;
 
-      const tot = hr*P_REP + hd*P_DESPL + km*P_KM + co + ma;
+      const pil = toInt0(pilas.value);
+      const tot = hr*P_REP + hd*P_DESPL + km*P_KM + co + ma + (pil * P_PILA);
 
-const savedAt = new Date().toISOString();
-const partId = `${header?.fecha || "nodate"}::${header?.idCliente || "noclient"}::reparacion::${savedAt}`;
+      const savedAt = new Date().toISOString();
+      const partId = `${header?.fecha || "nodate"}::${header?.idCliente || "noclient"}::reparacion::${savedAt}`;
 
-const payload = {
-  part_id: partId,
-  sent_by: {},
-  header: { ...header, tecnico: tec.value || "" },
-  tipo: "reparacion",
-  tarifas: { P_REP, P_DESPL, P_KM },
-  datos: {
-    horas_rep: hr,
-    horas_despl: hd,
-    kms: km,
-    comida: co,
-    material: maBase,
-    bateria: bat
-  },
-  totales: { total: tot },
-  observaciones: document.getElementById("obs").value || "",
-  fotos: {
-    ticket_count: ticketAll.length,
-    material_count: materialAll.length,
-    ticket_dataurls: ticketAll,
-    material_dataurls: materialAll
-  },
-  saved_at: savedAt
-};
+      const payload = {
+        part_id: partId,
+        sent_by: {},
+        header: { ...header, tecnico: tec.value || "" },
+        tipo: "reparacion",
+        tarifas: { P_REP, P_DESPL, P_KM, P_PILA },
+        datos: {
+          horas_rep: hr,
+          horas_despl: hd,
+          kms: km,
+          comida: co,
+          material: maBase,
+          bateria: bat,
+          pilas: pil
+        },
+        totales: { total: tot },
+        observaciones: document.getElementById("obs").value || "",
+        fotos: {
+          ticket_count: ticketAll.length,
+          material_count: materialAll.length,
+          ticket_dataurls: ticketAll,
+          material_dataurls: materialAll
+        },
+        saved_at: savedAt
+      };
+
       const key = "pv_partes";
       let arr = [];
       try { arr = JSON.parse(localStorage.getItem(key) || "[]"); } catch {}

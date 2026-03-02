@@ -116,50 +116,51 @@
         <div class="rate">€</div>
       </div>
 
-      <label class="field onecol">
-        <input id="material" inputmode="decimal" placeholder="0" />
-      </label>
-<!-- Selector batería -->
-<div style="margin-top:14px;">
-  <label style="font-weight:900; display:block; margin-bottom:6px;">
-    Batería
-  </label>
+      <div class="field onecol">
+        <label>Material (€)</label>
+        <input id="material" type="text" inputmode="decimal" autocomplete="off" placeholder="0,00" />
+      </div>
 
-  <select id="bateria"
-    style="width:100%; height:56px; border-radius:14px; border:1px solid var(--line); font-size:16px; padding:0 12px;">
-    <option value="0" selected>Sin batería</option>
-    <option value="73.15">Batería 12V 9Amp · 73,15€</option>
-    <option value="108.10">Batería 12V 12Amp · 108,10€</option>
-    <option value="36.84">Batería 12V 2Amp · 36,84€</option>
-    <option value="126.42">Batería 12V 18Amp · 126,42€</option>
-  </select>
-</div>
+      <div class="field onecol">
+        <label>Batería</label>
+        <select id="bateria"
+          style="width:100%; height:56px; border-radius:14px; border:1px solid var(--line); font-size:16px; padding:0 12px;">
+          <option value="0" selected>Sin batería</option>
+          <option value="73.15">Batería 12V 9Amp · 73,15€</option>
+          <option value="108.10">Batería 12V 12Amp · 108,10€</option>
+          <option value="36.84">Batería 12V 2Amp · 36,84€</option>
+          <option value="126.42">Batería 12V 18Amp · 126,42€</option>
+        </select>
+      </div>
 
-<!-- Pilas -->
-<div style="margin-top:14px;">
-  <div class="rowhead">
-    <h2 style="margin:0; font-size:18px;">Pilas</h2>
-    <div class="rate">1 €/pila</div>
-  </div>
+      <!-- Pilas -->
+      <div style="margin-top:14px;">
+        <div class="rowhead">
+          <h2 style="margin:0;">Pilas</h2>
+          <div class="rate">1 €/pila</div>
+        </div>
 
-  <label class="field onecol" style="margin-top:10px;">
-    <input id="pilas" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
-  </label>
+        <div class="field onecol" style="margin-top:10px;">
+          <label>Nº de pilas</label>
+          <input id="pilas" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="0" />
+        </div>
 
-  <div class="totline">
-    <span>Total pilas</span>
-    <strong id="tPilas">0,00 €</strong>
-  </div>
-</div>
+        <div class="totline">
+          <span>Total pilas</span>
+          <strong id="tPilas">0,00 €</strong>
+        </div>
+      </div>
 
       <div class="attach">
+        <button type="button" class="btn-attach" id="btnCamMaterial">📷 Sacar foto</button>
+
         <label class="btn-attach alt">
           🖼️ Fototeca
           <input id="fotoMaterial" type="file" accept="image/*" />
         </label>
 
-        <button type="button" class="btn-attach" id="btnDelMaterial" title="Borrar foto">🗑️</button>
-        <span class="count" id="cMat">0 foto</span>
+        <button type="button" class="btn-trash" id="btnDelMaterial" title="Borrar foto">🗑️</button>
+        <span class="count" id="cMat">0 fotos</span>
       </div>
     </section>
 

@@ -399,9 +399,25 @@
     const getMaterialCount = () => (fotoMaterial.files?.length || 0);
 
     const updatePhotoCounts = () => {
-      cTicket.textContent = `${getTicketCount()} foto`;
-      cMat.textContent = `${getMaterialCount()} foto`;
+      const nt = getTicketCount();
+      const nm = getMaterialCount();
+      cTicket.textContent = `${nt} foto${nt === 1 ? "" : "s"}`;
+      cMat.textContent = `${nm} foto${nm === 1 ? "" : "s"}`;
     };
+
+    // Botones 📷 (si existen en el HTML)
+    const btnCamTicket = document.getElementById("btnCamTicket");
+    const btnCamMaterial = document.getElementById("btnCamMaterial");
+
+    btnCamTicket?.addEventListener("click", () => {
+      try { fotoTicket.setAttribute("capture", "environment"); } catch {}
+      try { fotoTicket.click(); } catch {}
+    });
+
+    btnCamMaterial?.addEventListener("click", () => {
+      try { fotoMaterial.setAttribute("capture", "environment"); } catch {}
+      try { fotoMaterial.click(); } catch {}
+    });
 
     fotoTicket.addEventListener("change", () => {
       enforceSingleFile(fotoTicket);

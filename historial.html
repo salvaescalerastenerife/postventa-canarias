@@ -129,13 +129,20 @@
       return out;
     };
 
-    // Total estimado para instalación si no guardaste totales
+    // Total estimado (fallback) si no guardaste totales
     const computeTotalFallback = (p) => {
       const d = p?.datos || {};
       const t = p?.tarifas || {};
       const tipo = p?.tipo || "";
 
       const toN = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0);
+      const toI = (x) => {
+        const n = Math.floor(toN(x));
+        return Number.isFinite(n) && n > 0 ? n : 0;
+      };
+
+      // pilas: 1€ por pila (por defecto)
+      const P_PILA = toN(t.P_PILA ?? 1.0);
 
       if (tipo === "instalacion") {
         const hi = toN(d.horas_inst);
@@ -161,9 +168,40 @@
         const c = km * P_KM;
         return a + b + c + dietas + ma + fu;
       }
+
+      if (tipo === "reparacion") {
+        const hr = toN(d.horas_rep);
+        const hd = toN(d.horas_despl);
+        const km = toN(d.kms);
+        const co = toN(d.comida);
+
+        const maBase = toN(d.material);
+        const bat = toN(d.bateria);
+        const ma = maBase + bat;
+
+        const pil = toI(d.pilas);
+
+        const P_REP = toN(t.P_REP ?? 32.14);
+        const P_DESPL = toN(t.P_DESPL ?? 19.28);
+        const P_KM = toN(t.P_KM ?? 0.31);
+
+        const a = hr * P_REP;
+        const b = hd * P_DESPL;
+        const c = km * P_KM;
+
+        return a + b + c + co + ma + (pil * P_PILA);
+      }
+
+      if (tipo === "mantenimiento") {
+        const fijo = toN(d.fijo ?? (t.FIJO ?? 99));
+        const mat = toN(d.material);
+        const bat = toN(d.bateria);
+        const pil = toI(d.pilas);
+        return fijo + mat + bat + (pil * P_PILA);
+      }
+
       return toN(p?.totales?.total ?? 0);
     };
-
     // XSS escape simple
     const esc = (s) => String(s || "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
@@ -516,6 +554,9 @@ for (let i = 0; i < parts.length; i++) {
     const maBase = toN(d.material);
     const bat = toN(d.bateria);
 
+    const pil = Math.max(0, Math.floor(toN(d.pilas)));
+    const P_PILA = toN(t.P_PILA ?? 1.0);
+
     const P_REP = toN(t.P_REP ?? 32.14);
     const P_DESPL = toN(t.P_DESPL ?? 19.28);
     const P_KM = toN(t.P_KM ?? 0.31);
@@ -530,6 +571,7 @@ for (let i = 0; i < parts.length; i++) {
     doc.text(`Comida: ${EUR(co)}`, M, y); y += 5;
     doc.text(`Material: ${EUR(maBase)}`, M, y); y += 5;
     if (bat > 0) { doc.text(`Batería: ${EUR(bat)}`, M, y); y += 5; }
+    if (pil > 0) { doc.text(`Pilas: ${pil} x ${EUR(P_PILA)} = ${EUR(pil * P_PILA)}`, M, y); y += 5; }
   }
 
   if (p.tipo === "mantenimiento") {
@@ -537,9 +579,13 @@ for (let i = 0; i < parts.length; i++) {
     const mat = toN(d.material);
     const bat = toN(d.bateria);
 
+    const pil = Math.max(0, Math.floor(toN(d.pilas)));
+    const P_PILA = toN(t.P_PILA ?? 1.0);
+
     doc.text(`Mantenimiento (fijo): ${EUR(fijo)}`, M, y); y += 5;
     if (mat > 0) { doc.text(`Material: ${EUR(mat)}`, M, y); y += 5; }
     if (bat > 0) { doc.text(`Batería: ${EUR(bat)}`, M, y); y += 5; }
+    if (pil > 0) { doc.text(`Pilas: ${pil} x ${EUR(P_PILA)} = ${EUR(pil * P_PILA)}`, M, y); y += 5; }
   }
 
   y += 2;

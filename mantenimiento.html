@@ -36,16 +36,16 @@
       </div>
     </section>
 
-    <!-- Precio y Material -->
+    <!-- Material -->
     <section class="card">
       <div class="rowhead">
-        <h2>Importes</h2>
-        <div class="rate">Fijo + Extras</div>
+        <h2>Material / Piezas</h2>
+        <div class="rate">€</div>
       </div>
 
       <div class="field onecol">
         <label>Material (€)</label>
-        <input id="material" type="text" inputmode="decimal" autocomplete="off" placeholder="0,00">
+        <input id="material" type="text" inputmode="decimal" autocomplete="off" placeholder="0,00" />
       </div>
 
       <div class="field onecol">
@@ -61,28 +61,21 @@
       </div>
 
       <!-- Pilas -->
-      <div class="field onecol">
-        <label>Pilas (1 €/pila)</label>
-        <input id="pilas" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="0">
-      </div>
+      <div style="margin-top:14px;">
+        <div class="rowhead">
+          <h2 style="margin:0;">Pilas</h2>
+          <div class="rate">1 €/pila</div>
+        </div>
 
-      <div class="sumtotal" style="padding-top:10px;">
-        <span>TOTAL</span>
-        <strong id="total">99,00 €</strong>
-      </div>
-    </section>
+        <div class="field onecol" style="margin-top:10px;">
+          <label>Nº de pilas</label>
+          <input id="pilas" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="0" />
+        </div>
 
-    <!-- Observaciones -->
-    <section class="card">
-      <h2>Observaciones</h2>
-      <textarea id="obs" rows="4" placeholder="Escribe aquí si hay algo que anotar..."></textarea>
-    </section>
-
-    <!-- Fotos · Material -->
-    <section class="card">
-      <div class="rowhead">
-        <h2>Fotos · Material</h2>
-        <div class="rate">€</div>
+        <div class="totline">
+          <span>Total pilas</span>
+          <strong id="tPilas">0,00 €</strong>
+        </div>
       </div>
 
       <div class="attach">
@@ -96,6 +89,17 @@
         <button type="button" class="btn-trash" id="btnDelMaterial" title="Borrar foto material">🗑️</button>
         <span class="count" id="cMat">0 fotos</span>
       </div>
+
+      <div class="sumtotal" style="padding-top:10px;">
+        <span>TOTAL</span>
+        <strong id="total">99,00 €</strong>
+      </div>
+    </section>
+
+    <!-- Observaciones -->
+    <section class="card">
+      <h2>Observaciones</h2>
+      <textarea id="obs" rows="4" placeholder="Escribe aquí si hay algo que anotar..."></textarea>
     </section>
 
     <!-- Guardar -->
@@ -131,6 +135,7 @@
     const materialInput = document.getElementById("material");
     const bateriaSelect = document.getElementById("bateria");
     const pilasInput = document.getElementById("pilas");
+    const tPilas = document.getElementById("tPilas");
     const totalEl = document.getElementById("total");
 
     const toNum = (v) => {
@@ -149,7 +154,11 @@
       const mat = toNum(materialInput.value);
       const bat = toNum(bateriaSelect.value);
       const pil = toInt0(pilasInput.value);
-      const total = MANTENIMIENTO_FIJO + mat + bat + (pil * P_PILA);
+      const pilSub = pil * P_PILA;
+
+      if (tPilas) tPilas.textContent = EUR(pilSub);
+
+      const total = MANTENIMIENTO_FIJO + mat + bat + pilSub;
       totalEl.textContent = EUR(total);
     }
 
@@ -333,6 +342,39 @@
     .rowhead{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
     .rate{ font-weight:900; color:var(--muted); }
 
+    .totline{
+      display:flex; justify-content:space-between; align-items:center;
+      padding-top:12px; margin-top:8px;
+      border-top:1px solid var(--line);
+      font-size:16px;
+      color:var(--muted);
+    }
+    .totline strong{ color:var(--text); font-size:18px; }
+
+    .attach{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; margin-top:10px;
+    }
+    .btn-attach{
+      display:inline-flex; align-items:center; justify-content:center;
+      height:52px;
+      padding:0 14px;
+      border-radius:14px;
+      background:#0b5cff;
+      color:#fff;
+      font-weight:900;
+      border:none;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn-attach input{ display:none; }
+    .btn-attach.alt{
+      background:#ffffff;
+      color:var(--primary);
+      border:1px solid rgba(11,92,255,.35);
+    }
+    .count{ color:var(--muted); font-weight:800; }
+
     textarea{
       width:100%;
       border:1px solid var(--line);
@@ -342,9 +384,10 @@
       font-family:var(--font);
       outline:none;
     }
+
     /* iOS Safari: evita zoom + “deformación” al enfocar inputs */
     input, select, textarea{
-      font-size:16px;              /* clave: iOS no hace zoom si >=16px */
+      font-size:16px;
       box-sizing:border-box;
       max-width:100%;
     }
@@ -356,7 +399,7 @@
     }
 
     .container{
-      min-height: 100dvh;          /* viewport dinámico (iOS moderno) */
+      min-height: 100dvh;
     }
     textarea:focus{
       border-color: rgba(11,92,255,.45);

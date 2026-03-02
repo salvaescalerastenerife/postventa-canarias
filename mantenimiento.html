@@ -86,8 +86,10 @@
       </div>
 
       <div class="attach">
+        <button type="button" class="btn-attach" id="btnCamMaterial">📷 Sacar foto</button>
+
         <label class="btn-attach alt">
-          🖼️ Cámara / Fototeca
+          🖼️ Fototeca
           <input id="fotoMaterial" type="file" accept="image/*" />
         </label>
 
@@ -171,6 +173,7 @@
 
     // ===== MÓDULO FOTOS (fuera del guardar) =====
     const fotoMaterial = document.getElementById("fotoMaterial");
+    const btnCamMaterial = document.getElementById("btnCamMaterial");
     const btnDelMaterial = document.getElementById("btnDelMaterial");
     const cMat = document.getElementById("cMat");
 
@@ -187,6 +190,12 @@
       const n = fotoMaterial?.files?.length || 0;
       cMat.textContent = `${n} foto${n === 1 ? "" : "s"}`;
     }
+
+    // 📷 Sacar foto (iOS): forzamos cámara y abrimos el input
+    btnCamMaterial?.addEventListener("click", () => {
+      try { fotoMaterial.setAttribute("capture", "environment"); } catch {}
+      try { fotoMaterial.click(); } catch {}
+    });
 
     btnDelMaterial.addEventListener("click", () => {
       fotoMaterial.value = "";

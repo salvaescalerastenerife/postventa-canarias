@@ -650,18 +650,41 @@ for (let i = 0; i < parts.length; i++) {
 
         saveAll(updated);
 
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: "Cierre del día", text: "Adjunto cierre del día en PDF." });
-          ok.textContent = "Cierre compartido ✅";
-        } else {
-          const url = URL.createObjectURL(pdfBlob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = filename;
-          a.click();
-          URL.revokeObjectURL(url);
-          ok.textContent = "PDF descargado (fallback) ✅";
-        }
+// 1) Intentar compartir (si el SO lo permite de verdad)
+// 2) Si falla por permisos / app destino / PWA, hacer fallback a descarga SIN reventar
+let shared = false;
+
+if (navigator.share && navigator.canShare) {
+  try {
+    if (navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: "Cierre del día",
+        text: "Adjunto cierre del día en PDF."
+      });
+      shared = true;
+      ok.textContent = "Cierre compartido ✅";
+    }
+  } catch (shareErr) {
+    console.warn("Share failed, fallback to download:", shareErr);
+    shared = false;
+  }
+}
+
+if (!shared) {
+  const url = URL.createObjectURL(pdfBlob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  // Dale un pelín de tiempo a Android antes de revocar
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+
+  ok.textContent = "PDF descargado ✅ (no se pudo compartir desde el móvil)";
+}
 
         render();
       } catch (e) {

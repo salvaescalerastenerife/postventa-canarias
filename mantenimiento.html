@@ -44,6 +44,15 @@
       </div>
 
       <div class="field onecol">
+        <label>Tarifa mantenimiento</label>
+        <select id="tarifaMant"
+          style="width:100%; height:56px; border-radius:14px; border:1px solid var(--line); font-size:16px; padding:0 12px;">
+          <option value="99" selected>Cliente antiguo · 99,00 €</option>
+          <option value="102">Cliente nuevo · 102,00 €</option>
+        </select>
+      </div>
+
+      <div class="field onecol">
         <label>Material (€)</label>
         <input id="material" type="text" inputmode="decimal" autocomplete="off" placeholder="0,00" />
       </div>
@@ -116,7 +125,12 @@
   <script>
     const EUR = (n) => new Intl.NumberFormat("es-ES", { style:"currency", currency:"EUR" }).format(n);
 
-    const MANTENIMIENTO_FIJO = 99.00;
+    // Tarifa mantenimiento: viejos 99€, nuevos 102€
+    const MANT_VIEJO = 99.00;
+    const MANT_NUEVO = 102.00;
+
+    // Default: viejo
+    let MANTENIMIENTO_FIJO = MANT_VIEJO;
     const P_PILA = 1.00;
 
     const ok = document.getElementById("ok");
@@ -162,10 +176,15 @@
       totalEl.textContent = EUR(total);
     }
 
+        tarifaMant.addEventListener("change", () => {
+      MANTENIMIENTO_FIJO = (tarifaMant.value === "102") ? MANT_NUEVO : MANT_VIEJO;
+      try { localStorage.setItem("pv_mant_tarifa", tarifaMant.value); } catch {}
+      recalc();
+    });
+
     materialInput.addEventListener("input", recalc);
     bateriaSelect.addEventListener("change", recalc);
     pilasInput.addEventListener("input", recalc);
-    pilasInput.addEventListener("change", recalc);
 
     // Recalcular al cargar (Safari iOS a veces no dispara nada hasta tocar)
     recalc();
@@ -285,12 +304,13 @@
         sent_by: {},
         header: { ...header, tecnico: tec.value || "" },
         tipo: "mantenimiento",
-        tarifas: { FIJO: MANTENIMIENTO_FIJO, P_PILA },
+        tarifas: { FIJO: MANTENIMIENTO_FIJO, P_PILA: P_PILA },
         datos: {
           fijo: MANTENIMIENTO_FIJO,
+          fijo_tipo: (MANTENIMIENTO_FIJO === MANT_NUEVO) ? "nuevo" : "antiguo",
           material: mat,
           bateria: bat,
-          pilas: pil
+          pilas: pil,
         },
         totales: { total: totalFinal },
         observaciones: document.getElementById("obs").value || "",

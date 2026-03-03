@@ -143,14 +143,30 @@
       catch { return {}; }
     })();
 
-    document.getElementById("mFecha").textContent = header.fecha || "—";
+        document.getElementById("mFecha").textContent = header.fecha || "—";
     document.getElementById("mId").textContent = header.idCliente || "—";
 
+    const tarifaMant = document.getElementById("tarifaMant");
     const materialInput = document.getElementById("material");
     const bateriaSelect = document.getElementById("bateria");
     const pilasInput = document.getElementById("pilas");
     const tPilas = document.getElementById("tPilas");
     const totalEl = document.getElementById("total");
+
+    // Cargar preferencia anterior de tarifa (si existe)
+    try {
+      const lastTar = localStorage.getItem("pv_mant_tarifa") || "";
+      if (tarifaMant && (lastTar === "99" || lastTar === "102")) {
+        tarifaMant.value = lastTar;
+      }
+    } catch {}
+
+    // Fijar el fijo según el selector al arrancar
+    if (tarifaMant && tarifaMant.value === "102") MANTENIMIENTO_FIJO = MANT_NUEVO;
+    else MANTENIMIENTO_FIJO = MANT_VIEJO;
+
+    // Pintar total inicial (antes del primer recalc)
+    totalEl.textContent = EUR(MANTENIMIENTO_FIJO);
 
     const toNum = (v) => {
       if (v === null || v === undefined) return 0;
@@ -176,7 +192,7 @@
       totalEl.textContent = EUR(total);
     }
 
-        tarifaMant.addEventListener("change", () => {
+            tarifaMant?.addEventListener("change", () => {
       MANTENIMIENTO_FIJO = (tarifaMant.value === "102") ? MANT_NUEVO : MANT_VIEJO;
       try { localStorage.setItem("pv_mant_tarifa", tarifaMant.value); } catch {}
       recalc();

@@ -471,8 +471,13 @@ const MAX_MATERIAL = 3;
       const materialAll = [];
 
       try {
-        if (fotoTicket.files?.[0]) ticketAll.push(await fileToJpegDataURL(fotoTicket.files[0]));
-        if (fotoMaterial.files?.[0]) materialAll.push(await fileToJpegDataURL(fotoMaterial.files[0]));
+        for (const f of Array.from(fotoTicket.files || []).slice(0,3)) {
+  try { ticketAll.push(await fileToJpegDataURL(f)); } catch {}
+}
+
+for (const f of Array.from(fotoMaterial.files || []).slice(0,3)) {
+  try { materialAll.push(await fileToJpegDataURL(f)); } catch {}
+}
       } catch (_) {}
 
       const hr = clamp0(toNum(hRep.value));

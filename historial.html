@@ -318,9 +318,9 @@
       doc.text(title, M, y);
       y += 8;
 
-      const gap = 6;
-      const cellW = (W - gap) / 2;
-      const cellH = 60;
+const gap = 4;
+const cellW = (W - gap * 2) / 3;
+const cellH = 45;
 
       const getImgSize = (dataUrl) => new Promise((resolve, reject) => {
         const img = new Image();
@@ -363,8 +363,8 @@
         doc.addImage(images[i], "JPEG", dx, dy, dw, dh);
 
         col++;
-        if (col === 2) { col = 0; x = M; y += (cellH + gap); }
-        else { x = M + cellW + gap; }
+        if (col === 3) { col = 0; x = M; y += (cellH + gap); }
+        else { x = M + (cellW + gap) * col; }
       }
 
       if (col === 1) y += (cellH + gap);

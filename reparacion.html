@@ -156,7 +156,7 @@
 
         <label class="btn-attach alt">
           🖼️ Fototeca
-          <input id="fotoMaterial" type="file" accept="image/*" />
+          <input id="fotoMaterial" type="file" accept="image/*" multiple />
         </label>
 
         <button type="button" class="btn-trash" id="btnDelMaterial" title="Borrar foto">🗑️</button>
@@ -176,13 +176,15 @@
       </label>
 
       <div class="attach">
+        <button type="button" class="btn-attach" id="btnCamTicket">📷 Sacar foto</button>
+
         <label class="btn-attach alt">
           🖼️ Fototeca
-          <input id="fotoTicket" type="file" accept="image/*" />
+          <input id="fotoTicket" type="file" accept="image/*" multiple />
         </label>
 
-        <button type="button" class="btn-attach" id="btnDelTicket" title="Borrar foto">🗑️</button>
-        <span class="count" id="cTicket">0 foto</span>
+        <button type="button" class="btn-trash" id="btnDelTicket" title="Borrar foto">🗑️</button>
+        <span class="count" id="cTicket">0 fotos</span>
       </div>
     </section>
 
@@ -236,9 +238,9 @@
     const P_PILA = 1.00;   // €/pila
     // ================================
 
-// Fotos: hasta 3
-const MAX_TICKET = 3;
-const MAX_MATERIAL = 3;
+    // Fotos: hasta 3
+    const MAX_TICKET = 3;
+    const MAX_MATERIAL = 3;
 
     // Cabecera desde pv_header
     const header = (() => {
@@ -386,12 +388,13 @@ const MAX_MATERIAL = 3;
       });
     });
 
-    // Fotos 1 y 1
-    const enforceSingleFile = (inputEl) => {
+    // Fotos hasta 3
+    const trimFilesToMax = (inputEl, max) => {
       if (!inputEl?.files) return;
-      if (inputEl.files.length <= 1) return;
+      if (inputEl.files.length <= max) return;
+
       const dt = new DataTransfer();
-      dt.items.add(inputEl.files[0]);
+      Array.from(inputEl.files).slice(0, max).forEach(f => dt.items.add(f));
       inputEl.files = dt.files;
     };
 
@@ -405,7 +408,7 @@ const MAX_MATERIAL = 3;
       cMat.textContent = `${nm} foto${nm === 1 ? "" : "s"}`;
     };
 
-    // Botones 📷 (si existen en el HTML)
+    // Botones 📷
     const btnCamTicket = document.getElementById("btnCamTicket");
     const btnCamMaterial = document.getElementById("btnCamMaterial");
 
@@ -420,18 +423,24 @@ const MAX_MATERIAL = 3;
     });
 
     fotoTicket.addEventListener("change", () => {
-      enforceSingleFile(fotoTicket);
-      if (getTicketCount() > MAX_TICKET) fotoTicket.value = "";
-      updatePhotoCounts();
-    });
-    fotoMaterial.addEventListener("change", () => {
-      enforceSingleFile(fotoMaterial);
-      if (getMaterialCount() > MAX_MATERIAL) fotoMaterial.value = "";
+      trimFilesToMax(fotoTicket, MAX_TICKET);
       updatePhotoCounts();
     });
 
-    btnDelTicket.addEventListener("click", () => { fotoTicket.value = ""; updatePhotoCounts(); });
-    btnDelMaterial.addEventListener("click", () => { fotoMaterial.value = ""; updatePhotoCounts(); });
+    fotoMaterial.addEventListener("change", () => {
+      trimFilesToMax(fotoMaterial, MAX_MATERIAL);
+      updatePhotoCounts();
+    });
+
+    btnDelTicket.addEventListener("click", () => {
+      fotoTicket.value = "";
+      updatePhotoCounts();
+    });
+
+    btnDelMaterial.addEventListener("click", () => {
+      fotoMaterial.value = "";
+      updatePhotoCounts();
+    });
 
     // Helpers: file -> JPEG DataURL
     const fileToDataURL = (file) => new Promise((resolve, reject) => {
@@ -472,12 +481,12 @@ const MAX_MATERIAL = 3;
 
       try {
         for (const f of Array.from(fotoTicket.files || []).slice(0,3)) {
-  try { ticketAll.push(await fileToJpegDataURL(f)); } catch {}
-}
+          ticketAll.push(await fileToJpegDataURL(f));
+        }
 
-for (const f of Array.from(fotoMaterial.files || []).slice(0,3)) {
-  try { materialAll.push(await fileToJpegDataURL(f)); } catch {}
-}
+        for (const f of Array.from(fotoMaterial.files || []).slice(0,3)) {
+          materialAll.push(await fileToJpegDataURL(f));
+        }
       } catch (_) {}
 
       const hr = clamp0(toNum(hRep.value));
@@ -598,6 +607,21 @@ for (const f of Array.from(fotoMaterial.files || []).slice(0,3)) {
       color:var(--primary);
       border:1px solid rgba(11,92,255,.35);
     }
+
+    .btn-trash{
+      height:52px;
+      width:52px;
+      border-radius:14px;
+      border:1px solid rgba(148,163,184,.6);
+      background:#fff;
+      font-size:18px;
+      font-weight:900;
+      color:#0f172a;
+      cursor:pointer;
+      flex:0 0 auto;
+    }
+    .btn-trash:active{ transform: translateY(1px); }
+
     .count{ color:var(--muted); font-weight:800; }
 
     textarea{

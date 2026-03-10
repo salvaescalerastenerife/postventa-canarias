@@ -37,6 +37,11 @@
       </div>
 
       <label style="display:flex; align-items:center; gap:10px; margin-top:12px; font-weight:800;">
+        <input id="fTodasFechas" type="checkbox" style="width:20px; height:20px;" />
+        Mostrar partes de cualquier fecha
+      </label>
+
+      <label style="display:flex; align-items:center; gap:10px; margin-top:12px; font-weight:800;">
         <input id="fPendientes" type="checkbox" style="width:20px; height:20px;" />
         Mostrar no enviados de cualquier fecha
       </label>
@@ -65,6 +70,7 @@
     const fFecha = document.getElementById("fFecha");
     const fTec = document.getElementById("fTec");
     const fPendientes = document.getElementById("fPendientes");
+    const fTodasFechas = document.getElementById("fTodasFechas");
     const btnRefresh = document.getElementById("btnRefresh");
     const btnCierre = document.getElementById("btnCierre");
 
@@ -224,20 +230,22 @@
       const date = (fFecha.value || "").trim();
       const tec = (fTec.value || "").trim();
       const soloPendientes = !!fPendientes?.checked;
+      const todasFechas = !!fTodasFechas?.checked;
 
       const filtered = all
         .filter(p => {
-          if (soloPendientes) return true;   // si buscas no enviados globales, ignoramos fecha
+          if (todasFechas) return true;      // muestra todo sin importar la fecha
+          if (soloPendientes) return true;   // modo viejo: pendientes globales
           return !date || partDate(p) === date;
         })
         .filter(p => !tec || partTechs(p).includes(tec))
         .filter(p => !soloPendientes || !isSentForTec(p, tec))
         .sort((a,b) => (b.saved_at || "").localeCompare(a.saved_at || ""));
+
       if (!filtered.length) {
         list.innerHTML = `<p style="color:var(--muted); font-weight:800;">No hay partes para ese filtro.</p>`;
         return;
       }
-
       list.innerHTML = filtered.map((p) => {
         const tipo = p.tipo || "—";
         const id = p.header?.idCliente || "—";
@@ -286,6 +294,7 @@
 
     btnRefresh.addEventListener("click", render);
     fPendientes?.addEventListener("change", render);
+    fTodasFechas?.addEventListener("change", render);
 
     // ---------- PDF Cierre del día (por técnico) ----------
     const requireTecSelected = () => {

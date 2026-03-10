@@ -38,7 +38,7 @@
 
       <label style="display:flex; align-items:center; gap:10px; margin-top:12px; font-weight:800;">
         <input id="fPendientes" type="checkbox" style="width:20px; height:20px;" />
-        Mostrar solo partes no enviados
+        Mostrar no enviados de cualquier fecha
       </label>
 
       <div class="btnRow" style="margin-top:12px;">
@@ -226,7 +226,10 @@
       const soloPendientes = !!fPendientes?.checked;
 
       const filtered = all
-        .filter(p => !date || partDate(p) === date)
+        .filter(p => {
+          if (soloPendientes) return true;   // si buscas no enviados globales, ignoramos fecha
+          return !date || partDate(p) === date;
+        })
         .filter(p => !tec || partTechs(p).includes(tec))
         .filter(p => !soloPendientes || !isSentForTec(p, tec))
         .sort((a,b) => (b.saved_at || "").localeCompare(a.saved_at || ""));

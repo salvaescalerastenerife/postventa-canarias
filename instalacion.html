@@ -143,7 +143,7 @@
 
         <label class="btn-attach alt">
           🖼️ Fototeca
-          <input id="fotoAlmuerzo" type="file" accept="image/*" />
+          <input id="fotoAlmuerzo" type="file" accept="image/*" multiple />
         </label>
 
         <button type="button" class="btn-trash" id="btnDelAlmuerzo" title="Borrar foto almuerzo">🗑️</button>
@@ -167,7 +167,7 @@
 
         <label class="btn-attach alt">
           🖼️ Fototeca
-          <input id="fotoCena" type="file" accept="image/*" />
+          <input id="fotoCena" type="file" accept="image/*" multiple />
         </label>
 
         <button type="button" class="btn-trash" id="btnDelCena" title="Borrar foto cena">🗑️</button>
@@ -191,7 +191,7 @@
 
         <label class="btn-attach alt">
           🖼️ Fototeca
-          <input id="fotoMaterial" type="file" accept="image/*" />
+          <input id="fotoMaterial" type="file" accept="image/*" multiple />
         </label>
 
         <button type="button" class="btn-trash" id="btnDelMaterial" title="Borrar foto material">🗑️</button>
@@ -295,8 +295,8 @@
     const TECNICOS_INST = 2;
 
     // Fotos: límite por campo
-    const MAX_TICKET = 1;
-    const MAX_MATERIAL = 1;
+    const MAX_TICKET = 3;
+    const MAX_MATERIAL = 3;
 
     // ------- Cargar cabecera -------
     const header = (() => {
@@ -343,7 +343,7 @@
     syncTechOptions();
 
     // ------- Inputs -------
-        const hInst = document.getElementById("hInst");
+    const hInst = document.getElementById("hInst");
     const hDespl = document.getElementById("hDespl");
     const kms = document.getElementById("kms");
     const almuerzo = document.getElementById("almuerzo");
@@ -391,9 +391,9 @@
       const ma = clamp0(toNum(material.value));
       const fu = furgonOn.checked ? FURGON : 0;
 
-      const a = hi * P_INST * TECNICOS_INST;        // instalación ×2
-      const b = hd * P_DESPL * TECNICOS_INST;       // desplazamiento ×2
-      const c = km * P_KM;                          // km NO ×2
+      const a = hi * P_INST * TECNICOS_INST;
+      const b = hd * P_DESPL * TECNICOS_INST;
+      const c = km * P_KM;
 
       tInst.textContent = EUR(a);
       tDespl.textContent = EUR(b);
@@ -482,24 +482,29 @@
     let cenaShots = [];
     let materialShots = [];
 
-    const MAX_ALMUERZO = 1;
-    const MAX_CENA = 1;
+    const MAX_ALMUERZO = 3;
+    const MAX_CENA = 3;
 
     const getAlmuerzoCount = () => (almuerzoShots.length + (fotoAlmuerzo.files?.length || 0));
     const getCenaCount = () => (cenaShots.length + (fotoCena.files?.length || 0));
     const getMaterialCount = () => (materialShots.length + (fotoMaterial.files?.length || 0));
 
     const updatePhotoCounts = () => {
-      cAlmuerzo.textContent = `${getAlmuerzoCount()} foto`;
-      cCena.textContent = `${getCenaCount()} foto`;
-      cMat.textContent = `${getMaterialCount()} foto`;
+      const na = getAlmuerzoCount();
+      const nc = getCenaCount();
+      const nm = getMaterialCount();
+
+      cAlmuerzo.textContent = `${na} foto${na === 1 ? "" : "s"}`;
+      cCena.textContent = `${nc} foto${nc === 1 ? "" : "s"}`;
+      cMat.textContent = `${nm} foto${nm === 1 ? "" : "s"}`;
     };
 
-    const enforceSingleFile = (inputEl) => {
+    const trimFilesToMax = (inputEl, max) => {
       if (!inputEl?.files) return;
-      if (inputEl.files.length <= 1) return;
+      if (inputEl.files.length <= max) return;
+
       const dt = new DataTransfer();
-      dt.items.add(inputEl.files[0]);
+      Array.from(inputEl.files).slice(0, max).forEach(f => dt.items.add(f));
       inputEl.files = dt.files;
     };
 
@@ -525,12 +530,12 @@
     btnDelCena.addEventListener("click", () => { err.textContent = ""; ok.textContent=""; clearCenaPhoto(); });
     btnDelMaterial.addEventListener("click", () => { err.textContent = ""; ok.textContent=""; clearMaterialPhoto(); });
 
-    // Fototeca: 1 máximo y si ya hay foto -> no deja
+    // Fototeca: hasta 3 por campo
     fotoAlmuerzo.addEventListener("change", () => {
-      enforceSingleFile(fotoAlmuerzo);
+      trimFilesToMax(fotoAlmuerzo, MAX_ALMUERZO);
 
-      if (almuerzoShots.length >= MAX_ALMUERZO) {
-        err.textContent = "Solo 1 foto de Almuerzo por parte. Borra la anterior (🗑️) para cambiarla.";
+      if ((almuerzoShots.length + (fotoAlmuerzo.files?.length || 0)) > MAX_ALMUERZO) {
+        err.textContent = "Máximo 3 fotos de Almuerzo por parte.";
         fotoAlmuerzo.value = "";
         return;
       }
@@ -539,10 +544,10 @@
     });
 
     fotoCena.addEventListener("change", () => {
-      enforceSingleFile(fotoCena);
+      trimFilesToMax(fotoCena, MAX_CENA);
 
-      if (cenaShots.length >= MAX_CENA) {
-        err.textContent = "Solo 1 foto de Cena por parte. Borra la anterior (🗑️) para cambiarla.";
+      if ((cenaShots.length + (fotoCena.files?.length || 0)) > MAX_CENA) {
+        err.textContent = "Máximo 3 fotos de Cena por parte.";
         fotoCena.value = "";
         return;
       }
@@ -551,10 +556,10 @@
     });
 
     fotoMaterial.addEventListener("change", () => {
-      enforceSingleFile(fotoMaterial);
+      trimFilesToMax(fotoMaterial, MAX_MATERIAL);
 
-      if (materialShots.length >= MAX_MATERIAL) {
-        err.textContent = "Solo 1 foto de Material por parte. Borra la anterior (🗑️) para cambiarla.";
+      if ((materialShots.length + (fotoMaterial.files?.length || 0)) > MAX_MATERIAL) {
+        err.textContent = "Máximo 3 fotos de Material por parte.";
         fotoMaterial.value = "";
         return;
       }
@@ -583,17 +588,17 @@
     let lastDataUrl = null;
 
     const openCam = async (target) => {
-      // Bloqueo por límite 1
+      // Bloqueo por límite 3
       if (target === "almuerzo" && getAlmuerzoCount() >= MAX_ALMUERZO) {
-        err.textContent = "Ya hay 1 foto de Almuerzo. Borra la anterior (🗑️) para cambiarla.";
+        err.textContent = "Ya hay 3 fotos de Almuerzo.";
         return;
       }
       if (target === "cena" && getCenaCount() >= MAX_CENA) {
-        err.textContent = "Ya hay 1 foto de Cena. Borra la anterior (🗑️) para cambiarla.";
+        err.textContent = "Ya hay 3 fotos de Cena.";
         return;
       }
       if (target === "material" && getMaterialCount() >= MAX_MATERIAL) {
-        err.textContent = "Ya hay 1 foto de Material. Borra la anterior (🗑️) para cambiarla.";
+        err.textContent = "Ya hay 3 fotos de Material.";
         return;
       }
 
@@ -664,26 +669,26 @@
 
       if (currentTarget === "almuerzo") {
         if (getAlmuerzoCount() >= MAX_ALMUERZO) {
-          camMsg.textContent = "Ya hay 1 foto de Almuerzo. Borra la anterior (🗑️) para cambiarla.";
+          camMsg.textContent = "Ya hay 3 fotos de Almuerzo.";
           return;
         }
-        almuerzoShots = [lastDataUrl];
+        almuerzoShots.push(lastDataUrl);
       }
 
       if (currentTarget === "cena") {
         if (getCenaCount() >= MAX_CENA) {
-          camMsg.textContent = "Ya hay 1 foto de Cena. Borra la anterior (🗑️) para cambiarla.";
+          camMsg.textContent = "Ya hay 3 fotos de Cena.";
           return;
         }
-        cenaShots = [lastDataUrl];
+        cenaShots.push(lastDataUrl);
       }
 
       if (currentTarget === "material") {
         if (getMaterialCount() >= MAX_MATERIAL) {
-          camMsg.textContent = "Ya hay 1 foto de Material. Borra la anterior (🗑️) para cambiarla.";
+          camMsg.textContent = "Ya hay 3 fotos de Material.";
           return;
         }
-        materialShots = [lastDataUrl];
+        materialShots.push(lastDataUrl);
       }
 
       updatePhotoCounts();
@@ -732,7 +737,7 @@
     const collectFototecaJpegs = async (inputEl) => {
       const out = [];
       const files = inputEl?.files ? Array.from(inputEl.files) : [];
-      for (const f of files) {
+      for (const f of files.slice(0, 3)) {
         try { out.push(await fileToJpegDataURL(f)); } catch(_) {}
       }
       return out;
@@ -758,32 +763,32 @@
         return;
       }
 
-      // Normaliza y guarda 1 foto máximo por campo (cámara + fototeca)
+      // Normaliza y guarda hasta 3 fotos por campo (cámara + fototeca)
       const almuerzoFototeca = await collectFototecaJpegs(fotoAlmuerzo);
       const cenaFototeca = await collectFototecaJpegs(fotoCena);
       const materialFototeca = await collectFototecaJpegs(fotoMaterial);
 
-      const almuerzoAll = [...almuerzoShots, ...almuerzoFototeca].slice(0, 1);
-      const cenaAll = [...cenaShots, ...cenaFototeca].slice(0, 1);
-      const materialAll = [...materialShots, ...materialFototeca].slice(0, 1);
+      const almuerzoAll = [...almuerzoShots, ...almuerzoFototeca].slice(0, 3);
+      const cenaAll = [...cenaShots, ...cenaFototeca].slice(0, 3);
+      const materialAll = [...materialShots, ...materialFototeca].slice(0, 3);
 
       const hi = clamp0(toNum(hInst.value));
-const hd = clamp0(toNum(hDespl.value));
-const km = clamp0(toNum(kms.value));
-const al = clamp0(toNum(almuerzo.value));
-const ce = clamp0(toNum(cena.value));
-const ma = clamp0(toNum(material.value));
-const fu = furgonOn.checked ? FURGON : 0;
+      const hd = clamp0(toNum(hDespl.value));
+      const km = clamp0(toNum(kms.value));
+      const al = clamp0(toNum(almuerzo.value));
+      const ce = clamp0(toNum(cena.value));
+      const ma = clamp0(toNum(material.value));
+      const fu = furgonOn.checked ? FURGON : 0;
 
-const a = hi * P_INST * TECNICOS_INST;
-const b = hd * P_DESPL * TECNICOS_INST;
-const c = km * P_KM;
-const tot = a + b + c + al + ce + ma + fu;
+      const a = hi * P_INST * TECNICOS_INST;
+      const b = hd * P_DESPL * TECNICOS_INST;
+      const c = km * P_KM;
+      const tot = a + b + c + al + ce + ma + fu;
 
-const savedAt = new Date().toISOString();
-const partId = `${header?.fecha || "nodate"}::${header?.idCliente || "noclient"}::instalacion::${savedAt}`;
+      const savedAt = new Date().toISOString();
+      const partId = `${header?.fecha || "nodate"}::${header?.idCliente || "noclient"}::instalacion::${savedAt}`;
 
-const payload = {
+      const payload = {
         part_id: partId,
         sent_by: {},
         header: { ...header, tecnico1: tec1.value || "", tecnico2: tec2.value || "" },
@@ -814,31 +819,29 @@ const payload = {
       const key = "pv_partes";
       let arr = [];
       try { arr = JSON.parse(localStorage.getItem(key) || "[]"); } catch {}
+
       try {
-arr.push(payload);
-localStorage.setItem(key, JSON.stringify(arr));
+        arr.push(payload);
+        localStorage.setItem(key, JSON.stringify(arr));
 
-// Confirmación simple (iOS/localStorage edge)
-const test = JSON.parse(localStorage.getItem(key) || "[]");
-if (!Array.isArray(test) || test.length !== arr.length) throw new Error("Guardado no confirmado");
+        const test = JSON.parse(localStorage.getItem(key) || "[]");
+        if (!Array.isArray(test) || test.length !== arr.length) throw new Error("Guardado no confirmado");
 
-// Limpia cabecera del “nuevo parte” (evita arrastrar datos)
-try { localStorage.removeItem("pv_header"); } catch {}
+        try { localStorage.removeItem("pv_header"); } catch {}
 
-ok.textContent = "Guardado en el móvil ✅";
+        ok.textContent = "Guardado en el móvil ✅";
 
-// deja respirar el event loop antes de navegar (iOS)
-await new Promise(r => requestAnimationFrame(r));
-await new Promise(r => setTimeout(r, 50));
+        await new Promise(r => requestAnimationFrame(r));
+        await new Promise(r => setTimeout(r, 50));
 
-window.location.href = "./index.html";
-} catch (e) {
-  console.error(e);
-  err.textContent = "Error guardando en el teléfono.";
-  return;
-}
+        window.location.href = "./index.html";
+      } catch (e) {
+        console.error(e);
+        err.textContent = "Error guardando en el teléfono.";
+        return;
+      }
     });
-    
+
     // Inicialización final
     syncDisplays();
     recalc();

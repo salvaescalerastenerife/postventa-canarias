@@ -92,7 +92,7 @@
 
         <label class="btn-attach alt">
           🖼️ Fototeca
-          <input id="fotoMaterial" type="file" accept="image/*" />
+          <input id="fotoMaterial" type="file" accept="image/*" multiple />
         </label>
 
         <button type="button" class="btn-trash" id="btnDelMaterial" title="Borrar foto material">🗑️</button>
@@ -132,6 +132,7 @@
     // Default: viejo
     let MANTENIMIENTO_FIJO = MANT_VIEJO;
     const P_PILA = 1.00;
+    const MAX_MATERIAL = 3;
 
     const ok = document.getElementById("ok");
     const err = document.getElementById("err");
@@ -143,7 +144,7 @@
       catch { return {}; }
     })();
 
-        document.getElementById("mFecha").textContent = header.fecha || "—";
+    document.getElementById("mFecha").textContent = header.fecha || "—";
     document.getElementById("mId").textContent = header.idCliente || "—";
 
     const tarifaMant = document.getElementById("tarifaMant");
@@ -192,7 +193,7 @@
       totalEl.textContent = EUR(total);
     }
 
-            tarifaMant?.addEventListener("change", () => {
+    tarifaMant?.addEventListener("change", () => {
       MANTENIMIENTO_FIJO = (tarifaMant.value === "102") ? MANT_NUEVO : MANT_VIEJO;
       try { localStorage.setItem("pv_mant_tarifa", tarifaMant.value); } catch {}
       recalc();
@@ -202,7 +203,7 @@
     bateriaSelect.addEventListener("change", recalc);
     pilasInput.addEventListener("input", recalc);
 
-    // Recalcular al cargar (Safari iOS a veces no dispara nada hasta tocar)
+    // Recalcular al cargar
     recalc();
 
     // Recordar último técnico (para mantenimiento)
@@ -215,18 +216,18 @@
       try { localStorage.setItem("pv_tecnico_mant", tec.value || ""); } catch {}
     });
 
-    // ===== MÓDULO FOTOS (fuera del guardar) =====
+    // ===== MÓDULO FOTOS =====
     const fotoMaterial = document.getElementById("fotoMaterial");
     const btnCamMaterial = document.getElementById("btnCamMaterial");
     const btnDelMaterial = document.getElementById("btnDelMaterial");
     const cMat = document.getElementById("cMat");
 
-    // Mantener solo 1 foto (como instalaciones)
-    function keepOneFile(inputEl) {
+    function trimFilesToMax(inputEl, max) {
       if (!inputEl || !inputEl.files) return;
-      if (inputEl.files.length <= 1) return;
+      if (inputEl.files.length <= max) return;
+
       const dt = new DataTransfer();
-      dt.items.add(inputEl.files[0]);
+      Array.from(inputEl.files).slice(0, max).forEach(f => dt.items.add(f));
       inputEl.files = dt.files;
     }
 
@@ -247,13 +248,13 @@
     });
 
     fotoMaterial.addEventListener("change", () => {
-      keepOneFile(fotoMaterial);
+      trimFilesToMax(fotoMaterial, MAX_MATERIAL);
       updateMatCount();
     });
 
     updateMatCount();
 
-    // Convertir a JPEG y limitar tamaño (más estable en iOS/localStorage)
+    // Convertir a JPEG y limitar tamaño
     async function fileToJpegDataURL(file) {
       const src = await new Promise((resolve, reject) => {
         const r = new FileReader();
@@ -280,7 +281,6 @@
 
       return c.toDataURL("image/jpeg", 0.85);
     }
-    // ===========================================
 
     // ------- Guardado local -------
     document.getElementById("btnGuardar").addEventListener("click", async () => {
@@ -304,8 +304,8 @@
       const pil = toInt0(pilasInput.value);
       const totalFinal = MANTENIMIENTO_FIJO + mat + bat + (pil * P_PILA);
 
-      // Leer 0..1 imágenes
-const files = Array.from(fotoMaterial.files || []).slice(0, 3);
+      // Leer hasta 3 imágenes
+      const files = Array.from(fotoMaterial.files || []).slice(0, 3);
       const materialImages = [];
 
       for (const f of files) {
@@ -409,6 +409,21 @@ const files = Array.from(fotoMaterial.files || []).slice(0, 3);
       color:var(--primary);
       border:1px solid rgba(11,92,255,.35);
     }
+
+    .btn-trash{
+      height:52px;
+      width:52px;
+      border-radius:14px;
+      border:1px solid rgba(148,163,184,.6);
+      background:#fff;
+      font-size:18px;
+      font-weight:900;
+      color:#0f172a;
+      cursor:pointer;
+      flex:0 0 auto;
+    }
+    .btn-trash:active{ transform: translateY(1px); }
+
     .count{ color:var(--muted); font-weight:800; }
 
     textarea{

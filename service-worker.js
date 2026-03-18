@@ -1,4 +1,4 @@
-const CACHE = "postventa-canarias-v17";
+const CACHE = "postventa-canarias-v18";
 
 /**
  * Precache SOLO rutas que existen en el ZIP.

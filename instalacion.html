@@ -424,11 +424,10 @@
       furgonOn.addEventListener(evt, recalc);
     });
 
-    // --- STEPPER horas (saltos de 0,5 hasta 30h) ---
+    // --- STEPPER horas (saltos de 0,5 sin límite superior) ---
     const setHalfHour = (val) => {
       let v = Math.round(val * 2) / 2;
       if (v < 0) v = 0;
-      if (v > 30) v = 30;
       return v;
     };
 

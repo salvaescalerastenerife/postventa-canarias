@@ -1,5 +1,5 @@
 window.PV_TECH_FLAGS = {
-  ENABLE_CARLOS_JAVIER: false
+  ENABLE_CARLOS_JAVIER: true
 };
 
 window.PV_PENDING_TECHS = [

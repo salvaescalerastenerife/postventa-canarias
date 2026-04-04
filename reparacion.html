@@ -487,23 +487,60 @@ btnDelObsPart.addEventListener("click", () => {
       r.readAsDataURL(file);
     });
 
-    const dataUrlToJpeg = (src) => new Promise((resolve, reject) => {
+ const dataUrlToJpeg = (src, kind = "normal") => new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
-        const MAX_W = 1400;
+        const isObsPart = kind === "obsPart";
+        const MAX_W = isObsPart ? 1600 : 900;
+        const QUALITY = isObsPart ? 0.9 : 0.55;
+
         let w = img.naturalWidth || img.width;
         let h = img.naturalHeight || img.height;
-        if (w > MAX_W) { h = Math.round(h * (MAX_W / w)); w = MAX_W; }
+
+        if (w > MAX_W) {
+          h = Math.round(h * (MAX_W / w));
+          w = MAX_W;
+        }
+
         const c = document.createElement("canvas");
-        c.width = w; c.height = h;
+        c.width = w;
+        c.height = h;
         c.getContext("2d").drawImage(img, 0, 0, w, h);
-        resolve(c.toDataURL("image/jpeg", 0.85));
+        resolve(c.toDataURL("image/jpeg", QUALITY));
       };
       img.onerror = reject;
       img.src = src;
     });
 
-    const fileToJpegDataURL = async (file) => dataUrlToJpeg(await fileToDataURL(file));
+const fileToJpegDataURL = async (file, kind = "normal") => {
+  const src = await fileToDataURL(file);
+
+  const img = await new Promise((resolve, reject) => {
+    const im = new Image();
+    im.onload = () => resolve(im);
+    im.onerror = reject;
+    im.src = src;
+  });
+
+  const isObsPart = kind === "obsPart";
+  const MAX_W = isObsPart ? 1600 : 900;
+  const QUALITY = isObsPart ? 0.9 : 0.55;
+
+  let w = img.naturalWidth || img.width;
+  let h = img.naturalHeight || img.height;
+
+  if (w > MAX_W) {
+    h = Math.round(h * (MAX_W / w));
+    w = MAX_W;
+  }
+
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  c.getContext("2d").drawImage(img, 0, 0, w, h);
+
+  return c.toDataURL("image/jpeg", QUALITY);
+};
 
     // Guardar
     document.getElementById("btnGuardar").addEventListener("click", async () => {
@@ -519,18 +556,17 @@ const obsPartAll = [];
 
 try {
   for (const f of Array.from(fotoTicket.files || []).slice(0,3)) {
-    ticketAll.push(await fileToJpegDataURL(f));
+    ticketAll.push(await fileToJpegDataURL(f, "normal"));
   }
 
   for (const f of Array.from(fotoMaterial.files || []).slice(0,3)) {
-    materialAll.push(await fileToJpegDataURL(f));
+    materialAll.push(await fileToJpegDataURL(f, "normal"));
   }
 
   for (const f of Array.from(fotoObsPart.files || []).slice(0,1)) {
-    obsPartAll.push(await fileToJpegDataURL(f));
+    obsPartAll.push(await fileToJpegDataURL(f, "obsPart"));
   }
 } catch (_) {}
-
       const hr = clamp0(toNum(hRep.value));
       const hd = clamp0(toNum(hDespl.value));
       const km = clamp0(toNum(kms.value));

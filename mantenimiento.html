@@ -106,10 +106,23 @@
     </section>
 
     <!-- Observaciones -->
-    <section class="card">
-      <h2>Observaciones</h2>
-      <textarea id="obs" rows="4" placeholder="Escribe aquí si hay algo que anotar..."></textarea>
-    </section>
+<!-- Observaciones -->
+<section class="card">
+  <h2>Observaciones</h2>
+  <textarea id="obs" rows="4" placeholder="Escribe aquí si hay algo que anotar..."></textarea>
+
+  <div class="attach" style="margin-top:12px;">
+    <button type="button" class="btn-attach" id="btnCamObsPart">📷 Sacar foto</button>
+
+    <label class="btn-attach alt">
+      🖼️ Fototeca
+      <input id="fotoObsPart" type="file" accept="image/*" />
+    </label>
+
+    <button type="button" class="btn-trash" id="btnDelObsPart" title="Borrar foto del parte">🗑️</button>
+    <span class="count" id="cObsPart">0 fotos</span>
+  </div>
+</section>
 
     <!-- Guardar -->
     <section class="card">
@@ -218,9 +231,16 @@
 
     // ===== MÓDULO FOTOS =====
     const fotoMaterial = document.getElementById("fotoMaterial");
-    const btnCamMaterial = document.getElementById("btnCamMaterial");
-    const btnDelMaterial = document.getElementById("btnDelMaterial");
-    const cMat = document.getElementById("cMat");
+const fotoObsPart = document.getElementById("fotoObsPart");
+
+const btnCamMaterial = document.getElementById("btnCamMaterial");
+const btnCamObsPart = document.getElementById("btnCamObsPart");
+
+const btnDelMaterial = document.getElementById("btnDelMaterial");
+const btnDelObsPart = document.getElementById("btnDelObsPart");
+
+const cMat = document.getElementById("cMat");
+const cObsPart = document.getElementById("cObsPart");
 
     function trimFilesToMax(inputEl, max) {
       if (!inputEl || !inputEl.files) return;
@@ -231,27 +251,44 @@
       inputEl.files = dt.files;
     }
 
-    function updateMatCount() {
-      const n = fotoMaterial?.files?.length || 0;
-      cMat.textContent = `${n} foto${n === 1 ? "" : "s"}`;
-    }
+function updateMatCount() {
+  const n = fotoMaterial?.files?.length || 0;
+  const no = fotoObsPart?.files?.length || 0;
+
+  cMat.textContent = `${n} foto${n === 1 ? "" : "s"}`;
+  cObsPart.textContent = `${no} foto${no === 1 ? "" : "s"}`;
+}
 
     // 📷 Sacar foto (iOS): forzamos cámara y abrimos el input
     btnCamMaterial?.addEventListener("click", () => {
       try { fotoMaterial.setAttribute("capture", "environment"); } catch {}
       try { fotoMaterial.click(); } catch {}
     });
-
+btnCamObsPart?.addEventListener("click", () => {
+  try { fotoObsPart.setAttribute("capture", "environment"); } catch {}
+  try { fotoObsPart.click(); } catch {}
+});
     btnDelMaterial.addEventListener("click", () => {
       fotoMaterial.value = "";
       updateMatCount();
     });
-
+btnDelObsPart.addEventListener("click", () => {
+  fotoObsPart.value = "";
+  updateMatCount();
+});
     fotoMaterial.addEventListener("change", () => {
       trimFilesToMax(fotoMaterial, MAX_MATERIAL);
       updateMatCount();
     });
-
+fotoObsPart.addEventListener("change", () => {
+  if ((fotoObsPart.files?.length || 0) > 1) {
+    err.textContent = "Máximo 1 foto del parte por intervención.";
+    fotoObsPart.value = "";
+    return;
+  }
+  err.textContent = "";
+  updateMatCount();
+});
     updateMatCount();
 
     // Convertir a JPEG y limitar tamaño
@@ -306,14 +343,24 @@
 
       // Leer hasta 3 imágenes
       const files = Array.from(fotoMaterial.files || []).slice(0, 3);
-      const materialImages = [];
+const obsFiles = Array.from(fotoObsPart.files || []).slice(0, 1);
 
-      for (const f of files) {
-        try {
-          const data = await fileToJpegDataURL(f);
-          materialImages.push(data);
-        } catch (e) {}
-      }
+const materialImages = [];
+const obsPartImages = [];
+
+for (const f of files) {
+  try {
+    const data = await fileToJpegDataURL(f);
+    materialImages.push(data);
+  } catch (e) {}
+}
+
+for (const f of obsFiles) {
+  try {
+    const data = await fileToJpegDataURL(f);
+    obsPartImages.push(data);
+  } catch (e) {}
+}
 
       const payload = {
         part_id: partId,
@@ -331,11 +378,13 @@
         totales: { total: totalFinal },
         observaciones: document.getElementById("obs").value || "",
         fotos: {
-          ticket_count: 0,
-          material_count: materialImages.length,
-          ticket_dataurls: [],
-          material_dataurls: materialImages
-        },
+  ticket_count: 0,
+  material_count: materialImages.length,
+  obs_part_count: obsPartImages.length,
+  ticket_dataurls: [],
+  material_dataurls: materialImages,
+  obs_part_dataurls: obsPartImages
+},
         saved_at: savedAt
       };
 

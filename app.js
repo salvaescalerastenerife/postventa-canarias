@@ -4,6 +4,7 @@
   const fecha = $("fecha");
   const btnHoy = $("btnHoy");
   const idCliente = $("idCliente");
+  const nombreCliente = $("nombreCliente");
   const btnContinuar = $("btnContinuar");
   const msg = $("msg");
 
@@ -152,7 +153,7 @@
     msg.textContent = "";
 
     const id = (idCliente.value || "").trim();
-
+    const nombre = (nombreCliente?.value || "").trim();
     if (!tipo) {
       msg.textContent = "Selecciona el tipo de intervención.";
       return;
@@ -167,7 +168,7 @@
       return;
     }
 
-    const header = { tipo, fecha: f, idCliente: id };
+    const header = { tipo, fecha: f, idCliente: id, nombreCliente: nombre };
     localStorage.setItem("pv_header", JSON.stringify(header));
 
     const url = routes[tipo];

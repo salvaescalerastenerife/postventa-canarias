@@ -308,8 +308,8 @@ async function fileToJpegDataURL(file, kind = "normal") {
   });
 
   const isObsPart = kind === "obsPart";
-  const MAX_W = isObsPart ? 1600 : 900;
-  const QUALITY = isObsPart ? 0.9 : 0.55;
+const MAX_W = isObsPart ? 1200 : 800;
+const QUALITY = isObsPart ? 0.7 : 0.45;
 
   let w = img.naturalWidth || img.width;
   let h = img.naturalHeight || img.height;

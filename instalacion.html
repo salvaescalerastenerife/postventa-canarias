@@ -735,7 +735,16 @@ const btnCamObsPart = document.getElementById("btnCamObsPart");
       camShot.disabled = false;
       camMsg.textContent = "";
     });
+// Activación botones cámara
+btnCamAlmuerzo?.addEventListener("click", () => openCam("almuerzo"));
+btnCamCena?.addEventListener("click", () => openCam("cena"));
+btnCamMaterial?.addEventListener("click", () => openCam("material"));
 
+// Observaciones → usar input directamente (más robusto)
+btnCamObsPart?.addEventListener("click", () => {
+  try { fotoObsPart.setAttribute("capture", "environment"); } catch {}
+  try { fotoObsPart.click(); } catch {}
+});
     // ------- Helpers imagen -> JPEG DataURL (persistir en local/PDF) -------
     const fileToDataURL = (file) => new Promise((resolve, reject) => {
       const r = new FileReader();

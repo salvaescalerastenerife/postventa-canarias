@@ -799,13 +799,14 @@ const btnCamObsPart = document.getElementById("btnCamObsPart");
 
       // Normaliza y guarda hasta 3 fotos por campo (cámara + fototeca)
       const almuerzoFototeca = await collectFototecaJpegs(fotoAlmuerzo);
-      const cenaFototeca = await collectFototecaJpegs(fotoCena);
-      const materialFototeca = await collectFototecaJpegs(fotoMaterial);
+const cenaFototeca = await collectFototecaJpegs(fotoCena);
+const materialFototeca = await collectFototecaJpegs(fotoMaterial);
+const obsPartFototeca = await collectFototecaJpegs(fotoObsPart);
 
-      const almuerzoAll = [...almuerzoShots, ...almuerzoFototeca].slice(0, 3);
-      const cenaAll = [...cenaShots, ...cenaFototeca].slice(0, 3);
-      const materialAll = [...materialShots, ...materialFototeca].slice(0, 3);
-
+const almuerzoAll = [...almuerzoShots, ...almuerzoFototeca].slice(0, 3);
+const cenaAll = [...cenaShots, ...cenaFototeca].slice(0, 3);
+const materialAll = [...materialShots, ...materialFototeca].slice(0, 3);
+const obsPartAll = [...obsPartFototeca].slice(0, 1);
       const hi = clamp0(toNum(hInst.value));
       const hd = clamp0(toNum(hDespl.value));
       const km = clamp0(toNum(kms.value));
@@ -840,13 +841,15 @@ const btnCamObsPart = document.getElementById("btnCamObsPart");
         totales: { total: tot },
         observaciones: document.getElementById("obs").value || "",
         fotos: {
-          almuerzo_count: almuerzoAll.length,
-          cena_count: cenaAll.length,
-          material_count: materialAll.length,
-          almuerzo_dataurls: almuerzoAll,
-          cena_dataurls: cenaAll,
-          material_dataurls: materialAll
-        },
+  almuerzo_count: almuerzoAll.length,
+  cena_count: cenaAll.length,
+  material_count: materialAll.length,
+  obs_part_count: obsPartAll.length,
+  almuerzo_dataurls: almuerzoAll,
+  cena_dataurls: cenaAll,
+  material_dataurls: materialAll,
+  obs_part_dataurls: obsPartAll
+},
         saved_at: savedAt
       };
 

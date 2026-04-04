@@ -220,10 +220,22 @@
     </section>
 
     <!-- Observaciones -->
-    <section class="card">
-      <h2>Observaciones</h2>
-      <textarea id="obs" rows="4" placeholder="Escribe aquí si hay algo que anotar..."></textarea>
-    </section>
+<section class="card">
+  <h2>Observaciones</h2>
+  <textarea id="obs" rows="4" placeholder="Escribe aquí si hay algo que anotar..."></textarea>
+
+  <div class="attach" style="margin-top:12px;">
+    <button type="button" class="btn-attach" id="btnCamObsPart">📷 Sacar foto</button>
+
+    <label class="btn-attach alt">
+      🖼️ Fototeca
+      <input id="fotoObsPart" type="file" accept="image/*" />
+    </label>
+
+    <button type="button" class="btn-trash" id="btnDelObsPart" title="Borrar foto del parte">🗑️</button>
+    <span class="count" id="cObsPart">0 fotos</span>
+  </div>
+</section>
 
     <!-- Resumen -->
     <section class="card">
@@ -294,9 +306,10 @@
     const FURGON = 80.00;
     const TECNICOS_INST = 2;
 
-    // Fotos: límite por campo
-    const MAX_TICKET = 3;
-    const MAX_MATERIAL = 3;
+// Fotos: límite por campo
+const MAX_TICKET = 3;
+const MAX_MATERIAL = 3;
+const MAX_OBS_PART = 1;
 
     // ------- Cargar cabecera -------
     const header = (() => {
@@ -352,16 +365,19 @@
     const furgonOn = document.getElementById("furgonOn");
 
     const fotoAlmuerzo = document.getElementById("fotoAlmuerzo");
-    const fotoCena = document.getElementById("fotoCena");
-    const fotoMaterial = document.getElementById("fotoMaterial");
+const fotoCena = document.getElementById("fotoCena");
+const fotoMaterial = document.getElementById("fotoMaterial");
+const fotoObsPart = document.getElementById("fotoObsPart");
 
-    const cAlmuerzo = document.getElementById("cAlmuerzo");
-    const cCena = document.getElementById("cCena");
-    const cMat = document.getElementById("cMat");
+const cAlmuerzo = document.getElementById("cAlmuerzo");
+const cCena = document.getElementById("cCena");
+const cMat = document.getElementById("cMat");
+const cObsPart = document.getElementById("cObsPart");
 
-    const btnDelAlmuerzo = document.getElementById("btnDelAlmuerzo");
-    const btnDelCena = document.getElementById("btnDelCena");
-    const btnDelMaterial = document.getElementById("btnDelMaterial");
+const btnDelAlmuerzo = document.getElementById("btnDelAlmuerzo");
+const btnDelCena = document.getElementById("btnDelCena");
+const btnDelMaterial = document.getElementById("btnDelMaterial");
+const btnDelObsPart = document.getElementById("btnDelObsPart");
 
     // Mensajes
     const ok = document.getElementById("ok");
@@ -484,19 +500,22 @@
     const MAX_ALMUERZO = 3;
     const MAX_CENA = 3;
 
-    const getAlmuerzoCount = () => (almuerzoShots.length + (fotoAlmuerzo.files?.length || 0));
-    const getCenaCount = () => (cenaShots.length + (fotoCena.files?.length || 0));
-    const getMaterialCount = () => (materialShots.length + (fotoMaterial.files?.length || 0));
+const getAlmuerzoCount = () => (almuerzoShots.length + (fotoAlmuerzo.files?.length || 0));
+const getCenaCount = () => (cenaShots.length + (fotoCena.files?.length || 0));
+const getMaterialCount = () => (materialShots.length + (fotoMaterial.files?.length || 0));
+const getObsPartCount = () => (fotoObsPart.files?.length || 0);
 
-    const updatePhotoCounts = () => {
-      const na = getAlmuerzoCount();
-      const nc = getCenaCount();
-      const nm = getMaterialCount();
+const updatePhotoCounts = () => {
+  const na = getAlmuerzoCount();
+  const nc = getCenaCount();
+  const nm = getMaterialCount();
+  const no = getObsPartCount();
 
-      cAlmuerzo.textContent = `${na} foto${na === 1 ? "" : "s"}`;
-      cCena.textContent = `${nc} foto${nc === 1 ? "" : "s"}`;
-      cMat.textContent = `${nm} foto${nm === 1 ? "" : "s"}`;
-    };
+  cAlmuerzo.textContent = `${na} foto${na === 1 ? "" : "s"}`;
+  cCena.textContent = `${nc} foto${nc === 1 ? "" : "s"}`;
+  cMat.textContent = `${nm} foto${nm === 1 ? "" : "s"}`;
+  cObsPart.textContent = `${no} foto${no === 1 ? "" : "s"}`;
+};
 
     const trimFilesToMax = (inputEl, max) => {
       if (!inputEl?.files) return;
@@ -528,7 +547,11 @@
     btnDelAlmuerzo.addEventListener("click", () => { err.textContent = ""; ok.textContent=""; clearAlmuerzoPhoto(); });
     btnDelCena.addEventListener("click", () => { err.textContent = ""; ok.textContent=""; clearCenaPhoto(); });
     btnDelMaterial.addEventListener("click", () => { err.textContent = ""; ok.textContent=""; clearMaterialPhoto(); });
-
+    btnDelObsPart.addEventListener("click", () => {
+  fotoObsPart.value = "";
+  updatePhotoCounts();
+  err.textContent = "";
+});
     // Fototeca: hasta 3 por campo
     fotoAlmuerzo.addEventListener("change", () => {
       trimFilesToMax(fotoAlmuerzo, MAX_ALMUERZO);
@@ -565,6 +588,17 @@
       err.textContent = "";
       updatePhotoCounts();
     });
+    fotoObsPart.addEventListener("change", () => {
+  trimFilesToMax(fotoObsPart, MAX_OBS_PART);
+
+  if ((fotoObsPart.files?.length || 0) > MAX_OBS_PART) {
+    err.textContent = "Máximo 1 foto del parte por intervención.";
+    fotoObsPart.value = "";
+    return;
+  }
+  err.textContent = "";
+  updatePhotoCounts();
+});
 
     // -------- Cámara propia --------
     const camModal = document.getElementById("camModal");
@@ -702,9 +736,10 @@
       camMsg.textContent = "";
     });
 
-    btnCamAlmuerzo.addEventListener("click", () => openCam("almuerzo"));
-    btnCamCena.addEventListener("click", () => openCam("cena"));
-    btnCamMaterial.addEventListener("click", () => openCam("material"));
+    const btnCamAlmuerzo = document.getElementById("btnCamAlmuerzo");
+const btnCamCena = document.getElementById("btnCamCena");
+const btnCamMaterial = document.getElementById("btnCamMaterial");
+const btnCamObsPart = document.getElementById("btnCamObsPart");
 
     // ------- Helpers imagen -> JPEG DataURL (persistir en local/PDF) -------
     const fileToDataURL = (file) => new Promise((resolve, reject) => {

@@ -632,16 +632,19 @@
           const aImgsRaw = p?.fotos?.almuerzo_dataurls || [];
           const cImgsRaw = p?.fotos?.cena_dataurls || [];
           const tImgsRaw = p?.fotos?.ticket_dataurls || [];
+          const oImgsRaw = p?.fotos?.obs_part_dataurls || [];
 
           const aImgs = [];
           const cImgs = [];
           const tImgs = [];
           const mImgs = [];
+          const oImgs = [];
 
           for (const u of aImgsRaw) { try { aImgs.push(await dataUrlToJpeg(u)); } catch (_) {} }
           for (const u of cImgsRaw) { try { cImgs.push(await dataUrlToJpeg(u)); } catch (_) {} }
           for (const u of tImgsRaw) { try { tImgs.push(await dataUrlToJpeg(u)); } catch (_) {} }
           for (const u of mImgsRaw) { try { mImgs.push(await dataUrlToJpeg(u)); } catch (_) {} }
+          for (const u of oImgsRaw) { try { oImgs.push(await dataUrlToJpeg(u)); } catch (_) {} }
 
           if ((aImgsRaw.length || cImgsRaw.length) || (p.tipo === "instalacion" && (aImgs.length || cImgs.length))) {
             y = await addPhotos(doc, y, `FOTOS · Almuerzo (${aImgs.length})`, aImgs);
@@ -651,6 +654,7 @@
           }
 
           y = await addPhotos(doc, y, `FOTOS · Material (${mImgs.length})`, mImgs);
+          y = await addPhotos(doc, y, `FOTOS · Parte cliente (${oImgs.length})`, oImgs);
         }
 
         const pdfBlob = doc.output("blob");

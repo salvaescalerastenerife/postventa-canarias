@@ -526,6 +526,12 @@
           doc.setFont("helvetica", "normal");
           doc.setFontSize(10.5);
 
+          const nombreCliente = String(p?.header?.nombreCliente || "").trim();
+          if (nombreCliente) {
+            doc.text(`Nombre cliente: ${nombreCliente}`, M, y);
+            y += 6;
+          }
+
           doc.text(`Técnicos en parte: ${techs}`, M, y);
           y += 6;
 

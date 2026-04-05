@@ -63,7 +63,7 @@
   </main>
 
 <script type="module">
-  import { getPartes, saveParte } from "./db.js";
+import { getPartes, saveParte, deleteParte } from "./db.js";
 
   const EUR = (n) => new Intl.NumberFormat("es-ES", { style:"currency", currency:"EUR" }).format(n);
 
@@ -289,9 +289,7 @@ let all = await ensureIds(await loadAll());
           const okDel = confirm("¿Borrar este parte del teléfono?");
           if (!okDel) return;
 
-          const allNow = await loadAll();
-          const next = allNow.filter(p => (p?.part_id || "") !== id);
-          await saveAll(next);
+          await deleteParte(id);
           await render();
         });
       });

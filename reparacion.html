@@ -611,7 +611,10 @@ fotos: {
         try { localStorage.removeItem("pv_header"); } catch {}
 
         ok.textContent = "Guardado en el móvil ✅";
+
         await new Promise(r => requestAnimationFrame(r));
+        await new Promise(r => setTimeout(r, 50));
+
         window.location.href = "./index.html";
       } catch (e) {
         console.error(e);

@@ -421,7 +421,11 @@ for (const f of obsFiles) {
         try { localStorage.removeItem("pv_header"); } catch {}
 
         ok.textContent = "Guardado en el móvil ✅";
-        setTimeout(() => { window.location.href = "./index.html"; }, 350);
+
+        await new Promise(r => requestAnimationFrame(r));
+        await new Promise(r => setTimeout(r, 50));
+
+        window.location.href = "./index.html";
       } catch (e) {
         console.error(e);
         err.textContent = "Error guardando en el teléfono (memoria llena o fallo iOS).";

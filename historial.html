@@ -311,27 +311,46 @@ let all = await ensureIds(await loadAll());
       return tec;
     };
 
-    const dataUrlToJpeg = (src) => new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        const MAX_W = 1400;
-        let w = img.naturalWidth || img.width;
-        let h = img.naturalHeight || img.height;
+const sourceToJpegDataUrl = (src) => new Promise((resolve, reject) => {
+  const img = new Image();
+  let objectUrl = null;
 
-        if (w > MAX_W) {
-          h = Math.round(h * (MAX_W / w));
-          w = MAX_W;
-        }
+  img.onload = () => {
+    try {
+      const MAX_W = 1400;
+      let w = img.naturalWidth || img.width;
+      let h = img.naturalHeight || img.height;
 
-        const c = document.createElement("canvas");
-        c.width = w; c.height = h;
-        c.getContext("2d").drawImage(img, 0, 0, w, h);
+      if (w > MAX_W) {
+        h = Math.round(h * (MAX_W / w));
+        w = MAX_W;
+      }
 
-        resolve(c.toDataURL("image/jpeg", 0.85));
-      };
-      img.onerror = reject;
-      img.src = src;
-    });
+      const c = document.createElement("canvas");
+      c.width = w;
+      c.height = h;
+      c.getContext("2d").drawImage(img, 0, 0, w, h);
+
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      resolve(c.toDataURL("image/jpeg", 0.85));
+    } catch (e) {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      reject(e);
+    }
+  };
+
+  img.onerror = (e) => {
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
+    reject(e);
+  };
+
+  if (src instanceof Blob) {
+    objectUrl = URL.createObjectURL(src);
+    img.src = objectUrl;
+  } else {
+    img.src = src;
+  }
+});
 
     async function addPhotos(doc, y, title, images) {
       const M = 14;
@@ -426,7 +445,7 @@ let all = await ensureIds(await loadAll());
         return;
       }
 
-      let all = ensureIds(loadAll());
+let all = await ensureIds(await loadAll());
 
       const parts = all
         .filter(p => partDate(p) === date)
@@ -632,11 +651,30 @@ let all = await ensureIds(await loadAll());
           doc.text(obsLines, M, y);
           y += obsLines.length * 4.6 + 4;
 
-          const mImgsRaw = p?.fotos?.material_dataurls || [];
-          const aImgsRaw = p?.fotos?.almuerzo_dataurls || [];
-          const cImgsRaw = p?.fotos?.cena_dataurls || [];
-          const tImgsRaw = p?.fotos?.ticket_dataurls || [];
-          const oImgsRaw = p?.fotos?.obs_part_dataurls || [];
+const aImgsRaw =
+  Array.isArray(p.almuerzo_blobs) ? p.almuerzo_blobs
+  : Array.isArray(p.almuerzo_dataurls) ? p.almuerzo_dataurls
+  : (p.comida_dataurl ? [p.comida_dataurl] : []);
+
+const cImgsRaw =
+  Array.isArray(p.cena_blobs) ? p.cena_blobs
+  : Array.isArray(p.cena_dataurls) ? p.cena_dataurls
+  : [];
+
+const tImgsRaw =
+  Array.isArray(p.material_blobs) ? p.material_blobs
+  : Array.isArray(p.material_dataurls) ? p.material_dataurls
+  : [];
+
+const mImgsRaw =
+  Array.isArray(p.fotos_blobs) ? p.fotos_blobs
+  : Array.isArray(p.fotos_dataurls) ? p.fotos_dataurls
+  : [];
+
+const oImgsRaw =
+  Array.isArray(p.obs_part_blobs) ? p.obs_part_blobs
+  : Array.isArray(p.obs_part_dataurls) ? p.obs_part_dataurls
+  : [];
 
           const aImgs = [];
           const cImgs = [];
@@ -644,11 +682,11 @@ let all = await ensureIds(await loadAll());
           const mImgs = [];
           const oImgs = [];
 
-          for (const u of aImgsRaw) { try { aImgs.push(await dataUrlToJpeg(u)); } catch (_) {} }
-          for (const u of cImgsRaw) { try { cImgs.push(await dataUrlToJpeg(u)); } catch (_) {} }
-          for (const u of tImgsRaw) { try { tImgs.push(await dataUrlToJpeg(u)); } catch (_) {} }
-          for (const u of mImgsRaw) { try { mImgs.push(await dataUrlToJpeg(u)); } catch (_) {} }
-          for (const u of oImgsRaw) { try { oImgs.push(await dataUrlToJpeg(u)); } catch (_) {} }
+for (const u of aImgsRaw) { try { aImgs.push(await sourceToJpegDataUrl(u)); } catch (_) {} }
+for (const u of cImgsRaw) { try { cImgs.push(await sourceToJpegDataUrl(u)); } catch (_) {} }
+for (const u of tImgsRaw) { try { tImgs.push(await sourceToJpegDataUrl(u)); } catch (_) {} }
+for (const u of mImgsRaw) { try { mImgs.push(await sourceToJpegDataUrl(u)); } catch (_) {} }
+for (const u of oImgsRaw) { try { oImgs.push(await sourceToJpegDataUrl(u)); } catch (_) {} }
 
           if ((aImgsRaw.length || cImgsRaw.length) || (p.tipo === "instalacion" && (aImgs.length || cImgs.length))) {
             y = await addPhotos(doc, y, `FOTOS · Almuerzo (${aImgs.length})`, aImgs);

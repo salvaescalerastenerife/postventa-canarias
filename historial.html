@@ -62,8 +62,10 @@
     </section>
   </main>
 
-  <script>
-    const EUR = (n) => new Intl.NumberFormat("es-ES", { style:"currency", currency:"EUR" }).format(n);
+<script type="module">
+  import { getPartes, saveParte } from "./db.js";
+
+  const EUR = (n) => new Intl.NumberFormat("es-ES", { style:"currency", currency:"EUR" }).format(n);
 
     const ok = document.getElementById("ok");
     const err = document.getElementById("err");
@@ -91,14 +93,16 @@
       try { localStorage.setItem(LAST_TEC_KEY, fTec.value || ""); } catch {}
     });
 
-    const loadAll = () => {
-      try { return JSON.parse(localStorage.getItem(PARTS_KEY) || "[]"); }
-      catch { return []; }
-    };
+const loadAll = async () => {
+  try { return await getPartes(); }
+  catch { return []; }
+};
 
-    const saveAll = (arr) => {
-      localStorage.setItem(PARTS_KEY, JSON.stringify(arr));
-    };
+const saveAll = async (arr) => {
+  for (const p of arr) {
+    await saveParte(p);
+  }
+};
 
     // --- Helpers datos ---
     const partDate = (p) => (p?.header?.fecha || "");
@@ -123,23 +127,23 @@
     };
 
     // Garantiza part_id en todos los registros (retrocompatible)
-    const ensureIds = (all) => {
-      let changed = false;
-      const now = Date.now();
-      const out = all.map((p, i) => {
-        if (p && !p.part_id) {
-          changed = true;
-          const f = p?.header?.fecha || "nodate";
-          const idc = p?.header?.idCliente || "noclient";
-          const typ = p?.tipo || "tipo";
-          const ts = p?.saved_at || new Date(now + i).toISOString();
-          return { ...p, part_id: `${f}::${idc}::${typ}::${ts}::${i}` };
-        }
-        return p;
-      });
-      if (changed) saveAll(out);
-      return out;
-    };
+const ensureIds = async (all) => {
+  let changed = false;
+  const now = Date.now();
+  const out = all.map((p, i) => {
+    if (p && !p.part_id) {
+      changed = true;
+      const f = p?.header?.fecha || "nodate";
+      const idc = p?.header?.idCliente || "noclient";
+      const typ = p?.tipo || "tipo";
+      const ts = p?.saved_at || new Date(now + i).toISOString();
+      return { ...p, part_id: `${f}::${idc}::${typ}::${ts}::${i}` };
+    }
+    return p;
+  });
+  if (changed) await saveAll(out);
+  return out;
+};
 
     // Total estimado (fallback) si no guardaste totales
     const computeTotalFallback = (p) => {
@@ -222,11 +226,11 @@
       "'":'&#39;'
     }[m]));
 
-    const render = () => {
+const render = async () => {
       ok.textContent = "";
       err.textContent = "";
 
-      let all = ensureIds(loadAll());
+let all = await ensureIds(await loadAll());
 
       const date = (fFecha.value || "").trim();
       const tec = (fTec.value || "").trim();
@@ -278,17 +282,17 @@
       }).join("");
 
       list.querySelectorAll("button[data-act='del']").forEach(btn => {
-        btn.addEventListener("click", () => {
+        btn.addEventListener("click", async () => {
           const id = btn.dataset.id;
           if (!id) return;
 
           const okDel = confirm("¿Borrar este parte del teléfono?");
           if (!okDel) return;
 
-          const allNow = loadAll();
+          const allNow = await loadAll();
           const next = allNow.filter(p => (p?.part_id || "") !== id);
-          saveAll(next);
-          render();
+          await saveAll(next);
+          await render();
         });
       });
     };

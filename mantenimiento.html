@@ -136,8 +136,10 @@
     </section>
   </main>
 
-  <script>
-    const EUR = (n) => new Intl.NumberFormat("es-ES", { style:"currency", currency:"EUR" }).format(n);
+<script type="module">
+  import { saveParte } from "./db.js";
+
+  const EUR = (n) => new Intl.NumberFormat("es-ES", { style:"currency", currency:"EUR" }).format(n);
 
     // Tarifa mantenimiento: viejos 99€, nuevos 102€
     const MANT_VIEJO = 99.00;
@@ -292,42 +294,51 @@ fotoObsPart.addEventListener("change", () => {
 });
     updateMatCount();
 
-    // Convertir a JPEG y limitar tamaño
-async function fileToJpegDataURL(file, kind = "normal") {
-  const src = await new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(r.result);
-    r.onerror = reject;
-    r.readAsDataURL(file);
-  });
+    // Convertir a JPEG Blob y limitar tamaño
+    const fileToObjectURL = (file) => URL.createObjectURL(file);
 
-  const img = await new Promise((resolve, reject) => {
-    const im = new Image();
-    im.onload = () => resolve(im);
-    im.onerror = reject;
-    im.src = src;
-  });
+    async function fileToJpegBlob(file, kind = "normal") {
+      const src = fileToObjectURL(file);
 
-  const isObsPart = kind === "obsPart";
-const MAX_W = isObsPart ? 1200 : 800;
-const QUALITY = isObsPart ? 0.7 : 0.45;
+      const img = await new Promise((resolve, reject) => {
+        const im = new Image();
+        im.onload = () => resolve(im);
+        im.onerror = reject;
+        im.src = src;
+      });
 
-  let w = img.naturalWidth || img.width;
-  let h = img.naturalHeight || img.height;
+      const isObsPart = kind === "obsPart";
+      const MAX_W = isObsPart ? 1200 : 800;
+      const QUALITY = isObsPart ? 0.7 : 0.45;
 
-  if (w > MAX_W) {
-    h = Math.round(h * (MAX_W / w));
-    w = MAX_W;
-  }
+      let w = img.naturalWidth || img.width;
+      let h = img.naturalHeight || img.height;
 
-  const c = document.createElement("canvas");
-  c.width = w;
-  c.height = h;
-  c.getContext("2d").drawImage(img, 0, 0, w, h);
+      if (w > MAX_W) {
+        h = Math.round(h * (MAX_W / w));
+        w = MAX_W;
+      }
 
-  return c.toDataURL("image/jpeg", QUALITY);
-}
+      const c = document.createElement("canvas");
+      c.width = w;
+      c.height = h;
+      c.getContext("2d").drawImage(img, 0, 0, w, h);
 
+      return await new Promise((resolve, reject) => {
+        c.toBlob(
+          (blob) => {
+            URL.revokeObjectURL(src);
+            if (!blob) {
+              reject(new Error("No se pudo convertir la imagen"));
+              return;
+            }
+            resolve(blob);
+          },
+          "image/jpeg",
+          QUALITY
+        );
+      });
+    }
     // ------- Guardado local -------
     document.getElementById("btnGuardar").addEventListener("click", async () => {
       ok.textContent = "";
@@ -352,17 +363,24 @@ const QUALITY = isObsPart ? 0.7 : 0.45;
 
       // Leer hasta 3 imágenes
       const files = Array.from(fotoMaterial.files || []).slice(0, 3);
-const obsFiles = Array.from(fotoObsPart.files || []).slice(0, 1);
+      const obsFiles = Array.from(fotoObsPart.files || []).slice(0, 1);
 
-const materialImages = [];
-const obsPartImages = [];
+      const materialImages = [];
+      const obsPartImages = [];
 
-for (const f of files) {
-  try {
-    const data = await fileToJpegDataURL(f, "normal");
-    materialImages.push(data);
-  } catch (e) {}
-}
+      for (const f of files) {
+        try {
+          const data = await fileToJpegBlob(f, "normal");
+          materialImages.push(data);
+        } catch (e) {}
+      }
+
+      for (const f of obsFiles) {
+        try {
+          const data = await fileToJpegBlob(f, "obsPart");
+          obsPartImages.push(data);
+        } catch (e) {}
+      }
 
 for (const f of obsFiles) {
   try {
@@ -387,26 +405,18 @@ for (const f of obsFiles) {
         totales: { total: totalFinal },
         observaciones: document.getElementById("obs").value || "",
         fotos: {
-  ticket_count: 0,
-  material_count: materialImages.length,
-  obs_part_count: obsPartImages.length,
-  ticket_dataurls: [],
-  material_dataurls: materialImages,
-  obs_part_dataurls: obsPartImages
-},
+          ticket_count: 0,
+          material_count: materialImages.length,
+          obs_part_count: obsPartImages.length,
+          ticket_blobs: [],
+          material_blobs: materialImages,
+          obs_part_blobs: obsPartImages
+        },
         saved_at: savedAt
       };
 
-      const key = "pv_partes";
-      let arr = [];
-      try { arr = JSON.parse(localStorage.getItem(key) || "[]"); } catch {}
-
       try {
-        arr.push(payload);
-        localStorage.setItem(key, JSON.stringify(arr));
-
-        const test = JSON.parse(localStorage.getItem(key) || "[]");
-        if (!Array.isArray(test) || test.length !== arr.length) throw new Error("Guardado no confirmado");
+        await saveParte(payload);
 
         try { localStorage.removeItem("pv_header"); } catch {}
 

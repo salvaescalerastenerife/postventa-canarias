@@ -234,8 +234,11 @@
     </section>
   </main>
 
-  <script>
-    const EUR = (n) => new Intl.NumberFormat("es-ES", { style:"currency", currency:"EUR" }).format(n);
+<script type="module">
+  import { saveParte } from "./db.js";
+
+  // ------- Utilidades -------
+  const EUR = (n) => new Intl.NumberFormat("es-ES", { style:"currency", currency:"EUR" }).format(n);
     const toNum = (v) => {
       if (!v) return 0;
       const s = String(v).trim().replace(",", ".");
@@ -480,69 +483,60 @@ btnDelObsPart.addEventListener("click", () => {
   updatePhotoCounts();
   err.textContent = "";
 });
-    // Helpers: file -> JPEG DataURL
-    const fileToDataURL = (file) => new Promise((resolve, reject) => {
-      const r = new FileReader();
-      r.onload = () => resolve(r.result);
-      r.onerror = reject;
-      r.readAsDataURL(file);
-    });
+    // Helpers: file -> JPEG Blob
+    const fileToObjectURL = (file) => URL.createObjectURL(file);
 
- const dataUrlToJpeg = (src, kind = "normal") => new Promise((resolve, reject) => {
+    const objectUrlToJpegBlob = (src, kind = "normal") => new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
-        const isObsPart = kind === "obsPart";
-const MAX_W = isObsPart ? 1200 : 800;
-const QUALITY = isObsPart ? 0.7 : 0.45;
+        try {
+          const isObsPart = kind === "obsPart";
+          const MAX_W = isObsPart ? 1200 : 800;
+          const QUALITY = isObsPart ? 0.7 : 0.45;
 
-        let w = img.naturalWidth || img.width;
-        let h = img.naturalHeight || img.height;
+          let w = img.naturalWidth || img.width;
+          let h = img.naturalHeight || img.height;
 
-        if (w > MAX_W) {
-          h = Math.round(h * (MAX_W / w));
-          w = MAX_W;
+          if (w > MAX_W) {
+            h = Math.round(h * (MAX_W / w));
+            w = MAX_W;
+          }
+
+          const c = document.createElement("canvas");
+          c.width = w;
+          c.height = h;
+          c.getContext("2d").drawImage(img, 0, 0, w, h);
+
+          c.toBlob(
+            (blob) => {
+              URL.revokeObjectURL(src);
+              if (!blob) {
+                reject(new Error("No se pudo convertir la imagen"));
+                return;
+              }
+              resolve(blob);
+            },
+            "image/jpeg",
+            QUALITY
+          );
+        } catch (e) {
+          URL.revokeObjectURL(src);
+          reject(e);
         }
-
-        const c = document.createElement("canvas");
-        c.width = w;
-        c.height = h;
-        c.getContext("2d").drawImage(img, 0, 0, w, h);
-        resolve(c.toDataURL("image/jpeg", QUALITY));
       };
-      img.onerror = reject;
+
+      img.onerror = (e) => {
+        URL.revokeObjectURL(src);
+        reject(e);
+      };
+
       img.src = src;
     });
 
-const fileToJpegDataURL = async (file, kind = "normal") => {
-  const src = await fileToDataURL(file);
-
-  const img = await new Promise((resolve, reject) => {
-    const im = new Image();
-    im.onload = () => resolve(im);
-    im.onerror = reject;
-    im.src = src;
-  });
-
-  const isObsPart = kind === "obsPart";
-  const MAX_W = isObsPart ? 1600 : 900;
-  const QUALITY = isObsPart ? 0.9 : 0.55;
-
-  let w = img.naturalWidth || img.width;
-  let h = img.naturalHeight || img.height;
-
-  if (w > MAX_W) {
-    h = Math.round(h * (MAX_W / w));
-    w = MAX_W;
-  }
-
-  const c = document.createElement("canvas");
-  c.width = w;
-  c.height = h;
-  c.getContext("2d").drawImage(img, 0, 0, w, h);
-
-  return c.toDataURL("image/jpeg", QUALITY);
-};
-
+    const fileToJpegBlob = async (file, kind = "normal") => {
+      const url = fileToObjectURL(file);
+      return objectUrlToJpegBlob(url, kind);
+    };
     // Guardar
     document.getElementById("btnGuardar").addEventListener("click", async () => {
       ok.textContent = "";
@@ -611,15 +605,10 @@ try {
         saved_at: savedAt
       };
 
-      const key = "pv_partes";
-      let arr = [];
-      try { arr = JSON.parse(localStorage.getItem(key) || "[]"); } catch {}
       try {
-        arr.push(payload);
-        localStorage.setItem(key, JSON.stringify(arr));
+        await saveParte(payload);
 
-        const test = JSON.parse(localStorage.getItem(key) || "[]");
-        if (!Array.isArray(test) || test.length !== arr.length) throw new Error("Guardado no confirmado");
+        try { localStorage.removeItem("pv_header"); } catch {}
 
         ok.textContent = "Guardado en el móvil ✅";
         await new Promise(r => requestAnimationFrame(r));

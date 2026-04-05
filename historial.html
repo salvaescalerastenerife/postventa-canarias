@@ -713,7 +713,9 @@ for (const u of oImgsRaw) { try { oImgs.push(await sourceToJpegDataUrl(u)); } ca
           return { ...p, sent_by };
         });
 
-        saveAll(updated);
+for (const p of updated) {
+  await saveParte(p);
+}
 
         let shared = false;
 

@@ -287,9 +287,11 @@
     </div>
   </main>
 
-  <script>
-    // ------- Utilidades -------
-    const EUR = (n) => new Intl.NumberFormat("es-ES", { style:"currency", currency:"EUR" }).format(n);
+<script type="module">
+  import { saveParte } from "./db.js";
+
+  // ------- Utilidades -------
+  const EUR = (n) => new Intl.NumberFormat("es-ES", { style:"currency", currency:"EUR" }).format(n);
 
     const toNum = (v) => {
       if (!v) return 0;
@@ -619,7 +621,7 @@ const btnCamMaterial = document.getElementById("btnCamMaterial");
 const btnCamObsPart = document.getElementById("btnCamObsPart");
     let currentTarget = null;
     let stream = null;
-    let lastDataUrl = null;
+    let lastBlob = null;
 
     const openCam = async (target) => {
       // Bloqueo por límite 3
@@ -638,7 +640,7 @@ const btnCamObsPart = document.getElementById("btnCamObsPart");
 
       err.textContent = "";
       currentTarget = target;
-      lastDataUrl = null;
+      lastBlob = null;
       camMsg.textContent = "";
       camUse.disabled = true;
       camRetake.disabled = true;
@@ -665,7 +667,7 @@ const btnCamObsPart = document.getElementById("btnCamObsPart");
     const closeCam = () => {
       camModal.hidden = true;
       camMsg.textContent = "";
-      lastDataUrl = null;
+      lastBlob = null;
 
       if (stream) {
         stream.getTracks().forEach(t => t.stop());
@@ -676,7 +678,7 @@ const btnCamObsPart = document.getElementById("btnCamObsPart");
 
     camClose.addEventListener("click", closeCam);
 
-    camShot.addEventListener("click", () => {
+    camShot.addEventListener("click", async () => {
       if (!camVideo.videoWidth || !camVideo.videoHeight) {
         camMsg.textContent = "La cámara aún no está lista. Espera 1 segundo y prueba otra vez.";
         return;
@@ -690,7 +692,19 @@ const btnCamObsPart = document.getElementById("btnCamObsPart");
       const ctx = camCanvas.getContext("2d");
       ctx.drawImage(camVideo, 0, 0, w, h);
 
-      lastDataUrl = camCanvas.toDataURL("image/jpeg", 0.85);
+      lastBlob = await new Promise((resolve, reject) => {
+        camCanvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error("No se pudo capturar la foto"));
+              return;
+            }
+            resolve(blob);
+          },
+          "image/jpeg",
+          0.85
+        );
+      });
 
       camUse.disabled = false;
       camRetake.disabled = false;
@@ -699,14 +713,14 @@ const btnCamObsPart = document.getElementById("btnCamObsPart");
     });
 
     camUse.addEventListener("click", () => {
-      if (!lastDataUrl) return;
+      if (!lastBlob) return;
 
       if (currentTarget === "almuerzo") {
         if (getAlmuerzoCount() >= MAX_ALMUERZO) {
           camMsg.textContent = "Ya hay 3 fotos de Almuerzo.";
           return;
         }
-        almuerzoShots.push(lastDataUrl);
+        almuerzoShots.push(lastBlob);
       }
 
       if (currentTarget === "cena") {
@@ -714,7 +728,7 @@ const btnCamObsPart = document.getElementById("btnCamObsPart");
           camMsg.textContent = "Ya hay 3 fotos de Cena.";
           return;
         }
-        cenaShots.push(lastDataUrl);
+        cenaShots.push(lastBlob);
       }
 
       if (currentTarget === "material") {
@@ -722,7 +736,7 @@ const btnCamObsPart = document.getElementById("btnCamObsPart");
           camMsg.textContent = "Ya hay 3 fotos de Material.";
           return;
         }
-        materialShots.push(lastDataUrl);
+        materialShots.push(lastBlob);
       }
 
       updatePhotoCounts();
@@ -730,64 +744,73 @@ const btnCamObsPart = document.getElementById("btnCamObsPart");
     });
 
     camRetake.addEventListener("click", () => {
-      lastDataUrl = null;
+      lastBlob = null;
       camUse.disabled = true;
       camRetake.disabled = true;
       camShot.disabled = false;
       camMsg.textContent = "";
     });
-// Activación botones cámara
-btnCamAlmuerzo?.addEventListener("click", () => openCam("almuerzo"));
-btnCamCena?.addEventListener("click", () => openCam("cena"));
-btnCamMaterial?.addEventListener("click", () => openCam("material"));
 
-// Observaciones → usar input directamente (más robusto)
-btnCamObsPart?.addEventListener("click", () => {
-  try { fotoObsPart.setAttribute("capture", "environment"); } catch {}
-  try { fotoObsPart.click(); } catch {}
-});
-    // ------- Helpers imagen -> JPEG DataURL (persistir en local/PDF) -------
-    const fileToDataURL = (file) => new Promise((resolve, reject) => {
-      const r = new FileReader();
-      r.onload = () => resolve(r.result);
-      r.onerror = reject;
-      r.readAsDataURL(file);
+    // ------- Helpers imagen -> JPEG Blob (persistir en IndexedDB/PDF) -------
+    const fileToObjectURL = (file) => URL.createObjectURL(file);
+
+    const objectUrlToJpegBlob = (src, kind = "normal") => new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const isObsPart = kind === "obsPart";
+          const MAX_W = isObsPart ? 1200 : 800;
+          const QUALITY = isObsPart ? 0.7 : 0.45;
+
+          let w = img.naturalWidth || img.width;
+          let h = img.naturalHeight || img.height;
+
+          if (w > MAX_W) {
+            h = Math.round(h * (MAX_W / w));
+            w = MAX_W;
+          }
+
+          const c = document.createElement("canvas");
+          c.width = w;
+          c.height = h;
+          c.getContext("2d").drawImage(img, 0, 0, w, h);
+
+          c.toBlob(
+            (blob) => {
+              URL.revokeObjectURL(src);
+              if (!blob) {
+                reject(new Error("No se pudo convertir la imagen"));
+                return;
+              }
+              resolve(blob);
+            },
+            "image/jpeg",
+            QUALITY
+          );
+        } catch (e) {
+          URL.revokeObjectURL(src);
+          reject(e);
+        }
+      };
+
+      img.onerror = (e) => {
+        URL.revokeObjectURL(src);
+        reject(e);
+      };
+
+      img.src = src;
     });
 
-    const dataUrlToJpeg = (src, kind = "normal") => new Promise((resolve, reject) => {
-  const img = new Image();
-  img.onload = () => {
+    const fileToJpegBlob = async (file, kind = "normal") => {
+      const url = fileToObjectURL(file);
+      return objectUrlToJpegBlob(url, kind);
+    };
 
-    const isObsPart = kind === "obsPart";
-    const MAX_W = isObsPart ? 1200 : 800;
-    const QUALITY = isObsPart ? 0.7 : 0.45;
-
-    let w = img.naturalWidth || img.width;
-    let h = img.naturalHeight || img.height;
-
-    if (w > MAX_W) {
-      h = Math.round(h * (MAX_W / w));
-      w = MAX_W;
-    }
-
-    const c = document.createElement("canvas");
-    c.width = w;
-    c.height = h;
-    c.getContext("2d").drawImage(img, 0, 0, w, h);
-
-    resolve(c.toDataURL("image/jpeg", QUALITY));
-  };
-
-  img.onerror = reject;
-  img.src = src;
-});
-    const fileToJpegDataURL = async (file) => dataUrlToJpeg(await fileToDataURL(file));
-
-    const collectFototecaJpegs = async (inputEl) => {
+    const collectFototecaBlobs = async (inputEl, kind = "normal") => {
       const out = [];
       const files = inputEl?.files ? Array.from(inputEl.files) : [];
       for (const f of files.slice(0, 3)) {
-        try { out.push(await fileToJpegDataURL(f)); } catch(_) {}
+        try { out.push(await fileToJpegBlob(f, kind)); } catch (_) {}
       }
       return out;
     };
@@ -868,16 +891,8 @@ const obsPartAll = [...obsPartFototeca].slice(0, 1);
         saved_at: savedAt
       };
 
-      const key = "pv_partes";
-      let arr = [];
-      try { arr = JSON.parse(localStorage.getItem(key) || "[]"); } catch {}
-
       try {
-        arr.push(payload);
-        localStorage.setItem(key, JSON.stringify(arr));
-
-        const test = JSON.parse(localStorage.getItem(key) || "[]");
-        if (!Array.isArray(test) || test.length !== arr.length) throw new Error("Guardado no confirmado");
+        await saveParte(payload);
 
         try { localStorage.removeItem("pv_header"); } catch {}
 

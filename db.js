@@ -28,8 +28,19 @@ export async function saveParte(parte) {
   const db = await initDB();
   const tx = db.transaction(STORE_NAME, "readwrite");
   const store = tx.objectStore(STORE_NAME);
-  store.put(parte);
-  return tx.complete;
+
+  const normalized = {
+    ...parte,
+    id: parte?.part_id || parte?.id || Date.now().toString()
+  };
+
+  store.put(normalized);
+
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error || new Error("Error al guardar parte"));
+    tx.onabort = () => reject(tx.error || new Error("Transacción abortada al guardar parte"));
+  });
 }
 
 export async function getPartes() {
@@ -47,5 +58,25 @@ export async function deleteParte(id) {
   const db = await initDB();
   const tx = db.transaction(STORE_NAME, "readwrite");
   const store = tx.objectStore(STORE_NAME);
-  store.delete(id);
+
+  return new Promise((resolve, reject) => {
+    const getAllReq = store.getAll();
+
+    getAllReq.onsuccess = () => {
+      const all = Array.isArray(getAllReq.result) ? getAllReq.result : [];
+      const matches = all.filter(p => (p?.id === id) || (p?.part_id === id));
+
+      for (const p of matches) {
+        try { store.delete(p.id); } catch (_) {}
+      }
+    };
+
+    getAllReq.onerror = () => {
+      reject(getAllReq.error || new Error("Error al buscar parte a borrar"));
+    };
+
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error || new Error("Error al borrar parte"));
+    tx.onabort = () => reject(tx.error || new Error("Transacción abortada al borrar parte"));
+  });
 }

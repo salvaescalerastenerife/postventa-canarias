@@ -649,28 +649,30 @@ let all = await ensureIds(await loadAll());
           doc.text(obsLines, M, y);
           y += obsLines.length * 4.6 + 4;
 
+const fotos = p.fotos || {};
+
 const aImgsRaw =
-  Array.isArray(p.almuerzo_blobs) ? p.almuerzo_blobs
+  Array.isArray(fotos.almuerzo_blobs) ? fotos.almuerzo_blobs
   : Array.isArray(p.almuerzo_dataurls) ? p.almuerzo_dataurls
   : (p.comida_dataurl ? [p.comida_dataurl] : []);
 
 const cImgsRaw =
-  Array.isArray(p.cena_blobs) ? p.cena_blobs
+  Array.isArray(fotos.cena_blobs) ? fotos.cena_blobs
   : Array.isArray(p.cena_dataurls) ? p.cena_dataurls
   : [];
 
 const tImgsRaw =
-  Array.isArray(p.material_blobs) ? p.material_blobs
+  Array.isArray(fotos.material_blobs) ? fotos.material_blobs
   : Array.isArray(p.material_dataurls) ? p.material_dataurls
   : [];
 
 const mImgsRaw =
-  Array.isArray(p.fotos_blobs) ? p.fotos_blobs
+  Array.isArray(fotos.fotos_blobs) ? fotos.fotos_blobs
   : Array.isArray(p.fotos_dataurls) ? p.fotos_dataurls
   : [];
 
 const oImgsRaw =
-  Array.isArray(p.obs_part_blobs) ? p.obs_part_blobs
+  Array.isArray(fotos.obs_part_blobs) ? fotos.obs_part_blobs
   : Array.isArray(p.obs_part_dataurls) ? p.obs_part_dataurls
   : [];
 

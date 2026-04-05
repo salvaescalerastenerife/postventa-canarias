@@ -551,15 +551,15 @@ const obsPartAll = [];
 
 try {
   for (const f of Array.from(fotoTicket.files || []).slice(0,3)) {
-    ticketAll.push(await fileToJpegDataURL(f, "normal"));
+    ticketAll.push(await fileToJpegBlob(f, "normal"));
   }
 
   for (const f of Array.from(fotoMaterial.files || []).slice(0,3)) {
-    materialAll.push(await fileToJpegDataURL(f, "normal"));
+    materialAll.push(await fileToJpegBlob(f, "normal"));
   }
 
   for (const f of Array.from(fotoObsPart.files || []).slice(0,1)) {
-    obsPartAll.push(await fileToJpegDataURL(f, "obsPart"));
+    obsPartAll.push(await fileToJpegBlob(f, "obsPart"));
   }
 } catch (_) {}
       const hr = clamp0(toNum(hRep.value));
@@ -594,13 +594,13 @@ try {
         },
         totales: { total: tot },
         observaciones: document.getElementById("obs").value || "",
-        fotos: {
+fotos: {
   ticket_count: ticketAll.length,
   material_count: materialAll.length,
   obs_part_count: obsPartAll.length,
-  ticket_dataurls: ticketAll,
-  material_dataurls: materialAll,
-  obs_part_dataurls: obsPartAll
+  ticket_blobs: ticketAll,
+  material_blobs: materialAll,
+  obs_part_blobs: obsPartAll
 },
         saved_at: savedAt
       };

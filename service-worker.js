@@ -1,4 +1,4 @@
-const CACHE = "postventa-canarias-v22";
+const CACHE = "postventa-canarias-v23";
 
 /**
  * Precache SOLO rutas que existen en el ZIP.
@@ -14,6 +14,7 @@ const ASSETS = [
   "./historial.html",
   "./styles.css",
   "./app.js",
+  "./tarifas-config.js",
   "./manifest.webmanifest",
 
   // Imágenes / iconos (existentes en el ZIP)

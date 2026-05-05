@@ -189,6 +189,31 @@
       </div>
     </section>
 
+
+    <!-- Parking -->
+    <section class="card">
+      <div class="rowhead">
+        <h2>Parking</h2>
+        <div class="rate">€</div>
+      </div>
+
+      <label class="field onecol">
+        <input id="parking" inputmode="decimal" placeholder="0" />
+      </label>
+    </section>
+
+    <!-- Coche de alquiler -->
+    <section class="card">
+      <div class="rowhead">
+        <h2>Coche de alquiler</h2>
+        <div class="rate">€</div>
+      </div>
+
+      <label class="field onecol">
+        <input id="cocheAlquiler" inputmode="decimal" placeholder="0" />
+      </label>
+    </section>
+
     <!-- Observaciones -->
 <section class="card">
   <h2>Observaciones</h2>
@@ -216,6 +241,8 @@
       <div class="sumline"><span>Kilómetros</span><strong id="sKm">0,00 €</strong></div>
       <div class="sumline"><span>Comida</span><strong id="sComida">0,00 €</strong></div>
       <div class="sumline"><span>Material</span><strong id="sMat">0,00 €</strong></div>
+      <div class="sumline"><span>Parking</span><strong id="sParking">0,00 €</strong></div>
+      <div class="sumline"><span>Coche alquiler</span><strong id="sCocheAlquiler">0,00 €</strong></div>
       <div class="sumline"><span>Pilas</span><strong id="sPilas">0,00 €</strong></div>
 
       <div class="sumtotal">
@@ -236,6 +263,7 @@
 
 <script type="module">
   import { saveParte } from "./db.js";
+  import { getTarifasForDate } from "./tarifas-config.js";
 
   // ------- Utilidades -------
   const EUR = (n) => new Intl.NumberFormat("es-ES", { style:"currency", currency:"EUR" }).format(n);
@@ -247,12 +275,7 @@
     };
     const clamp0 = (n) => (n < 0 ? 0 : n);
 
-    // ====== TARIFAS (AJUSTA AQUÍ) ======
-    const P_REP = 32.14;   // €/h reparación (mano de obra)
-    const P_DESPL = 19.28; // €/h desplazamiento
-    const P_KM = 0.31;     // €/km
-    const P_PILA = 1.00;   // €/pila
-    // ================================
+
 
     // Fotos: hasta 3
     const MAX_TICKET = 2;
@@ -266,6 +289,14 @@
 
     document.getElementById("mFecha").textContent = header.fecha || "—";
     document.getElementById("mId").textContent = header.idCliente || "—";
+
+    // Tarifas versionadas por fecha del parte
+    const TARIFAS_PARTE = getTarifasForDate(header.fecha);
+    const TARIFAS_VERSION_PARTE = TARIFAS_PARTE.version;
+    const P_REP = TARIFAS_PARTE.reparacion.P_REP;
+    const P_DESPL = TARIFAS_PARTE.reparacion.P_DESPL;
+    const P_KM = TARIFAS_PARTE.reparacion.P_KM;
+    const P_PILA = TARIFAS_PARTE.reparacion.P_PILA;
 
     // Pintar tarifas
     document.getElementById("rRep").textContent = String(P_REP).replace(".", ",");
@@ -287,6 +318,8 @@
     const kms = document.getElementById("kms");
     const comida = document.getElementById("comida");
     const material = document.getElementById("material");
+    const parking = document.getElementById("parking");
+    const cocheAlquiler = document.getElementById("cocheAlquiler");
     const bateria = document.getElementById("bateria");
     const pilas = document.getElementById("pilas");
 
@@ -315,6 +348,8 @@ const btnDelObsPart = document.getElementById("btnDelObsPart");
     const sKm = document.getElementById("sKm");
     const sComida = document.getElementById("sComida");
     const sMat = document.getElementById("sMat");
+    const sParking = document.getElementById("sParking");
+    const sCocheAlquiler = document.getElementById("sCocheAlquiler");
     const sPilas = document.getElementById("sPilas");
 
     const totalEl = document.getElementById("total");
@@ -333,6 +368,8 @@ const btnDelObsPart = document.getElementById("btnDelObsPart");
       const maBase = clamp0(toNum(material.value));
       const bat = clamp0(toNum(bateria.value));
       const ma = maBase + bat;
+      const park = clamp0(toNum(parking.value));
+      const rent = clamp0(toNum(cocheAlquiler.value));
 
       const pil = toInt0(pilas.value);
       const psub = pil * P_PILA;
@@ -351,9 +388,11 @@ const btnDelObsPart = document.getElementById("btnDelObsPart");
       sKm.textContent = EUR(c);
       sComida.textContent = EUR(co);
       sMat.textContent = EUR(ma);
+      sParking.textContent = EUR(park);
+      sCocheAlquiler.textContent = EUR(rent);
       sPilas.textContent = EUR(psub);
 
-      totalEl.textContent = EUR(a + b + c + co + ma + psub);
+      totalEl.textContent = EUR(a + b + c + co + ma + park + rent + psub);
     };
 
     ["input","change"].forEach(evt => {
@@ -362,6 +401,8 @@ const btnDelObsPart = document.getElementById("btnDelObsPart");
       kms.addEventListener(evt, recalc);
       comida.addEventListener(evt, recalc);
       material.addEventListener(evt, recalc);
+      parking.addEventListener(evt, recalc);
+      cocheAlquiler.addEventListener(evt, recalc);
       bateria.addEventListener(evt, recalc);
       pilas.addEventListener(evt, recalc);
     });
@@ -570,9 +611,11 @@ try {
       const maBase = clamp0(toNum(material.value));
       const bat = clamp0(toNum(bateria.value));
       const ma = maBase + bat;
+      const park = clamp0(toNum(parking.value));
+      const rent = clamp0(toNum(cocheAlquiler.value));
 
       const pil = toInt0(pilas.value);
-      const tot = hr*P_REP + hd*P_DESPL + km*P_KM + co + ma + (pil * P_PILA);
+      const tot = hr*P_REP + hd*P_DESPL + km*P_KM + co + ma + park + rent + (pil * P_PILA);
 
       const savedAt = new Date().toISOString();
       const partId = `${header?.fecha || "nodate"}::${header?.idCliente || "noclient"}::reparacion::${savedAt}`;
@@ -582,13 +625,15 @@ try {
         sent_by: {},
         header: { ...header, tecnico: tec.value || "" },
         tipo: "reparacion",
-        tarifas: { P_REP, P_DESPL, P_KM, P_PILA },
+        tarifas: { version: TARIFAS_VERSION_PARTE, desde: TARIFAS_PARTE.desde, P_REP, P_DESPL, P_KM, P_PILA },
         datos: {
           horas_rep: hr,
           horas_despl: hd,
           kms: km,
           comida: co,
           material: maBase,
+          parking: park,
+          coche_alquiler: rent,
           bateria: bat,
           pilas: pil
         },

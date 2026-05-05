@@ -200,6 +200,31 @@
       </div>
     </section>
 
+
+    <!-- Parking -->
+    <section class="card">
+      <div class="rowhead">
+        <h2>Parking</h2>
+        <div class="rate">€</div>
+      </div>
+
+      <label class="field onecol">
+        <input id="parking" inputmode="decimal" placeholder="0" />
+      </label>
+    </section>
+
+    <!-- Coche de alquiler -->
+    <section class="card">
+      <div class="rowhead">
+        <h2>Coche de alquiler</h2>
+        <div class="rate">€</div>
+      </div>
+
+      <label class="field onecol">
+        <input id="cocheAlquiler" inputmode="decimal" placeholder="0" />
+      </label>
+    </section>
+
     <!-- Furgón -->
     <section class="card">
       <div class="rowhead">
@@ -248,6 +273,8 @@
       <div class="sumline"><span>Almuerzo</span><strong id="sAlmuerzo">0,00 €</strong></div>
       <div class="sumline"><span>Cena</span><strong id="sCena">0,00 €</strong></div>
       <div class="sumline"><span>Material</span><strong id="sMat">0,00 €</strong></div>
+      <div class="sumline"><span>Parking</span><strong id="sParking">0,00 €</strong></div>
+      <div class="sumline"><span>Coche alquiler</span><strong id="sCocheAlquiler">0,00 €</strong></div>
       <div class="sumline"><span>Furgón</span><strong id="sFurgon">80,00 €</strong></div>
 
       <div class="sumtotal">
@@ -289,6 +316,7 @@
 
 <script type="module">
   import { saveParte } from "./db.js";
+  import { getTarifasForDate } from "./tarifas-config.js";
 
   // ------- Utilidades -------
   const EUR = (n) => new Intl.NumberFormat("es-ES", { style:"currency", currency:"EUR" }).format(n);
@@ -301,13 +329,6 @@
     };
 
     const clamp0 = (n) => (n < 0 ? 0 : n);
-
-    // Tarifas
-    const P_INST = 27.95;
-    const P_DESPL = 19.28;
-    const P_KM = 0.31;
-    const FURGON = 80.00;
-    const TECNICOS_INST = 2;
 
 // Fotos: límite por campo
 const MAX_TICKET = 2;
@@ -322,6 +343,15 @@ const MAX_OBS_PART = 1;
 
     document.getElementById("mFecha").textContent = header.fecha || "—";
     document.getElementById("mId").textContent = header.idCliente || "—";
+
+    // Tarifas versionadas por fecha del parte
+    const TARIFAS_PARTE = getTarifasForDate(header.fecha);
+    const TARIFAS_VERSION_PARTE = TARIFAS_PARTE.version;
+    const P_INST = TARIFAS_PARTE.instalacion.P_INST;
+    const P_DESPL = TARIFAS_PARTE.instalacion.P_DESPL;
+    const P_KM = TARIFAS_PARTE.instalacion.P_KM;
+    const FURGON = TARIFAS_PARTE.instalacion.FURGON;
+    const TECNICOS_INST = TARIFAS_PARTE.instalacion.TECNICOS_INST;
 
     // ------- Técnicos (2 selectores) -------
     const tec1 = document.getElementById("tec1");
@@ -365,6 +395,8 @@ const MAX_OBS_PART = 1;
     const almuerzo = document.getElementById("almuerzo");
     const cena = document.getElementById("cena");
     const material = document.getElementById("material");
+    const parking = document.getElementById("parking");
+    const cocheAlquiler = document.getElementById("cocheAlquiler");
     const furgonOn = document.getElementById("furgonOn");
 
     const fotoAlmuerzo = document.getElementById("fotoAlmuerzo");
@@ -398,6 +430,8 @@ const btnDelObsPart = document.getElementById("btnDelObsPart");
     const sAlmuerzo = document.getElementById("sAlmuerzo");
     const sCena = document.getElementById("sCena");
     const sMat = document.getElementById("sMat");
+    const sParking = document.getElementById("sParking");
+    const sCocheAlquiler = document.getElementById("sCocheAlquiler");
     const sFurgon = document.getElementById("sFurgon");
     const totalEl = document.getElementById("total");
 
@@ -408,6 +442,8 @@ const btnDelObsPart = document.getElementById("btnDelObsPart");
       const al = clamp0(toNum(almuerzo.value));
       const ce = clamp0(toNum(cena.value));
       const ma = clamp0(toNum(material.value));
+      const park = clamp0(toNum(parking.value));
+      const rent = clamp0(toNum(cocheAlquiler.value));
       const fu = furgonOn.checked ? FURGON : 0;
 
       const a = hi * P_INST * TECNICOS_INST;
@@ -427,9 +463,11 @@ const btnDelObsPart = document.getElementById("btnDelObsPart");
       sAlmuerzo.textContent = EUR(al);
       sCena.textContent = EUR(ce);
       sMat.textContent = EUR(ma);
+      sParking.textContent = EUR(park);
+      sCocheAlquiler.textContent = EUR(rent);
       sFurgon.textContent = tf;
 
-      const tot = a + b + c + al + ce + ma + fu;
+      const tot = a + b + c + al + ce + ma + park + rent + fu;
       totalEl.textContent = EUR(tot);
     };
 
@@ -440,6 +478,8 @@ const btnDelObsPart = document.getElementById("btnDelObsPart");
       almuerzo.addEventListener(evt, recalc);
       cena.addEventListener(evt, recalc);
       material.addEventListener(evt, recalc);
+      parking.addEventListener(evt, recalc);
+      cocheAlquiler.addEventListener(evt, recalc);
       furgonOn.addEventListener(evt, recalc);
     });
 
@@ -851,12 +891,14 @@ const obsPartAll = [...obsPartFototeca].slice(0, 1);
       const al = clamp0(toNum(almuerzo.value));
       const ce = clamp0(toNum(cena.value));
       const ma = clamp0(toNum(material.value));
+      const park = clamp0(toNum(parking.value));
+      const rent = clamp0(toNum(cocheAlquiler.value));
       const fu = furgonOn.checked ? FURGON : 0;
 
       const a = hi * P_INST * TECNICOS_INST;
       const b = hd * P_DESPL * TECNICOS_INST;
       const c = km * P_KM;
-      const tot = a + b + c + al + ce + ma + fu;
+      const tot = a + b + c + al + ce + ma + park + rent + fu;
 
       const savedAt = new Date().toISOString();
       const partId = `${header?.fecha || "nodate"}::${header?.idCliente || "noclient"}::instalacion::${savedAt}`;
@@ -866,7 +908,7 @@ const obsPartAll = [...obsPartFototeca].slice(0, 1);
         sent_by: {},
         header: { ...header, tecnico1: tec1.value || "", tecnico2: tec2.value || "" },
         tipo: "instalacion",
-        tarifas: { P_INST, P_DESPL, P_KM, FURGON },
+        tarifas: { version: TARIFAS_VERSION_PARTE, desde: TARIFAS_PARTE.desde, P_INST, P_DESPL, P_KM, FURGON },
         datos: {
           horas_inst: toNum(hInst.value),
           horas_despl: toNum(hDespl.value),
@@ -874,6 +916,8 @@ const obsPartAll = [...obsPartFototeca].slice(0, 1);
           almuerzo: toNum(almuerzo.value),
           cena: toNum(cena.value),
           material: toNum(material.value),
+          parking: toNum(parking.value),
+          coche_alquiler: toNum(cocheAlquiler.value),
           furgon: furgonOn.checked
         },
         totales: { total: tot },

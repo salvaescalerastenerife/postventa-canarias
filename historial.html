@@ -170,6 +170,8 @@ const ensureIds = async (all) => {
         const dietas = (al || ce) ? (al + ce) : coLegacy;
 
         const ma = toN(d.material);
+        const park = toN(d.parking);
+        const rent = toN(d.coche_alquiler);
         const fu = d.furgon ? toN(t.FURGON ?? 80) : 0;
 
         const P_INST = toN(t.P_INST ?? 27.95);
@@ -180,7 +182,7 @@ const ensureIds = async (all) => {
         const a = hi * P_INST * TEC;
         const b = hd * P_DESPL * TEC;
         const c = km * P_KM;
-        return a + b + c + dietas + ma + fu;
+        return a + b + c + dietas + ma + park + rent + fu;
       }
 
       if (tipo === "reparacion") {
@@ -192,6 +194,8 @@ const ensureIds = async (all) => {
         const maBase = toN(d.material);
         const bat = toN(d.bateria);
         const ma = maBase + bat;
+        const park = toN(d.parking);
+        const rent = toN(d.coche_alquiler);
 
         const pil = toI(d.pilas);
 
@@ -203,15 +207,17 @@ const ensureIds = async (all) => {
         const b = hd * P_DESPL;
         const c = km * P_KM;
 
-        return a + b + c + co + ma + (pil * P_PILA);
+        return a + b + c + co + ma + park + rent + (pil * P_PILA);
       }
 
       if (tipo === "mantenimiento") {
         const fijo = toN(d.fijo ?? (t.FIJO ?? 99));
         const mat = toN(d.material);
+        const park = toN(d.parking);
+        const rent = toN(d.coche_alquiler);
         const bat = toN(d.bateria);
         const pil = toI(d.pilas);
-        return fijo + mat + bat + (pil * P_PILA);
+        return fijo + mat + park + rent + bat + (pil * P_PILA);
       }
 
       return toN(p?.totales?.total ?? 0);
@@ -565,6 +571,8 @@ let all = await ensureIds(await loadAll());
             const hd = toN(d.horas_despl);
             const km = toN(d.kms);
             const ma = toN(d.material);
+            const park = toN(d.parking);
+            const rent = toN(d.coche_alquiler);
             const fu = d.furgon ? toN(t.FURGON ?? 80) : 0;
 
             const P_INST = toN(t.P_INST ?? 27.95);
@@ -593,6 +601,8 @@ let all = await ensureIds(await loadAll());
             }
 
             doc.text(`Material: ${EUR(ma)}`, M, y); y += 5;
+            if (park > 0) { doc.text(`Parking: ${EUR(park)}`, M, y); y += 5; }
+            if (rent > 0) { doc.text(`Coche de alquiler: ${EUR(rent)}`, M, y); y += 5; }
             doc.text(`Furgón: ${EUR(fu)}`, M, y); y += 5;
           }
 
@@ -602,6 +612,8 @@ let all = await ensureIds(await loadAll());
             const km = toN(d.kms);
             const co = toN(d.comida);
             const maBase = toN(d.material);
+            const park = toN(d.parking);
+            const rent = toN(d.coche_alquiler);
             const bat = toN(d.bateria);
 
             const pil = Math.max(0, Math.floor(toN(d.pilas)));
@@ -620,6 +632,8 @@ let all = await ensureIds(await loadAll());
             doc.text(`Kilómetros: ${String(km).replace(".", ",")} = ${EUR(subtotalKm)}`, M, y); y += 5;
             doc.text(`Comida: ${EUR(co)}`, M, y); y += 5;
             doc.text(`Material: ${EUR(maBase)}`, M, y); y += 5;
+            if (park > 0) { doc.text(`Parking: ${EUR(park)}`, M, y); y += 5; }
+            if (rent > 0) { doc.text(`Coche de alquiler: ${EUR(rent)}`, M, y); y += 5; }
             if (bat > 0) { doc.text(`Batería: ${EUR(bat)}`, M, y); y += 5; }
             if (pil > 0) { doc.text(`Pilas: ${pil} x ${EUR(P_PILA)} = ${EUR(pil * P_PILA)}`, M, y); y += 5; }
           }
@@ -627,6 +641,8 @@ let all = await ensureIds(await loadAll());
           if (p.tipo === "mantenimiento") {
             const fijo = toN(d.fijo);
             const mat = toN(d.material);
+            const park = toN(d.parking);
+            const rent = toN(d.coche_alquiler);
             const bat = toN(d.bateria);
 
             const pil = Math.max(0, Math.floor(toN(d.pilas)));
@@ -634,6 +650,8 @@ let all = await ensureIds(await loadAll());
 
             doc.text(`Mantenimiento (fijo): ${EUR(fijo)}`, M, y); y += 5;
             if (mat > 0) { doc.text(`Material: ${EUR(mat)}`, M, y); y += 5; }
+            if (park > 0) { doc.text(`Parking: ${EUR(park)}`, M, y); y += 5; }
+            if (rent > 0) { doc.text(`Coche de alquiler: ${EUR(rent)}`, M, y); y += 5; }
             if (bat > 0) { doc.text(`Batería: ${EUR(bat)}`, M, y); y += 5; }
             if (pil > 0) { doc.text(`Pilas: ${pil} x ${EUR(P_PILA)} = ${EUR(pil * P_PILA)}`, M, y); y += 5; }
           }

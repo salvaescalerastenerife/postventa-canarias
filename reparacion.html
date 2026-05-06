@@ -339,6 +339,10 @@ function renderBaterias() {
 }
 
 renderBaterias();
+
+requestAnimationFrame(() => {
+  window.PV_ENHANCE_TECH_SELECTS?.();
+});
 const fotoTicket = document.getElementById("fotoTicket");
 const fotoMaterial = document.getElementById("fotoMaterial");
 const fotoObsPart = document.getElementById("fotoObsPart");

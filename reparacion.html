@@ -126,11 +126,7 @@
         <label>Batería</label>
         <select id="bateria"
           style="width:100%; height:56px; border-radius:14px; border:1px solid var(--line); font-size:16px; padding:0 12px;">
-          <option value="0" selected>Sin batería</option>
-          <option value="73.15">Batería 12V 9Amp · 73,15€</option>
-          <option value="108.10">Batería 12V 12Amp · 108,10€</option>
-          <option value="36.84">Batería 12V 2Amp · 36,84€</option>
-          <option value="126.42">Batería 12V 18Amp · 126,42€</option>
+<option value="0" selected>Sin batería</option>
         </select>
       </div>
 
@@ -322,7 +318,27 @@
     const cocheAlquiler = document.getElementById("cocheAlquiler");
     const bateria = document.getElementById("bateria");
     const pilas = document.getElementById("pilas");
+function renderBaterias() {
+  const lista = Array.isArray(TARIFAS_PARTE.baterias)
+    ? TARIFAS_PARTE.baterias
+    : [
+        { value: 36.84, label: "Batería 12V 2Amp · 36,84€" },
+        { value: 73.15, label: "Batería 12V 9Amp · 73,15€" },
+        { value: 108.10, label: "Batería 12V 12Amp · 108,10€" },
+        { value: 126.42, label: "Batería 12V 18Amp · 126,42€" }
+      ];
 
+  bateria.innerHTML = `<option value="0" selected>Sin batería</option>`;
+
+  lista.forEach((b) => {
+    const opt = document.createElement("option");
+    opt.value = String(b.value);
+    opt.textContent = b.label;
+    bateria.appendChild(opt);
+  });
+}
+
+renderBaterias();
 const fotoTicket = document.getElementById("fotoTicket");
 const fotoMaterial = document.getElementById("fotoMaterial");
 const fotoObsPart = document.getElementById("fotoObsPart");

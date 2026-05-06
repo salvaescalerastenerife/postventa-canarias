@@ -186,7 +186,27 @@
     const pilasInput = document.getElementById("pilas");
     const tPilas = document.getElementById("tPilas");
     const totalEl = document.getElementById("total");
+function renderBaterias() {
+  const lista = Array.isArray(TARIFAS_PARTE.baterias)
+    ? TARIFAS_PARTE.baterias
+    : [
+        { value: 36.84, label: "Batería 12V 2Amp · 36,84€" },
+        { value: 73.15, label: "Batería 12V 9Amp · 73,15€" },
+        { value: 108.10, label: "Batería 12V 12Amp · 108,10€" },
+        { value: 126.42, label: "Batería 12V 18Amp · 126,42€" }
+      ];
 
+  bateriaSelect.innerHTML = `<option value="0" selected>Sin batería</option>`;
+
+  lista.forEach((b) => {
+    const opt = document.createElement("option");
+    opt.value = String(b.value);
+    opt.textContent = b.label;
+    bateriaSelect.appendChild(opt);
+  });
+}
+
+renderBaterias();
     // Cargar preferencia anterior de tarifa (si existe)
     try {
       const lastTar = localStorage.getItem("pv_mant_tarifa") || "";
